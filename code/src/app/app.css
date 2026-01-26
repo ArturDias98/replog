@@ -47,6 +47,12 @@
     margin-bottom: 2rem;
 }
 
+.section-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
 .content-section h2 {
     color: var(--text-primary);
     font-size: 1.5rem;
@@ -67,12 +73,59 @@
     padding: 1rem 1.5rem;
     color: var(--text-primary);
     transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
 .item-card:hover {
     background-color: var(--bg-tertiary);
     border-color: var(--primary-color);
     transform: translateX(4px);
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.item-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.item-date {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.btn-icon-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon-remove:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-color);
+}
+
+.btn-icon-remove:active {
+    background-color: rgba(220, 53, 69, 0.2);
 }
 
 /* Utility Button Classes */
