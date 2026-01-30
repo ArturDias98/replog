@@ -1,5 +1,9 @@
+import { MuscleGroup } from './muscle-group';
+
 export type WorkOutGroup = {
-    id: number;
+    id: string;
     title: string;
-    date: Date;
+    date: string;
+    userId: string;
+    muscleGroup: MuscleGroup[];
 };

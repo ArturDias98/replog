@@ -1,0 +1,108 @@
+[
+    {
+        "id": "b1a7f3d2-9c4e-4f2a-8d6a-2a5f9c7e8a11",
+        "title": "Upper Body Strength",
+        "date": "2026-01-28",
+        "user-id": "google-oauth-user-12345",
+        "muscle-group": [
+            {
+                "id": "c3f9a8b7-2d4e-4a6b-9f3c-7e2d8a5b9c44",
+                "workout-id": "b1a7f3d2-9c4e-4f2a-8d6a-2a5f9c7e8a11",
+                "title": "Chest",
+                "date": "2026-01-28",
+                "muscle-item": [
+                    {
+                        "id": "d4e7f9a6-3b2c-4d8f-9a7e-5c2d9b8f7a33",
+                        "muscle-group-id": "c3f9a8b7-2d4e-4a6b-9f3c-7e2d8a5b9c44",
+                        "title": "Bench Press",
+                        "log": [
+                            {
+                                "id": "e5f8a9b7-4c3d-4e9f-8a7b-6d3c9a8f7b22",
+                                "number-reps": 10,
+                                "max-weight": 80
+                            },
+                            {
+                                "id": "f6a9b8c7-5d4e-4f0a-9b8c-7e4d9a8f6c11",
+                                "number-reps": 8,
+                                "max-weight": 85
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "a2b3c4d5-6e7f-4g8h-9i0j-1k2l3m4n5o66",
+        "title": "Leg Day",
+        "date": "2026-01-29",
+        "user-id": "google-oauth-user-12345",
+        "muscle-group": [
+            {
+                "id": "p7q8r9s0-1t2u-4v5w-9x0y-2z3a4b5c6d77",
+                "workout-id": "a2b3c4d5-6e7f-4g8h-9i0j-1k2l3m4n5o66",
+                "title": "Quads",
+                "date": "2026-01-29",
+                "muscle-item": [
+                    {
+                        "id": "q8r9s0t1-2u3v-4w5x-9y0z-3a4b5c6d7e88",
+                        "muscle-group-id": "p7q8r9s0-1t2u-4v5w-9x0y-2z3a4b5c6d77",
+                        "title": "Squats",
+                        "log": [
+                            {
+                                "id": "r9s0t1u2-3v4w-4x5y-9z0a-4b5c6d7e8f99",
+                                "number-reps": 12,
+                                "max-weight": 100
+                            },
+                            {
+                                "id": "s0t1u2v3-4w5x-4y5z-9a0b-5c6d7e8f9g00",
+                                "number-reps": 10,
+                                "max-weight": 110
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "z9y8x7w6-5v4u-3t2s-1r0q-9p8o7n6m5l44",
+        "title": "Cardio & Core",
+        "date": "2026-01-30",
+        "user-id": "google-oauth-user-12345",
+        "muscle-group": [
+            {
+                "id": "y8x7w6v5-4u3t-2s1r-0q9p-8o7n6m5l4k33",
+                "workout-id": "z9y8x7w6-5v4u-3t2s-1r0q-9p8o7n6m5l44",
+                "title": "Abs",
+                "date": "2026-01-30",
+                "muscle-item": [
+                    {
+                        "id": "x7w6v5u4-3t2s-1r0q-9p8o-7n6m5l4k3j22",
+                        "muscle-group-id": "y8x7w6v5-4u3t-2s1r-0q9p-8o7n6m5l4k33",
+                        "title": "Plank",
+                        "log": [
+                            {
+                                "id": "w6v5u4t3-2s1r-0q9p-8o7n-6m5l4k3j2i11",
+                                "number-reps": 1,
+                                "max-weight": 0
+                            }
+                        ]
+                    },
+                    {
+                        "id": "v5u4t3s2-1r0q-9p8o-7n6m-5l4k3j2i1h00",
+                        "muscle-group-id": "y8x7w6v5-4u3t-2s1r-0q9p-8o7n6m5l4k33",
+                        "title": "Sit Ups",
+                        "log": [
+                            {
+                                "id": "u4t3s2r1-0q9p-8o7n-6m5l-4k3j2i1h0g99",
+                                "number-reps": 20,
+                                "max-weight": 0
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
