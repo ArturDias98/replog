@@ -1,0 +1,33 @@
+<div class="content-section">
+    <div class="section-header">
+        <button class="btn btn-primary" type="button" aria-label="Add item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+            </svg>
+        </button>
+    </div>
+    <ul class="item-list">
+        @for (item of items(); track item.id) {
+        <li class="item-card" (click)="navigateToMuscleGroups(item.id)" role="button" tabindex="0"
+            (keydown.enter)="navigateToMuscleGroups(item.id)">
+            <div class="item-content">
+                <h3 class="item-title">{{ item.title }}</h3>
+            </div>
+            <div class="item-content">
+                <p class="item-date">{{ item.date | date: 'dd/MM/yyyy' }}</p>
+                <button class="btn-icon-remove" type="button" aria-label="Remove item"
+                    (click)="$event.stopPropagation()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
+                </button>
+            </div>
+        </li>
+        }
+    </ul>
+</div>
