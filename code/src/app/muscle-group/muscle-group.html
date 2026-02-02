@@ -8,6 +8,13 @@
             </svg>
         </button>
     </div>
+
+    @if (isLoading()) {
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading muscle groups...</p>
+    </div>
+    } @else {
     <ul class="item-list">
         @for (group of muscleGroups(); track group.id) {
         <li class="item-card">
@@ -28,4 +35,5 @@
         </li>
         }
     </ul>
+    }
 </div>

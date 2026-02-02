@@ -1,7 +1,7 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { WorkoutDataService } from '../services/workout-data.service';
 import { WorkOutGroup } from '../models/workout-group';
 
 @Component({
@@ -12,20 +12,22 @@ import { WorkOutGroup } from '../models/workout-group';
 })
 export class Workout implements OnInit {
     private readonly router = inject(Router);
-    private readonly http = inject(HttpClient);
+    private readonly workoutService = inject(WorkoutDataService);
 
     protected readonly items = signal<WorkOutGroup[]>([]);
+    protected readonly isLoading = signal<boolean>(false);
 
-    ngOnInit(): void {
-        this.http.get<WorkOutGroup[]>('sample-data.json').subscribe(data => {
-            this.items.set(data);
-        });
+    async ngOnInit(): Promise<void> {
+        this.isLoading.set(true);
+        try {
+            const workouts = await this.workoutService.getWorkouts();
+            this.items.set(workouts);
+        } finally {
+            this.isLoading.set(false);
+        }
     }
 
     protected navigateToMuscleGroups(workoutId: string): void {
-        const workout = this.items().find(item => item.id === workoutId);
-        this.router.navigate(['workout', workoutId, 'muscle-groups'], {
-            state: { muscleGroups: workout?.muscleGroup || [] }
-        });
+        this.router.navigate(['workout', workoutId, 'muscle-groups']);
     }
 }
