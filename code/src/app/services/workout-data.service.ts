@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { WorkOutGroup } from '../models/workout-group';
+import { CreateWorkoutModel, UpdateWorkoutModel } from '../models/workout';
 
 @Injectable({
     providedIn: 'root'
@@ -30,7 +31,7 @@ export class WorkoutDataService {
         return [...this.workoutsCache];
     }
 
-    async addWorkout(workout: WorkOutGroup): Promise<void> {
+    async addWorkout(model: CreateWorkoutModel): Promise<WorkOutGroup> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -40,15 +41,26 @@ export class WorkoutDataService {
                 await this.getWorkouts();
             }
 
+            // Create new workout with generated ID
+            const newWorkout: WorkOutGroup = {
+                id: crypto.randomUUID(),
+                title: model.title,
+                date: model.date,
+                userId: model.userId,
+                muscleGroup: []
+            };
+
             // In the future, replace with: POST /api/workouts
-            this.workoutsCache?.push(workout);
+            this.workoutsCache?.push(newWorkout);
+
+            return newWorkout;
         } catch (error) {
             console.error('Error adding workout:', error);
             throw error;
         }
     }
 
-    async updateWorkout(workout: WorkOutGroup): Promise<void> {
+    async updateWorkout(model: UpdateWorkoutModel): Promise<void> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -59,9 +71,13 @@ export class WorkoutDataService {
             }
 
             // In the future, replace with: PUT /api/workouts/:id
-            const index = this.workoutsCache?.findIndex(w => w.id === workout.id) ?? -1;
+            const index = this.workoutsCache?.findIndex(w => w.id === model.id) ?? -1;
             if (index !== -1 && this.workoutsCache) {
-                this.workoutsCache[index] = workout;
+                this.workoutsCache[index] = {
+                    ...this.workoutsCache[index],
+                    title: model.title,
+                    date: model.date
+                };
             }
         } catch (error) {
             console.error('Error updating workout:', error);
