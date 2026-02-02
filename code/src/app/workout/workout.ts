@@ -18,6 +18,9 @@ export class Workout implements OnInit {
     protected readonly items = signal<WorkOutGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);
     protected readonly showAddModal = signal<boolean>(false);
+    protected readonly showDeleteConfirm = signal<boolean>(false);
+    protected readonly workoutToDelete = signal<string | null>(null);
+    protected readonly isDeleting = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         await this.loadWorkouts();
@@ -29,6 +32,32 @@ export class Workout implements OnInit {
 
     protected closeAddModal(): void {
         this.showAddModal.set(false);
+    }
+
+    protected confirmDelete(workoutId: string): void {
+        this.workoutToDelete.set(workoutId);
+        this.showDeleteConfirm.set(true);
+    }
+
+    protected closeDeleteConfirm(): void {
+        this.showDeleteConfirm.set(false);
+        this.workoutToDelete.set(null);
+    }
+
+    protected async deleteWorkout(): Promise<void> {
+        const id = this.workoutToDelete();
+        if (!id) return;
+
+        this.isDeleting.set(true);
+        try {
+            await this.workoutService.deleteWorkout(id);
+            await this.loadWorkouts();
+            this.closeDeleteConfirm();
+        } catch (error) {
+            console.error('Failed to delete workout:', error);
+        } finally {
+            this.isDeleting.set(false);
+        }
     }
 
     protected async onWorkoutAdded(workoutId: string): Promise<void> {
