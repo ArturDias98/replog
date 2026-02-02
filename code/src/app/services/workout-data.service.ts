@@ -28,7 +28,10 @@ export class WorkoutDataService {
                 this.workoutsCache = [];
             }
         }
-        return [...this.workoutsCache];
+        // Sort by date descending (most recent first)
+        return [...this.workoutsCache].sort((a, b) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
     }
 
     async addWorkout(model: CreateWorkoutModel): Promise<WorkOutGroup> {

@@ -3,10 +3,11 @@ import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { WorkoutDataService } from '../services/workout-data.service';
 import { WorkOutGroup } from '../models/workout-group';
+import { AddWorkoutModal } from '../add-workout-modal/add-workout-modal';
 
 @Component({
     selector: 'app-workout',
-    imports: [DatePipe],
+    imports: [DatePipe, AddWorkoutModal],
     templateUrl: './workout.html',
     styleUrl: './workout.css'
 })
@@ -16,8 +17,25 @@ export class Workout implements OnInit {
 
     protected readonly items = signal<WorkOutGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);
+    protected readonly showAddModal = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
+        await this.loadWorkouts();
+    }
+
+    protected openAddModal(): void {
+        this.showAddModal.set(true);
+    }
+
+    protected closeAddModal(): void {
+        this.showAddModal.set(false);
+    }
+
+    protected async onWorkoutAdded(workoutId: string): Promise<void> {
+        this.router.navigate(['workout', workoutId, 'muscle-groups']);
+    }
+
+    private async loadWorkouts(): Promise<void> {
         this.isLoading.set(true);
         try {
             const workouts = await this.workoutService.getWorkouts();
