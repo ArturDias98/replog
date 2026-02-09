@@ -19,7 +19,7 @@
         <p class="workout-date">{{ workoutDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
     <div class="section-header">
-        <button class="btn btn-primary" type="button" aria-label="Add muscle group">
+        <button class="btn btn-primary" type="button" aria-label="Add muscle group" (click)="openAddModal()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 5v14" />
@@ -55,6 +55,11 @@
 @if (showEditModal()) {
 <app-edit-workout-modal [workoutId]="workoutId()" [initialTitle]="workoutTitle()" [initialDate]="workoutDate()"
     (workoutUpdated)="onWorkoutUpdated($event)" (closeModal)="closeEditModal()" />
+}
+
+@if (showAddModal()) {
+<app-add-muscle-group-modal [workoutId]="workoutId()" (muscleGroupAdded)="onMuscleGroupAdded()"
+    (closeModal)="closeAddModal()" />
 }
 
 @if (showDeleteConfirm()) {

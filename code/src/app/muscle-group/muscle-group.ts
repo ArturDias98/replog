@@ -4,10 +4,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../services/workout-data.service';
 import { MuscleGroup } from '../models/muscle-group';
 import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
+import { AddMuscleGroupModal } from '../add-muscle-group-modal/add-muscle-group-modal';
 
 @Component({
     selector: 'app-muscle-group',
-    imports: [DatePipe, EditWorkoutModal],
+    imports: [DatePipe, EditWorkoutModal, AddMuscleGroupModal],
     templateUrl: './muscle-group.html',
     styleUrl: './muscle-group.css'
 })
@@ -22,6 +23,7 @@ export class MuscleGroupComponent implements OnInit {
     protected readonly workoutDate = signal<string>('');
     protected readonly workoutId = signal<string>('');
     protected readonly showEditModal = signal<boolean>(false);
+    protected readonly showAddModal = signal<boolean>(false);
     protected readonly showDeleteConfirm = signal<boolean>(false);
     protected readonly isDeleting = signal<boolean>(false);
     protected readonly muscleGroupToDelete = signal<string>('');
@@ -54,6 +56,18 @@ export class MuscleGroupComponent implements OnInit {
 
     protected closeEditModal(): void {
         this.showEditModal.set(false);
+    }
+
+    protected openAddModal(): void {
+        this.showAddModal.set(true);
+    }
+
+    protected closeAddModal(): void {
+        this.showAddModal.set(false);
+    }
+
+    protected async onMuscleGroupAdded(): Promise<void> {
+        await this.loadWorkout();
     }
 
     protected onWorkoutUpdated(updatedData: { title: string; date: string }): void {
