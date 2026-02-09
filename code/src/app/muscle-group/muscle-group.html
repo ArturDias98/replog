@@ -1,9 +1,14 @@
 <div class="content-section">
+    @if (isLoading()) {
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading muscle groups...</p>
+    </div>
+    } @else {
     <div class="workout-header">
         <div class="workout-title-row">
             <h2 class="workout-title">{{ workoutTitle() }}</h2>
-            <button class="btn-icon-edit" type="button" aria-label="Edit workout" [disabled]="isLoading()"
-                (click)="openEditModal()">
+            <button class="btn-icon-edit" type="button" aria-label="Edit workout" (click)="openEditModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 20h9" />
@@ -14,7 +19,7 @@
         <p class="workout-date">{{ workoutDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
     <div class="section-header">
-        <button class="btn btn-primary" type="button" aria-label="Add muscle group" [disabled]="isLoading()">
+        <button class="btn btn-primary" type="button" aria-label="Add muscle group">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 5v14" />
@@ -23,12 +28,6 @@
         </button>
     </div>
 
-    @if (isLoading()) {
-    <div class="loading-container">
-        <div class="spinner"></div>
-        <p>Loading muscle groups...</p>
-    </div>
-    } @else {
     <ul class="item-list">
         @for (group of muscleGroups(); track group.id) {
         <li class="item-card">

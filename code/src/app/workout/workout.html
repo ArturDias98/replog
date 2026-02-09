@@ -1,7 +1,12 @@
 <div class="content-section">
+    @if (isLoading()) {
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading workouts...</p>
+    </div>
+    } @else {
     <div class="section-header">
-        <button class="btn btn-primary" type="button" aria-label="Add item" (click)="openAddModal()"
-            [disabled]="isLoading()">
+        <button class="btn btn-primary" type="button" aria-label="Add item" (click)="openAddModal()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 5v14" />
@@ -10,12 +15,6 @@
         </button>
     </div>
 
-    @if (isLoading()) {
-    <div class="loading-container">
-        <div class="spinner"></div>
-        <p>Loading workouts...</p>
-    </div>
-    } @else {
     <ul class="item-list">
         @for (item of items(); track item.id) {
         <li class="item-card" (click)="navigateToMuscleGroups(item.id)" role="button" tabindex="0"
