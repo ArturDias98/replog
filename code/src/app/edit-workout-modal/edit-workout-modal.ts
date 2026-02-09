@@ -21,7 +21,7 @@ export class EditWorkoutModal {
     protected readonly isSubmitting = signal<boolean>(false);
     protected readonly isClosing = signal<boolean>(false);
 
-    workoutUpdated = output<void>();
+    workoutUpdated = output<{ title: string; date: string }>();
     closeModal = output<void>();
 
     constructor() {
@@ -47,7 +47,7 @@ export class EditWorkoutModal {
 
         this.workoutService.updateWorkout(model)
             .then(() => {
-                this.workoutUpdated.emit();
+                this.workoutUpdated.emit({ title: this.title(), date: this.date() });
                 this.close();
             })
             .catch(error => {

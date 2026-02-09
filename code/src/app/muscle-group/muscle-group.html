@@ -1,5 +1,4 @@
 <div class="content-section">
-    @if (workoutTitle()) {
     <div class="workout-header">
         <div class="workout-title-row">
             <h2 class="workout-title">{{ workoutTitle() }}</h2>
@@ -14,7 +13,6 @@
         </div>
         <p class="workout-date">{{ workoutDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
-    }
     <div class="section-header">
         <button class="btn btn-primary" type="button" aria-label="Add muscle group" [disabled]="isLoading()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -56,5 +54,5 @@
 
 @if (showEditModal()) {
 <app-edit-workout-modal [workoutId]="workoutId()" [initialTitle]="workoutTitle()" [initialDate]="workoutDate()"
-    (workoutUpdated)="onWorkoutUpdated()" (closeModal)="closeEditModal()" />
+    (workoutUpdated)="onWorkoutUpdated($event)" (closeModal)="closeEditModal()" />
 }

@@ -53,7 +53,9 @@ export class MuscleGroupComponent implements OnInit {
         this.showEditModal.set(false);
     }
 
-    protected async onWorkoutUpdated(): Promise<void> {
-        await this.loadWorkout();
+    protected onWorkoutUpdated(updatedData: { title: string; date: string }): void {
+        // Update workout title and date with the returned data
+        this.workoutTitle.set(updatedData.title);
+        this.workoutDate.set(updatedData.date);
     }
 }
