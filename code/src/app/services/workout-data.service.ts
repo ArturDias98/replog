@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { WorkOutGroup } from '../models/workout-group';
 import { CreateWorkoutModel, UpdateWorkoutModel } from '../models/workout';
+import { CreateMuscleGroupModel, UpdateMuscleGroupModel, CreateMuscleItemModel } from '../models/muscle-group';
+import { MuscleGroup } from '../models/muscle-group';
+import { MuscleItem } from '../models/muscle-item';
 
 @Injectable({
     providedIn: 'root'
@@ -142,6 +145,124 @@ export class WorkoutDataService {
         } catch (error) {
             console.error('Error loading workout:', error);
             return undefined;
+        }
+    }
+
+    async addMuscleGroup(model: CreateMuscleGroupModel): Promise<MuscleGroup> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            const workoutIndex = workouts.findIndex(w => w.id === model.workoutId);
+            if (workoutIndex === -1) {
+                throw new Error('Workout not found');
+            }
+
+            const muscleGroupId = crypto.randomUUID();
+
+            // Create new muscle group with generated ID
+            const newMuscleGroup: MuscleGroup = {
+                id: muscleGroupId,
+                workoutId: model.workoutId,
+                title: model.title,
+                date: model.date,
+                muscleItem: model.muscleItems.map((item: CreateMuscleItemModel) => ({
+                    id: crypto.randomUUID(),
+                    muscleGroupId: muscleGroupId,
+                    title: item.title,
+                    log: []
+                }))
+            };
+
+            workouts[workoutIndex].muscleGroup.push(newMuscleGroup);
+            // Save to local storage
+            this.saveToStorage(workouts);
+
+            return newMuscleGroup;
+        } catch (error) {
+            console.error('Error adding muscle group:', error);
+            throw error;
+        }
+    }
+
+    async updateMuscleGroup(model: UpdateMuscleGroupModel): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.id === model.muscleGroupId)
+            );
+
+            if (!workout) {
+                throw new Error('Muscle group not found');
+            }
+
+            const muscleGroupIndex = workout.muscleGroup.findIndex(
+                mg => mg.id === model.muscleGroupId
+            );
+
+            workout.muscleGroup[muscleGroupIndex] = {
+                ...workout.muscleGroup[muscleGroupIndex],
+                title: model.title,
+                date: model.date
+            };
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error updating muscle group:', error);
+            throw error;
+        }
+    }
+
+    async deleteMuscleGroup(muscleGroupId: string): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.id === muscleGroupId)
+            );
+
+            if (!workout) {
+                throw new Error('Muscle group not found');
+            }
+
+            workout.muscleGroup = workout.muscleGroup.filter(
+                mg => mg.id !== muscleGroupId
+            );
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error deleting muscle group:', error);
+            throw error;
+        }
+    }
+
+    async getMuscleGroupsByWorkoutId(workoutId: string): Promise<MuscleGroup[]> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            const workout = workouts.find(w => w.id === workoutId);
+            return workout?.muscleGroup ?? [];
+        } catch (error) {
+            console.error('Error loading muscle groups:', error);
+            return [];
         }
     }
 }

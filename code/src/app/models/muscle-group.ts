@@ -7,3 +7,5 @@ export type MuscleGroup = {
     date: string;
     muscleItem: MuscleItem[];
 };
+
+export * from './muscle-group/index';

@@ -22,6 +22,9 @@ export class MuscleGroupComponent implements OnInit {
     protected readonly workoutDate = signal<string>('');
     protected readonly workoutId = signal<string>('');
     protected readonly showEditModal = signal<boolean>(false);
+    protected readonly showDeleteConfirm = signal<boolean>(false);
+    protected readonly isDeleting = signal<boolean>(false);
+    protected readonly muscleGroupToDelete = signal<string>('');
 
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('id');
@@ -57,5 +60,36 @@ export class MuscleGroupComponent implements OnInit {
         // Update workout title and date with the returned data
         this.workoutTitle.set(updatedData.title);
         this.workoutDate.set(updatedData.date);
+    }
+
+    protected confirmDelete(muscleGroupId: string): void {
+        this.muscleGroupToDelete.set(muscleGroupId);
+        this.showDeleteConfirm.set(true);
+    }
+
+    protected closeDeleteConfirm(): void {
+        this.showDeleteConfirm.set(false);
+        this.muscleGroupToDelete.set('');
+    }
+
+    protected async deleteMuscleGroup(): Promise<void> {
+        const muscleGroupId = this.muscleGroupToDelete();
+        if (!muscleGroupId) {
+            return;
+        }
+
+        this.isDeleting.set(true);
+        try {
+            await this.workoutService.deleteMuscleGroup(muscleGroupId);
+            // Remove from local state
+            this.muscleGroups.set(
+                this.muscleGroups().filter(mg => mg.id !== muscleGroupId)
+            );
+            this.closeDeleteConfirm();
+        } catch (error) {
+            console.error('Error deleting muscle group:', error);
+        } finally {
+            this.isDeleting.set(false);
+        }
     }
 }
