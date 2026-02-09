@@ -3,10 +3,11 @@ import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../services/workout-data.service';
 import { MuscleGroup } from '../models/muscle-group';
+import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
 
 @Component({
     selector: 'app-muscle-group',
-    imports: [DatePipe],
+    imports: [DatePipe, EditWorkoutModal],
     templateUrl: './muscle-group.html',
     styleUrl: './muscle-group.css'
 })
@@ -19,21 +20,40 @@ export class MuscleGroupComponent implements OnInit {
     protected readonly isLoading = signal<boolean>(false);
     protected readonly workoutTitle = signal<string>('');
     protected readonly workoutDate = signal<string>('');
+    protected readonly workoutId = signal<string>('');
+    protected readonly showEditModal = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('id');
         if (workoutId) {
-            this.isLoading.set(true);
-            try {
-                const workout = await this.workoutService.getWorkoutById(workoutId);
-                if (workout) {
-                    this.muscleGroups.set(workout.muscleGroup);
-                    this.workoutTitle.set(workout.title);
-                    this.workoutDate.set(workout.date);
-                }
-            } finally {
-                this.isLoading.set(false);
-            }
+            this.workoutId.set(workoutId);
+            await this.loadWorkout();
         }
+    }
+
+    private async loadWorkout(): Promise<void> {
+        this.isLoading.set(true);
+        try {
+            const workout = await this.workoutService.getWorkoutById(this.workoutId());
+            if (workout) {
+                this.muscleGroups.set(workout.muscleGroup);
+                this.workoutTitle.set(workout.title);
+                this.workoutDate.set(workout.date);
+            }
+        } finally {
+            this.isLoading.set(false);
+        }
+    }
+
+    protected openEditModal(): void {
+        this.showEditModal.set(true);
+    }
+
+    protected closeEditModal(): void {
+        this.showEditModal.set(false);
+    }
+
+    protected async onWorkoutUpdated(): Promise<void> {
+        await this.loadWorkout();
     }
 }
