@@ -112,6 +112,18 @@
     transform: translateY(0);
 }
 
+.btn-primary:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-primary:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .btn-danger {
     background-color: var(--danger-color);
     color: white;

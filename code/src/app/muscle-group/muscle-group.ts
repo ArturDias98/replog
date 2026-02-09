@@ -17,6 +17,8 @@ export class MuscleGroupComponent implements OnInit {
 
     protected readonly muscleGroups = signal<MuscleGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);
+    protected readonly workoutTitle = signal<string>('');
+    protected readonly workoutDate = signal<string>('');
 
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('id');
@@ -26,6 +28,8 @@ export class MuscleGroupComponent implements OnInit {
                 const workout = await this.workoutService.getWorkoutById(workoutId);
                 if (workout) {
                     this.muscleGroups.set(workout.muscleGroup);
+                    this.workoutTitle.set(workout.title);
+                    this.workoutDate.set(workout.date);
                 }
             } finally {
                 this.isLoading.set(false);
