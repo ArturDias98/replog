@@ -53,7 +53,8 @@ export class Workout implements OnInit {
         this.isDeleting.set(true);
         try {
             await this.workoutService.deleteWorkout(id);
-            await this.loadWorkouts();
+            // Update items list directly without showing loading state
+            this.items.set(this.items().filter(item => item.id !== id));
             this.closeDeleteConfirm();
         } catch (error) {
             console.error('Failed to delete workout:', error);
