@@ -188,7 +188,7 @@ export class WorkoutDataService {
         }
     }
 
-    async updateMuscleGroup(model: UpdateMuscleGroupModel): Promise<void> {
+    async updateMuscleGroup(model: UpdateMuscleGroupModel): Promise<MuscleGroup> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -216,6 +216,8 @@ export class WorkoutDataService {
 
             // Save to local storage
             this.saveToStorage(workouts);
+
+            return workout.muscleGroup[muscleGroupIndex];
         } catch (error) {
             console.error('Error updating muscle group:', error);
             throw error;

@@ -5,10 +5,11 @@ import { WorkoutDataService } from '../services/workout-data.service';
 import { MuscleGroup } from '../models/muscle-group';
 import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
 import { AddMuscleGroupModal } from '../add-muscle-group-modal/add-muscle-group-modal';
+import { EditMuscleGroupModal } from '../edit-muscle-group-modal/edit-muscle-group-modal';
 
 @Component({
     selector: 'app-muscle-group',
-    imports: [DatePipe, EditWorkoutModal, AddMuscleGroupModal],
+    imports: [DatePipe, EditWorkoutModal, AddMuscleGroupModal, EditMuscleGroupModal],
     templateUrl: './muscle-group.html',
     styleUrl: './muscle-group.css'
 })
@@ -24,9 +25,13 @@ export class MuscleGroupComponent implements OnInit {
     protected readonly workoutId = signal<string>('');
     protected readonly showEditModal = signal<boolean>(false);
     protected readonly showAddModal = signal<boolean>(false);
+    protected readonly showEditMuscleGroupModal = signal<boolean>(false);
     protected readonly showDeleteConfirm = signal<boolean>(false);
     protected readonly isDeleting = signal<boolean>(false);
     protected readonly muscleGroupToDelete = signal<string>('');
+    protected readonly muscleGroupToEdit = signal<string>('');
+    protected readonly muscleGroupTitle = signal<string>('');
+    protected readonly muscleGroupDate = signal<string>('');
 
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('id');
@@ -66,8 +71,30 @@ export class MuscleGroupComponent implements OnInit {
         this.showAddModal.set(false);
     }
 
-    protected async onMuscleGroupAdded(): Promise<void> {
-        await this.loadWorkout();
+    protected async onMuscleGroupAdded(newMuscleGroup: MuscleGroup): Promise<void> {
+        // Add the new muscle group to the list
+        this.muscleGroups.update(groups => [...groups, newMuscleGroup]);
+    }
+
+    protected openEditMuscleGroupModal(muscleGroup: MuscleGroup): void {
+        this.muscleGroupToEdit.set(muscleGroup.id);
+        this.muscleGroupTitle.set(muscleGroup.title);
+        this.muscleGroupDate.set(muscleGroup.date);
+        this.showEditMuscleGroupModal.set(true);
+    }
+
+    protected closeEditMuscleGroupModal(): void {
+        this.showEditMuscleGroupModal.set(false);
+        this.muscleGroupToEdit.set('');
+        this.muscleGroupTitle.set('');
+        this.muscleGroupDate.set('');
+    }
+
+    protected async onMuscleGroupUpdated(updatedMuscleGroup: MuscleGroup): Promise<void> {
+        // Update the specific muscle group in the list
+        this.muscleGroups.update(groups =>
+            groups.map(mg => mg.id === updatedMuscleGroup.id ? updatedMuscleGroup : mg)
+        );
     }
 
     protected onWorkoutUpdated(updatedData: { title: string; date: string }): void {

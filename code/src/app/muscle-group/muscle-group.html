@@ -36,6 +36,14 @@
             </div>
             <div class="item-content">
                 <p class="item-date">{{ group.date | date: 'dd/MM/yyyy' }}</p>
+                <button class="btn-icon-edit" type="button" aria-label="Edit muscle group"
+                    (click)="openEditMuscleGroupModal(group); $event.stopPropagation()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                </button>
                 <button class="btn-icon-remove" type="button" aria-label="Remove muscle group"
                     (click)="confirmDelete(group.id); $event.stopPropagation()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -58,8 +66,14 @@
 }
 
 @if (showAddModal()) {
-<app-add-muscle-group-modal [workoutId]="workoutId()" (muscleGroupAdded)="onMuscleGroupAdded()"
+<app-add-muscle-group-modal [workoutId]="workoutId()" (muscleGroupAdded)="onMuscleGroupAdded($event)"
     (closeModal)="closeAddModal()" />
+}
+
+@if (showEditMuscleGroupModal()) {
+<app-edit-muscle-group-modal [muscleGroupId]="muscleGroupToEdit()" [initialTitle]="muscleGroupTitle()"
+    [initialDate]="muscleGroupDate()" (muscleGroupUpdated)="onMuscleGroupUpdated($event)"
+    (closeModal)="closeEditMuscleGroupModal()" />
 }
 
 @if (showDeleteConfirm()) {

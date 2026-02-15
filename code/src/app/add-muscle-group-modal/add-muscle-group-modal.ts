@@ -1,7 +1,7 @@
 import { Component, inject, output, signal, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WorkoutDataService } from '../services/workout-data.service';
-import { CreateMuscleGroupModel, CreateMuscleItemModel } from '../models/muscle-group';
+import { CreateMuscleGroupModel, CreateMuscleItemModel, MuscleGroup } from '../models/muscle-group';
 
 @Component({
     selector: 'app-add-muscle-group-modal',
@@ -20,7 +20,7 @@ export class AddMuscleGroupModal {
     protected readonly isSubmitting = signal<boolean>(false);
     protected readonly isClosing = signal<boolean>(false);
 
-    muscleGroupAdded = output<void>();
+    muscleGroupAdded = output<MuscleGroup>();
     closeModal = output<void>();
 
     private getTodayDate(): string {
@@ -70,8 +70,8 @@ export class AddMuscleGroupModal {
         };
 
         this.workoutService.addMuscleGroup(model)
-            .then(() => {
-                this.muscleGroupAdded.emit();
+            .then((newMuscleGroup) => {
+                this.muscleGroupAdded.emit(newMuscleGroup);
                 this.close();
             })
             .catch(error => {
