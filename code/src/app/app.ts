@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { Location } from '@angular/common';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
@@ -7,10 +6,4 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  private location = inject(Location);
-
-  goBack(): void {
-    this.location.back();
-  }
-}
+export class App { }
