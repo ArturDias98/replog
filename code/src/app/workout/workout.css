@@ -1,6 +1,6 @@
 .content-section {
     margin-bottom: 2rem;
-    padding-bottom: 9rem;
+    padding-bottom: 8rem;
     position: relative;
 }
 
@@ -10,55 +10,69 @@
     margin-bottom: 1rem;
 }
 
-.fab {
+/* Action buttons container - tab bar style */
+.action-buttons {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 800px;
+    width: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     z-index: 100;
 }
 
+.fab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: auto;
+    width: auto;
+    box-shadow: none;
+}
+
+.fab-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
 .fab-add {
-    background-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .fab-add:hover {
-    background-color: var(--primary-hover);
+    background-color: rgba(74, 144, 226, 0.1);
+    color: var(--primary-hover);
+}
+
+.fab-add:active {
+    background-color: rgba(74, 144, 226, 0.2);
 }
 
 .fab-clear {
-    background-color: var(--danger-color);
-    bottom: 6rem;
+    color: var(--danger-color);
 }
 
 .fab-clear:hover {
-    background-color: var(--danger-hover);
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-hover);
 }
 
-@media (min-width: 900px) {
-    .fab {
-        right: calc((100vw - 800px) / 2 + 2rem);
-    }
-}
-
-.fab:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.fab:active {
-    transform: scale(1.05);
+.fab-clear:active {
+    background-color: rgba(220, 53, 69, 0.2);
 }
 
 .content-section h2 {
