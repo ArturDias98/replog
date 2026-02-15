@@ -43,7 +43,8 @@
     width: 90%;
     max-width: 500px;
     max-height: 90vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     animation: slideUp 0.2s ease forwards;
 }
 
@@ -112,6 +113,9 @@
 
 .modal-body {
     padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .form-group {
@@ -147,10 +151,41 @@
     cursor: not-allowed;
 }
 
+.form-control.invalid {
+    border-color: var(--danger-color);
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.form-control.invalid:focus {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
 .muscle-items-list {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.muscle-items-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.muscle-items-list::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.muscle-items-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.muscle-items-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
 }
 
 .muscle-item-row {
@@ -218,14 +253,19 @@
 .btn-add-item:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    border-color: var(--border-color);
+    color: var(--text-tertiary);
+    background-color: transparent;
 }
 
 .modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
+    padding: 1.5rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .btn {

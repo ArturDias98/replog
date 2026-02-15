@@ -16,7 +16,7 @@ export class AddMuscleGroupModal {
 
     protected readonly title = signal<string>('');
     protected readonly date = signal<string>(this.getTodayDate());
-    protected readonly muscleItems = signal<CreateMuscleItemModel[]>([{ title: '' }]);
+    protected readonly muscleItems = signal<CreateMuscleItemModel[]>([]);
     protected readonly isSubmitting = signal<boolean>(false);
     protected readonly isClosing = signal<boolean>(false);
 
@@ -33,9 +33,7 @@ export class AddMuscleGroupModal {
     }
 
     protected removeMuscleItem(index: number): void {
-        if (this.muscleItems().length > 1) {
-            this.muscleItems.update(items => items.filter((_, i) => i !== index));
-        }
+        this.muscleItems.update(items => items.filter((_, i) => i !== index));
     }
 
     protected updateMuscleItemTitle(index: number, title: string): void {
@@ -47,12 +45,20 @@ export class AddMuscleGroupModal {
     }
 
     protected isFormValid(): boolean {
-        return !!(
-            this.title() &&
-            this.date() &&
-            this.muscleItems().length > 0 &&
-            this.muscleItems().every(item => item.title.trim())
-        );
+        const hasTitle = !!this.title();
+        const hasDate = !!this.date();
+
+        // If there are muscle items, all must have titles
+        const muscleItemsValid = this.muscleItems().length === 0 ||
+            this.muscleItems().every(item => item.title.trim());
+
+        return hasTitle && hasDate && muscleItemsValid;
+    }
+
+    protected canAddMoreItems(): boolean {
+        // Can add more items only if all existing items have titles
+        return this.muscleItems().length === 0 ||
+            this.muscleItems().every(item => item.title.trim());
     }
 
     protected onSubmit(): void {
@@ -87,7 +93,7 @@ export class AddMuscleGroupModal {
         setTimeout(() => {
             this.title.set('');
             this.date.set(this.getTodayDate());
-            this.muscleItems.set([{ title: '' }]);
+            this.muscleItems.set([]);
             this.isClosing.set(false);
             this.closeModal.emit();
         }, 200);

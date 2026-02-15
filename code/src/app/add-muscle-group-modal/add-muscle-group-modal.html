@@ -28,8 +28,8 @@
                     <div class="muscle-item-row">
                         <input type="text" class="form-control" [value]="item.title"
                             (input)="updateMuscleItemTitle($index, $any($event.target).value)"
-                            placeholder="Enter muscle item title" required [disabled]="isSubmitting()">
-                        @if (muscleItems().length > 1) {
+                            placeholder="Enter muscle item title" [disabled]="isSubmitting()"
+                            [class.invalid]="!item.title.trim() && muscleItems().length > 0">
                         <button type="button" class="btn-icon-remove" (click)="removeMuscleItem($index)"
                             [disabled]="isSubmitting()" aria-label="Remove muscle item">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
@@ -39,11 +39,11 @@
                                 <path d="M6 6l12 12" />
                             </svg>
                         </button>
-                        }
                     </div>
                     }
                     <button type="button" class="btn btn-add-item" (click)="addMuscleItem()"
-                        [disabled]="isSubmitting()">
+                        [disabled]="isSubmitting() || !canAddMoreItems()"
+                        [title]="!canAddMoreItems() ? 'Fill in all muscle items before adding more' : 'Add another muscle item'">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 5v14" />

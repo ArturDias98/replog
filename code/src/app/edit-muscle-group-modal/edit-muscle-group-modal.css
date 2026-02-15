@@ -43,7 +43,8 @@
     width: 90%;
     max-width: 500px;
     max-height: 90vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     animation: slideUp 0.2s ease forwards;
 }
 
@@ -112,6 +113,9 @@
 
 .modal-body {
     padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .form-group {
@@ -151,9 +155,10 @@
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
-    padding-top: 1.5rem;
-    margin-top: 1.5rem;
+    padding: 1.5rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .btn {
