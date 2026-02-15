@@ -111,7 +111,17 @@
 .item-content {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
+}
+
+.item-content:first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-content:last-child {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
 }
 
 .item-title {
@@ -119,6 +129,9 @@
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .item-date {

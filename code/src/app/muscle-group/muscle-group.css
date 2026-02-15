@@ -50,6 +50,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    min-width: 0;
 }
 
 .workout-title {
@@ -57,6 +58,11 @@
     font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 0.5rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 }
 
 .workout-date {
@@ -119,7 +125,7 @@
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 1rem 1.5rem;
+    padding: 1rem 0.75rem 1rem 1.5rem;
     color: var(--text-primary);
     transition: all 0.2s ease;
     display: flex;
@@ -140,11 +146,24 @@
     gap: 0.5rem;
 }
 
+.item-content:first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-content:last-child {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+}
+
 .item-title {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .item-date {

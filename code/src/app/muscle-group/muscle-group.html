@@ -7,7 +7,7 @@
     } @else {
     <div class="workout-header">
         <div class="workout-title-row">
-            <h2 class="workout-title">{{ workoutTitle() }}</h2>
+            <h2 class="workout-title" [title]="workoutTitle()">{{ workoutTitle() }}</h2>
             <button class="btn-icon-edit" type="button" aria-label="Edit workout" (click)="openEditModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,7 +23,7 @@
         @for (group of muscleGroups(); track group.id) {
         <li class="item-card">
             <div class="item-content">
-                <h3 class="item-title">{{ group.title }}</h3>
+                <h3 class="item-title" [title]="group.title">{{ group.title }}</h3>
             </div>
             <div class="item-content">
                 <p class="item-date">{{ group.date | date: 'dd/MM/yyyy' }}</p>
