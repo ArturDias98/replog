@@ -19,7 +19,7 @@ export class WorkoutDataService {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         try {
-            // Try to load from local storage first
+            // Load from local storage
             const storedData = this.loadFromStorage();
 
             if (storedData && storedData.length > 0) {
@@ -29,17 +29,8 @@ export class WorkoutDataService {
                 );
             }
 
-            // If no data in local storage, load from sample data
-            const workouts = await firstValueFrom(
-                this.http.get<WorkOutGroup[]>('/sample-data.json')
-            );
-            // Save initial data to local storage
-            this.saveToStorage(workouts);
-
-            // Sort by date descending (most recent first)
-            return [...workouts].sort((a, b) =>
-                new Date(b.date).getTime() - new Date(a.date).getTime()
-            );
+            // Return empty array if no data
+            return [];
         } catch (error) {
             console.error('Error loading workouts:', error);
             return [];
@@ -129,6 +120,20 @@ export class WorkoutDataService {
             this.saveToStorage(filteredWorkouts);
         } catch (error) {
             console.error('Error deleting workout:', error);
+            throw error;
+        }
+    }
+
+    async clearAllWorkouts(userId?: string): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Clear all workouts from local storage
+            // Note: userId parameter is kept for API consistency but not used in local storage implementation
+            this.saveToStorage([]);
+        } catch (error) {
+            console.error('Error clearing workouts:', error);
             throw error;
         }
     }

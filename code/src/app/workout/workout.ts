@@ -21,6 +21,8 @@ export class Workout implements OnInit {
     protected readonly showDeleteConfirm = signal<boolean>(false);
     protected readonly workoutToDelete = signal<string | null>(null);
     protected readonly isDeleting = signal<boolean>(false);
+    protected readonly showClearAllConfirm = signal<boolean>(false);
+    protected readonly isClearing = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         await this.loadWorkouts();
@@ -76,5 +78,27 @@ export class Workout implements OnInit {
 
     protected navigateToMuscleGroups(workoutId: string): void {
         this.router.navigate(['workout', workoutId, 'muscle-groups']);
+    }
+
+    protected confirmClearAll(): void {
+        this.showClearAllConfirm.set(true);
+    }
+
+    protected closeClearAllConfirm(): void {
+        this.showClearAllConfirm.set(false);
+    }
+
+    protected async clearAllWorkouts(): Promise<void> {
+        this.isClearing.set(true);
+        try {
+            // Clear all workouts (you can pass a userId here if needed)
+            await this.workoutService.clearAllWorkouts();
+            this.closeClearAllConfirm();
+            await this.loadWorkouts();
+        } catch (error) {
+            console.error('Failed to clear workouts:', error);
+        } finally {
+            this.isClearing.set(false);
+        }
     }
 }

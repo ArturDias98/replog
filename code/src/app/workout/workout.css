@@ -29,6 +29,23 @@
     z-index: 100;
 }
 
+.fab-add {
+    background-color: var(--primary-color);
+}
+
+.fab-add:hover {
+    background-color: var(--primary-hover);
+}
+
+.fab-clear {
+    background-color: var(--danger-color);
+    bottom: 6rem;
+}
+
+.fab-clear:hover {
+    background-color: var(--danger-hover);
+}
+
 @media (min-width: 900px) {
     .fab {
         right: calc((100vw - 800px) / 2 + 2rem);
@@ -36,7 +53,6 @@
 }
 
 .fab:hover {
-    background-color: var(--primary-hover);
     transform: scale(1.1);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
@@ -202,6 +218,37 @@
     color: var(--text-secondary);
     font-size: 0.875rem;
     margin: 0;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    padding: 3rem 1rem;
+    gap: 1.5rem;
+    text-align: center;
+}
+
+.empty-icon {
+    color: var(--text-tertiary);
+    opacity: 0.5;
+}
+
+.empty-title {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.empty-description {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 400px;
 }
 
 .spinner {
