@@ -1,17 +1,21 @@
 <div class="modal-backdrop" [class.closing]="isClosing()" (click)="onBackdropClick($event)">
     <div class="modal-content" [class.closing]="isClosing()">
         <div class="modal-header">
-            <h2>Edit Muscle Group</h2>
+            <h2>Edit Muscle</h2>
             <button type="button" class="btn-close" (click)="close()" aria-label="Close modal">
                 ×
             </button>
+        </div>
+
+        <div class="modal-description">
+            <p>Update the muscle group information to keep your training plan organized and accurate.</p>
         </div>
 
         <form (ngSubmit)="onSubmit()" class="modal-body">
             <div class="form-group">
                 <label for="title">Title</label>
                 <input type="text" id="title" class="form-control" [value]="title()"
-                    (input)="title.set($any($event.target).value)" placeholder="Enter muscle group title" required
+                    (input)="title.set($any($event.target).value)" placeholder="Enter muscle name" required
                     [disabled]="isSubmitting()">
             </div>
 
@@ -28,9 +32,9 @@
                 <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || isSubmitting()">
                     @if (isSubmitting()) {
                     <span class="spinner-small"></span>
-                    Updating...
+                    Saving...
                     } @else {
-                    Update Muscle Group
+                    Save
                     }
                 </button>
             </div>

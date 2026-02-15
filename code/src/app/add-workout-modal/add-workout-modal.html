@@ -1,10 +1,15 @@
 <div class="modal-backdrop" [class.closing]="isClosing()" (click)="onBackdropClick($event)">
     <div class="modal-content" [class.closing]="isClosing()">
         <div class="modal-header">
-            <h2>Add New Workout</h2>
+            <h2>New Workout</h2>
             <button type="button" class="btn-close" (click)="close()" aria-label="Close modal">
                 ×
             </button>
+        </div>
+
+        <div class="modal-description">
+            <p>Create a new workout session to organize your training. After creating, you'll define muscle groups and
+                exercises for this workout.</p>
         </div>
 
         <form (ngSubmit)="onSubmit()" class="modal-body">
