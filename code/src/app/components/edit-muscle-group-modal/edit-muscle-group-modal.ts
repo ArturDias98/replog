@@ -1,7 +1,7 @@
 import { Component, inject, output, signal, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { WorkoutDataService } from '../services/workout-data.service';
-import { UpdateMuscleGroupModel, MuscleGroup } from '../models/muscle-group';
+import { WorkoutDataService } from '../../services/workout-data.service';
+import { UpdateMuscleGroupModel, MuscleGroup } from '../../models/muscle-group';
 
 @Component({
     selector: 'app-edit-muscle-group-modal',

@@ -1,8 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { WorkoutDataService } from '../services/workout-data.service';
-import { WorkOutGroup } from '../models/workout-group';
+import { WorkoutDataService } from '../../services/workout-data.service';
+import { WorkOutGroup } from '../../models/workout-group';
 import { AddWorkoutModal } from '../add-workout-modal/add-workout-modal';
 
 @Component({

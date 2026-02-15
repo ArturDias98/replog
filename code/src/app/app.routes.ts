@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { Workout } from './workout/workout';
-import { MuscleGroupComponent } from './muscle-group/muscle-group';
+import { Workout } from './components/workout/workout';
+import { MuscleGroupComponent } from './components/muscle-group/muscle-group';
 
 export const routes: Routes = [
     { path: '', component: Workout },

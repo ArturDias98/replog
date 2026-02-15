@@ -1,7 +1,7 @@
 import { Component, inject, output, signal, input, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { WorkoutDataService } from '../services/workout-data.service';
-import { UpdateWorkoutModel } from '../models/workout';
+import { WorkoutDataService } from '../../services/workout-data.service';
+import { UpdateWorkoutModel } from '../../models/workout';
 
 @Component({
     selector: 'app-edit-workout-modal',
