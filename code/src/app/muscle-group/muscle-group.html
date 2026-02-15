@@ -18,15 +18,6 @@
         </div>
         <p class="workout-date">{{ workoutDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
-    <div class="section-header">
-        <button class="btn btn-primary" type="button" aria-label="Add muscle group" (click)="openAddModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14" />
-                <path d="M5 12h14" />
-            </svg>
-        </button>
-    </div>
 
     <ul class="item-list">
         @for (group of muscleGroups(); track group.id) {
@@ -59,6 +50,16 @@
     </ul>
     }
 </div>
+
+@if (!isLoading()) {
+<button class="fab" type="button" aria-label="Add muscle group" (click)="openAddModal()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+    </svg>
+</button>
+}
 
 @if (showEditModal()) {
 <app-edit-workout-modal [workoutId]="workoutId()" [initialTitle]="workoutTitle()" [initialDate]="workoutDate()"
