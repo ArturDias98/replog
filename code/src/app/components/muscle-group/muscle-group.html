@@ -28,7 +28,7 @@
 
     <ul class="item-list">
         @for (group of muscleGroups(); track group.id) {
-        <li class="item-card">
+        <li class="item-card" (click)="navigateToExercises(group.id)">
             <div class="item-content">
                 <h3 class="item-title" [title]="group.title">{{ group.title }}</h3>
             </div>

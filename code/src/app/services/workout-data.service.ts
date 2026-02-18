@@ -296,4 +296,39 @@ export class WorkoutDataService {
             throw error;
         }
     }
+
+    async getMuscleGroupById(muscleGroupId: string): Promise<MuscleGroup | undefined> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            for (const workout of workouts) {
+                const muscleGroup = workout.muscleGroup.find(mg => mg.id === muscleGroupId);
+                if (muscleGroup) {
+                    return muscleGroup;
+                }
+            }
+
+            return undefined;
+        } catch (error) {
+            console.error('Error loading muscle group:', error);
+            return undefined;
+        }
+    }
+
+    async getExercisesByMuscleGroupId(muscleGroupId: string): Promise<Exercise[]> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            const muscleGroup = await this.getMuscleGroupById(muscleGroupId);
+            return muscleGroup?.exercises ?? [];
+        } catch (error) {
+            console.error('Error loading exercises:', error);
+            return [];
+        }
+    }
 }

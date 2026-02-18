@@ -140,6 +140,10 @@ export class MuscleGroupComponent implements OnInit {
         this.router.navigate(['/']);
     }
 
+    protected navigateToExercises(muscleGroupId: string): void {
+        this.router.navigate(['/workout', this.workoutId(), 'muscle-group', muscleGroupId, 'exercises']);
+    }
+
     protected confirmClearAll(): void {
         this.showClearAllConfirm.set(true);
     }

@@ -1,0 +1,67 @@
+<div class="content-section">
+    @if (isLoading()) {
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading exercises...</p>
+    </div>
+    } @else {
+    <div class="muscle-group-header">
+        <div class="muscle-group-title-row">
+            <button class="btn-icon-back" type="button" aria-label="Go back" (click)="navigateBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5" />
+                    <path d="M12 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <h2 class="muscle-group-title" [title]="muscleGroupTitle()">{{ muscleGroupTitle() }}</h2>
+        </div>
+        <p class="muscle-group-date">{{ muscleGroupDate() | date: 'dd/MM/yyyy' }}</p>
+    </div>
+
+    <ul class="item-list">
+        @for (exercise of exercises(); track exercise.id) {
+        <li class="item-card">
+            <div class="item-content">
+                <h3 class="item-title" [title]="exercise.title">{{ exercise.title }}</h3>
+            </div>
+            <div class="item-content">
+                <p class="item-subtitle">{{ exercise.log.length }} logs</p>
+            </div>
+        </li>
+        } @empty {
+        <li class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+            <p>No exercises yet</p>
+            <p class="empty-subtitle">Add your first exercise to get started</p>
+        </li>
+        }
+    </ul>
+    }
+</div>
+
+@if (!isLoading() && exercises().length === 0) {
+<button class="fab" type="button" aria-label="Add exercise">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+    </svg>
+</button>
+}
+
+@if (!isLoading() && exercises().length > 0) {
+<div class="action-buttons">
+    <button class="fab fab-add" type="button" aria-label="Add exercise">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+        </svg>
+        <span class="fab-label">Add Exercise</span>
+    </button>
+</div>
+}
