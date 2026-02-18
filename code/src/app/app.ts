@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter, take } from 'rxjs';
 import { UserPreferencesService } from './services/user-preferences.service';
 
 @Component({
@@ -13,10 +14,17 @@ export class App implements OnInit {
   private userPreferencesService = inject(UserPreferencesService);
 
   ngOnInit(): void {
-    const lastVisitedWorkoutId = this.userPreferencesService.getLastVisitedWorkout();
+    // Wait for the first navigation to complete before checking if we should redirect
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      take(1)
+    ).subscribe((event: NavigationEnd) => {
+      const lastVisitedWorkoutId = this.userPreferencesService.getLastVisitedWorkout();
 
-    if (lastVisitedWorkoutId) {
-      this.router.navigate(['/muscle-group', lastVisitedWorkoutId]);
-    }
+      // Only navigate to saved workout if user landed on the root route
+      if (lastVisitedWorkoutId && event.urlAfterRedirects === '/') {
+        this.router.navigate(['/muscle-group', lastVisitedWorkoutId]);
+      }
+    });
   }
 }
