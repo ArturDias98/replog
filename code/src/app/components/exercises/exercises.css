@@ -489,3 +489,18 @@
     align-items: center;
     gap: 0.5rem;
 }
+
+.action-buttons .fab-clear {
+    color: var(--danger-color);
+}
+
+.action-buttons .fab-clear:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-hover);
+    transform: none;
+}
+
+.action-buttons .fab-clear:active {
+    background-color: rgba(220, 53, 69, 0.2);
+    transform: none;
+}

@@ -34,6 +34,8 @@ export class ExercisesComponent implements OnInit {
     protected readonly showEditExerciseModal = signal<boolean>(false);
     protected readonly exerciseToEdit = signal<string>('');
     protected readonly exerciseToEditTitle = signal<string>('');
+    protected readonly showClearAllConfirm = signal<boolean>(false);
+    protected readonly isClearing = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         const muscleGroupId = this.route.snapshot.paramMap.get('muscleGroupId');
@@ -137,5 +139,26 @@ export class ExercisesComponent implements OnInit {
         this.exercises.update(exercises =>
             exercises.map(ex => ex.id === updatedExercise.id ? updatedExercise : ex)
         );
+    }
+
+    protected confirmClearAll(): void {
+        this.showClearAllConfirm.set(true);
+    }
+
+    protected closeClearAllConfirm(): void {
+        this.showClearAllConfirm.set(false);
+    }
+
+    protected async clearAllExercises(): Promise<void> {
+        this.isClearing.set(true);
+        try {
+            await this.workoutService.clearAllExercises(this.muscleGroupId());
+            this.exercises.set([]);
+            this.closeClearAllConfirm();
+        } catch (error) {
+            console.error('Error clearing exercises:', error);
+        } finally {
+            this.isClearing.set(false);
+        }
     }
 }

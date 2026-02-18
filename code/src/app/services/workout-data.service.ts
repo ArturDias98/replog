@@ -457,4 +457,39 @@ export class WorkoutDataService {
             throw error;
         }
     }
+
+    async clearAllExercises(muscleGroupId: string): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the muscle group
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.id === muscleGroupId)
+            );
+
+            if (!workout) {
+                throw new Error('Muscle group not found');
+            }
+
+            // Find the muscle group
+            const muscleGroup = workout.muscleGroup.find(mg => mg.id === muscleGroupId);
+
+            if (!muscleGroup) {
+                throw new Error('Muscle group not found');
+            }
+
+            // Clear all exercises from the muscle group
+            muscleGroup.exercises = [];
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error clearing exercises:', error);
+            throw error;
+        }
+    }
 }
