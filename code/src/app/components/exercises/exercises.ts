@@ -24,6 +24,9 @@ export class ExercisesComponent implements OnInit {
     protected readonly muscleGroupId = signal<string>('');
     protected readonly workoutId = signal<string>('');
     protected readonly showAddExerciseModal = signal<boolean>(false);
+    protected readonly showDeleteConfirm = signal<boolean>(false);
+    protected readonly isDeleting = signal<boolean>(false);
+    protected readonly exerciseToDelete = signal<string>('');
 
     async ngOnInit(): Promise<void> {
         const muscleGroupId = this.route.snapshot.paramMap.get('muscleGroupId');
@@ -63,5 +66,36 @@ export class ExercisesComponent implements OnInit {
 
     protected handleExerciseAdded(exercise: Exercise): void {
         this.exercises.update(current => [...current, exercise]);
+    }
+
+    protected confirmDelete(exerciseId: string): void {
+        this.exerciseToDelete.set(exerciseId);
+        this.showDeleteConfirm.set(true);
+    }
+
+    protected closeDeleteConfirm(): void {
+        this.showDeleteConfirm.set(false);
+        this.exerciseToDelete.set('');
+    }
+
+    protected async deleteExercise(): Promise<void> {
+        const exerciseId = this.exerciseToDelete();
+        if (!exerciseId) {
+            return;
+        }
+
+        this.isDeleting.set(true);
+        try {
+            await this.workoutService.deleteExercise(exerciseId);
+            // Remove from local state
+            this.exercises.set(
+                this.exercises().filter(ex => ex.id !== exerciseId)
+            );
+            this.closeDeleteConfirm();
+        } catch (error) {
+            console.error('Error deleting exercise:', error);
+        } finally {
+            this.isDeleting.set(false);
+        }
     }
 }

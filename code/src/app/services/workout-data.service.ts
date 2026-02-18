@@ -372,4 +372,41 @@ export class WorkoutDataService {
             throw error;
         }
     }
+
+    async deleteExercise(exerciseId: string): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the exercise
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+            );
+
+            if (!workout) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the muscle group containing the exercise
+            const muscleGroup = workout.muscleGroup.find(mg =>
+                mg.exercises.some(ex => ex.id === exerciseId)
+            );
+
+            if (!muscleGroup) {
+                throw new Error('Exercise not found');
+            }
+
+            // Remove the exercise
+            muscleGroup.exercises = muscleGroup.exercises.filter(ex => ex.id !== exerciseId);
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error deleting exercise:', error);
+            throw error;
+        }
+    }
 }
