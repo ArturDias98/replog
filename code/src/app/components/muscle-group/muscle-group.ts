@@ -133,4 +133,8 @@ export class MuscleGroupComponent implements OnInit {
             this.isDeleting.set(false);
         }
     }
+
+    protected navigateBack(): void {
+        this.router.navigate(['/']);
+    }
 }

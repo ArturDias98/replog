@@ -53,6 +53,33 @@
     min-width: 0;
 }
 
+.btn-icon-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.btn-icon-back:hover {
+    background-color: var(--bg-secondary);
+    opacity: 1;
+    color: var(--text-primary);
+}
+
+.btn-icon-back:active {
+    opacity: 0.8;
+}
+
 .workout-title {
     font-size: 1.5rem;
     font-weight: 700;
