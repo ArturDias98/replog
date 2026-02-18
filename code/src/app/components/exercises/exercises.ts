@@ -24,11 +24,9 @@ export class ExercisesComponent implements OnInit {
     protected readonly workoutId = signal<string>('');
 
     async ngOnInit(): Promise<void> {
-        const workoutId = this.route.snapshot.paramMap.get('workoutId');
         const muscleGroupId = this.route.snapshot.paramMap.get('muscleGroupId');
 
-        if (workoutId && muscleGroupId) {
-            this.workoutId.set(workoutId);
+        if (muscleGroupId) {
             this.muscleGroupId.set(muscleGroupId);
             await this.loadMuscleGroup();
         }
@@ -42,6 +40,7 @@ export class ExercisesComponent implements OnInit {
                 this.exercises.set(muscleGroup.exercises);
                 this.muscleGroupTitle.set(muscleGroup.title);
                 this.muscleGroupDate.set(muscleGroup.date);
+                this.workoutId.set(muscleGroup.workoutId);
             }
         } finally {
             this.isLoading.set(false);
@@ -49,6 +48,6 @@ export class ExercisesComponent implements OnInit {
     }
 
     protected navigateBack(): void {
-        this.router.navigate(['/workout', this.workoutId(), 'muscle-groups']);
+        this.router.navigate(['/muscle-group', this.workoutId()]);
     }
 }

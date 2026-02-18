@@ -5,6 +5,6 @@ import { ExercisesComponent } from './components/exercises/exercises';
 
 export const routes: Routes = [
     { path: '', component: Workout },
-    { path: 'workout/:id/muscle-groups', component: MuscleGroupComponent },
-    { path: 'workout/:workoutId/muscle-group/:muscleGroupId/exercises', component: ExercisesComponent }
+    { path: 'muscle-group/:workoutId', component: MuscleGroupComponent },
+    { path: 'exercises/:muscleGroupId', component: ExercisesComponent }
 ];

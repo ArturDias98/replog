@@ -36,7 +36,7 @@ export class MuscleGroupComponent implements OnInit {
     protected readonly isClearing = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
-        const workoutId = this.route.snapshot.paramMap.get('id');
+        const workoutId = this.route.snapshot.paramMap.get('workoutId');
         if (workoutId) {
             this.workoutId.set(workoutId);
             await this.loadWorkout();
@@ -141,7 +141,7 @@ export class MuscleGroupComponent implements OnInit {
     }
 
     protected navigateToExercises(muscleGroupId: string): void {
-        this.router.navigate(['/workout', this.workoutId(), 'muscle-group', muscleGroupId, 'exercises']);
+        this.router.navigate(['/exercises', muscleGroupId]);
     }
 
     protected confirmClearAll(): void {

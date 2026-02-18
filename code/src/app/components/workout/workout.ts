@@ -64,7 +64,7 @@ export class Workout implements OnInit {
     }
 
     protected async onWorkoutAdded(workoutId: string): Promise<void> {
-        this.router.navigate(['workout', workoutId, 'muscle-groups']);
+        this.router.navigate(['muscle-group', workoutId]);
     }
 
     private async loadWorkouts(): Promise<void> {
@@ -78,7 +78,7 @@ export class Workout implements OnInit {
     }
 
     protected navigateToMuscleGroups(workoutId: string): void {
-        this.router.navigate(['workout', workoutId, 'muscle-groups']);
+        this.router.navigate(['muscle-group', workoutId]);
     }
 
     protected confirmClearAll(): void {
