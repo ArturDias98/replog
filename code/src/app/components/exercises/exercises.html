@@ -44,7 +44,7 @@
 </div>
 
 @if (!isLoading() && exercises().length === 0) {
-<button class="fab" type="button" aria-label="Add exercise">
+<button class="fab" type="button" aria-label="Add exercise" (click)="openAddExerciseModal()">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 5v14" />
@@ -55,7 +55,7 @@
 
 @if (!isLoading() && exercises().length > 0) {
 <div class="action-buttons">
-    <button class="fab fab-add" type="button" aria-label="Add exercise">
+    <button class="fab fab-add" type="button" aria-label="Add exercise" (click)="openAddExerciseModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 5v14" />
@@ -64,4 +64,9 @@
         <span class="fab-label">Add Exercise</span>
     </button>
 </div>
+}
+
+@if (showAddExerciseModal()) {
+<app-add-exercise-modal [muscleGroupId]="muscleGroupId()" (exerciseAdded)="handleExerciseAdded($event)"
+    (closeModal)="closeAddExerciseModal()"></app-add-exercise-modal>
 }

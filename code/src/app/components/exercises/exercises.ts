@@ -3,10 +3,11 @@ import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { Exercise } from '../../models/exercise';
+import { AddExerciseModal } from '../add-exercise-modal/add-exercise-modal';
 
 @Component({
     selector: 'app-exercises',
-    imports: [DatePipe],
+    imports: [DatePipe, AddExerciseModal],
     templateUrl: './exercises.html',
     styleUrl: './exercises.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,6 +23,7 @@ export class ExercisesComponent implements OnInit {
     protected readonly muscleGroupDate = signal<string>('');
     protected readonly muscleGroupId = signal<string>('');
     protected readonly workoutId = signal<string>('');
+    protected readonly showAddExerciseModal = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         const muscleGroupId = this.route.snapshot.paramMap.get('muscleGroupId');
@@ -49,5 +51,17 @@ export class ExercisesComponent implements OnInit {
 
     protected navigateBack(): void {
         this.router.navigate(['/muscle-group', this.workoutId()]);
+    }
+
+    protected openAddExerciseModal(): void {
+        this.showAddExerciseModal.set(true);
+    }
+
+    protected closeAddExerciseModal(): void {
+        this.showAddExerciseModal.set(false);
+    }
+
+    protected handleExerciseAdded(exercise: Exercise): void {
+        this.exercises.update(current => [...current, exercise]);
     }
 }

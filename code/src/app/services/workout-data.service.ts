@@ -331,4 +331,45 @@ export class WorkoutDataService {
             return [];
         }
     }
+
+    async addExercise(muscleGroupId: string, title: string): Promise<Exercise> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the muscle group
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.id === muscleGroupId)
+            );
+
+            if (!workout) {
+                throw new Error('Muscle group not found');
+            }
+
+            const muscleGroupIndex = workout.muscleGroup.findIndex(
+                mg => mg.id === muscleGroupId
+            );
+
+            // Create new exercise with generated ID
+            const newExercise: Exercise = {
+                id: crypto.randomUUID(),
+                muscleGroupId: muscleGroupId,
+                title: title,
+                log: []
+            };
+
+            workout.muscleGroup[muscleGroupIndex].exercises.push(newExercise);
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+
+            return newExercise;
+        } catch (error) {
+            console.error('Error adding exercise:', error);
+            throw error;
+        }
+    }
 }
