@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
+import { UserPreferencesService } from '../../services/user-preferences.service';
 import { MuscleGroup } from '../../models/muscle-group';
 import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
 import { AddMuscleGroupModal } from '../add-muscle-group-modal/add-muscle-group-modal';
@@ -17,6 +18,7 @@ export class MuscleGroupComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly workoutService = inject(WorkoutDataService);
+    private readonly userPreferencesService = inject(UserPreferencesService);
 
     protected readonly muscleGroups = signal<MuscleGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);
@@ -39,6 +41,7 @@ export class MuscleGroupComponent implements OnInit {
         const workoutId = this.route.snapshot.paramMap.get('workoutId');
         if (workoutId) {
             this.workoutId.set(workoutId);
+            this.userPreferencesService.setLastVisitedWorkout(workoutId);
             await this.loadWorkout();
         }
     }
