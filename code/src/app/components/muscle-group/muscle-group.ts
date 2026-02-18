@@ -32,6 +32,8 @@ export class MuscleGroupComponent implements OnInit {
     protected readonly muscleGroupToEdit = signal<string>('');
     protected readonly muscleGroupTitle = signal<string>('');
     protected readonly muscleGroupDate = signal<string>('');
+    protected readonly showClearAllConfirm = signal<boolean>(false);
+    protected readonly isClearing = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('id');
@@ -136,5 +138,26 @@ export class MuscleGroupComponent implements OnInit {
 
     protected navigateBack(): void {
         this.router.navigate(['/']);
+    }
+
+    protected confirmClearAll(): void {
+        this.showClearAllConfirm.set(true);
+    }
+
+    protected closeClearAllConfirm(): void {
+        this.showClearAllConfirm.set(false);
+    }
+
+    protected async clearAllMuscleGroups(): Promise<void> {
+        this.isClearing.set(true);
+        try {
+            await this.workoutService.clearAllMuscleGroups(this.workoutId());
+            this.muscleGroups.set([]);
+            this.closeClearAllConfirm();
+        } catch (error) {
+            console.error('Error clearing muscle groups:', error);
+        } finally {
+            this.isClearing.set(false);
+        }
     }
 }

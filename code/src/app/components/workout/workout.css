@@ -49,29 +49,29 @@
     font-weight: 500;
 }
 
-.fab-add {
+.action-buttons .fab-add {
     color: var(--primary-color);
 }
 
-.fab-add:hover {
-    background-color: rgba(74, 144, 226, 0.1);
+.action-buttons .fab-add:hover {
+    background-color: rgba(0, 175, 200, 0.1);
     color: var(--primary-hover);
 }
 
-.fab-add:active {
-    background-color: rgba(74, 144, 226, 0.2);
+.action-buttons .fab-add:active {
+    background-color: rgba(0, 175, 200, 0.2);
 }
 
-.fab-clear {
+.action-buttons .fab-clear {
     color: var(--danger-color);
 }
 
-.fab-clear:hover {
+.action-buttons .fab-clear:hover {
     background-color: rgba(220, 53, 69, 0.1);
     color: var(--danger-hover);
 }
 
-.fab-clear:active {
+.action-buttons .fab-clear:active {
     background-color: rgba(220, 53, 69, 0.2);
 }
 

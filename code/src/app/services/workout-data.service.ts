@@ -272,4 +272,28 @@ export class WorkoutDataService {
             return [];
         }
     }
+
+    async clearAllMuscleGroups(workoutId: string): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            const workout = workouts.find(w => w.id === workoutId);
+            if (!workout) {
+                throw new Error('Workout not found');
+            }
+
+            // Clear all muscle groups from the workout
+            workout.muscleGroup = [];
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error clearing muscle groups:', error);
+            throw error;
+        }
+    }
 }
