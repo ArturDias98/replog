@@ -10,7 +10,7 @@
                 "workoutId": "b1a7f3d2-9c4e-4f2a-8d6a-2a5f9c7e8a11",
                 "title": "Chest",
                 "date": "2026-01-28",
-                "muscleItem": [
+                "exercises": [
                     {
                         "id": "d4e7f9a6-3b2c-4d8f-9a7e-5c2d9b8f7a33",
                         "muscleGroupId": "c3f9a8b7-2d4e-4a6b-9f3c-7e2d8a5b9c44",
@@ -43,7 +43,7 @@
                 "workoutId": "a2b3c4d5-6e7f-4g8h-9i0j-1k2l3m4n5o66",
                 "title": "Quads",
                 "date": "2026-01-29",
-                "muscleItem": [
+                "exercises": [
                     {
                         "id": "q8r9s0t1-2u3v-4w5x-9y0z-3a4b5c6d7e88",
                         "muscleGroupId": "p7q8r9s0-1t2u-4v5w-9x0y-2z3a4b5c6d77",
@@ -76,7 +76,7 @@
                 "workoutId": "z9y8x7w6-5v4u-3t2s-1r0q-9p8o7n6m5l44",
                 "title": "Abs",
                 "date": "2026-01-30",
-                "muscleItem": [
+                "exercises": [
                     {
                         "id": "x7w6v5u4-3t2s-1r0q-9p8o-7n6m5l4k3j22",
                         "muscleGroupId": "y8x7w6v5-4u3t-2s1r-0q9p-8o7n6m5l4k33",

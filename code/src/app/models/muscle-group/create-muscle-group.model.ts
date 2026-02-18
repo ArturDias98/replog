@@ -1,4 +1,4 @@
-export type CreateMuscleItemModel = {
+export type CreateExerciseModel = {
     title: string;
 };
 
@@ -6,5 +6,5 @@ export type CreateMuscleGroupModel = {
     title: string;
     date: string;
     workoutId: string;
-    muscleItems: CreateMuscleItemModel[];
+    exercises: CreateExerciseModel[];
 };

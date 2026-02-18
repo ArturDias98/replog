@@ -29,13 +29,13 @@
             <div class="form-group">
                 <label>Exercises</label>
                 <div class="muscle-items-list">
-                    @for (item of muscleItems(); track $index) {
+                    @for (item of exercises(); track $index) {
                     <div class="muscle-item-row">
                         <input type="text" class="form-control" [value]="item.title"
-                            (input)="updateMuscleItemTitle($index, $any($event.target).value)"
+                            (input)="updateExerciseTitle($index, $any($event.target).value)"
                             placeholder="Enter exercise name" [disabled]="isSubmitting()"
-                            [class.invalid]="!item.title.trim() && muscleItems().length > 0">
-                        <button type="button" class="btn-icon-remove" (click)="removeMuscleItem($index)"
+                            [class.invalid]="!item.title.trim() && exercises().length > 0">
+                        <button type="button" class="btn-icon-remove" (click)="removeExercise($index)"
                             [disabled]="isSubmitting()" aria-label="Remove exercise">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -46,7 +46,7 @@
                         </button>
                     </div>
                     }
-                    <button type="button" class="btn btn-add-item" (click)="addMuscleItem()"
+                    <button type="button" class="btn btn-add-item" (click)="addExercise()"
                         [disabled]="isSubmitting() || !canAddMoreItems()"
                         [title]="!canAddMoreItems() ? 'Fill in all exercises before adding more' : 'Add another exercise'">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"

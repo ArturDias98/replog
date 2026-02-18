@@ -1,7 +1,7 @@
 import { Component, inject, output, signal, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WorkoutDataService } from '../../services/workout-data.service';
-import { CreateMuscleGroupModel, CreateMuscleItemModel, MuscleGroup } from '../../models/muscle-group';
+import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../models/muscle-group';
 
 @Component({
     selector: 'app-add-muscle-group-modal',
@@ -16,7 +16,7 @@ export class AddMuscleGroupModal {
 
     protected readonly title = signal<string>('');
     protected readonly date = signal<string>(this.getTodayDate());
-    protected readonly muscleItems = signal<CreateMuscleItemModel[]>([]);
+    protected readonly exercises = signal<CreateExerciseModel[]>([]);
     protected readonly isSubmitting = signal<boolean>(false);
     protected readonly isClosing = signal<boolean>(false);
 
@@ -28,16 +28,16 @@ export class AddMuscleGroupModal {
         return today.toISOString().split('T')[0];
     }
 
-    protected addMuscleItem(): void {
-        this.muscleItems.update(items => [...items, { title: '' }]);
+    protected addExercise(): void {
+        this.exercises.update(items => [...items, { title: '' }]);
     }
 
-    protected removeMuscleItem(index: number): void {
-        this.muscleItems.update(items => items.filter((_, i) => i !== index));
+    protected removeExercise(index: number): void {
+        this.exercises.update(items => items.filter((_, i) => i !== index));
     }
 
-    protected updateMuscleItemTitle(index: number, title: string): void {
-        this.muscleItems.update(items => {
+    protected updateExerciseTitle(index: number, title: string): void {
+        this.exercises.update(items => {
             const newItems = [...items];
             newItems[index] = { title };
             return newItems;
@@ -48,17 +48,17 @@ export class AddMuscleGroupModal {
         const hasTitle = !!this.title();
         const hasDate = !!this.date();
 
-        // If there are muscle items, all must have titles
-        const muscleItemsValid = this.muscleItems().length === 0 ||
-            this.muscleItems().every(item => item.title.trim());
+        // If there are exercises, all must have titles
+        const exercisesValid = this.exercises().length === 0 ||
+            this.exercises().every(item => item.title.trim());
 
-        return hasTitle && hasDate && muscleItemsValid;
+        return hasTitle && hasDate && exercisesValid;
     }
 
     protected canAddMoreItems(): boolean {
         // Can add more items only if all existing items have titles
-        return this.muscleItems().length === 0 ||
-            this.muscleItems().every(item => item.title.trim());
+        return this.exercises().length === 0 ||
+            this.exercises().every(item => item.title.trim());
     }
 
     protected onSubmit(): void {
@@ -72,7 +72,7 @@ export class AddMuscleGroupModal {
             title: this.title(),
             date: this.date(),
             workoutId: this.workoutId(),
-            muscleItems: this.muscleItems().filter(item => item.title.trim())
+            exercises: this.exercises().filter(item => item.title.trim())
         };
 
         this.workoutService.addMuscleGroup(model)
@@ -93,7 +93,7 @@ export class AddMuscleGroupModal {
         setTimeout(() => {
             this.title.set('');
             this.date.set(this.getTodayDate());
-            this.muscleItems.set([]);
+            this.exercises.set([]);
             this.isClosing.set(false);
             this.closeModal.emit();
         }, 200);

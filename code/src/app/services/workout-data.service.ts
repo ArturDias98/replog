@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { WorkOutGroup } from '../models/workout-group';
 import { CreateWorkoutModel, UpdateWorkoutModel } from '../models/workout';
-import { CreateMuscleGroupModel, UpdateMuscleGroupModel, CreateMuscleItemModel } from '../models/muscle-group';
+import { CreateMuscleGroupModel, UpdateMuscleGroupModel, CreateExerciseModel } from '../models/muscle-group';
 import { MuscleGroup } from '../models/muscle-group';
-import { MuscleItem } from '../models/muscle-item';
+import { Exercise } from '../models/exercise';
 
 @Injectable({
     providedIn: 'root'
@@ -174,7 +174,7 @@ export class WorkoutDataService {
                 workoutId: model.workoutId,
                 title: model.title,
                 date: model.date,
-                muscleItem: model.muscleItems.map((item: CreateMuscleItemModel) => ({
+                exercises: model.exercises.map((item: CreateExerciseModel) => ({
                     id: crypto.randomUUID(),
                     muscleGroupId: muscleGroupId,
                     title: item.title,

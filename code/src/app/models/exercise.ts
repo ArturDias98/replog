@@ -1,6 +1,6 @@
 import { Log } from './log';
 
-export type MuscleItem = {
+export type Exercise = {
     id: string;
     muscleGroupId: string;
     title: string;
