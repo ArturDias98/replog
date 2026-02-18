@@ -3,11 +3,14 @@ import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { Exercise } from '../../models/exercise';
+import { MuscleGroup } from '../../models/muscle-group';
 import { AddExerciseModal } from '../add-exercise-modal/add-exercise-modal';
+import { EditMuscleGroupModal } from '../edit-muscle-group-modal/edit-muscle-group-modal';
+import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
 
 @Component({
     selector: 'app-exercises',
-    imports: [DatePipe, AddExerciseModal],
+    imports: [DatePipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal],
     templateUrl: './exercises.html',
     styleUrl: './exercises.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,6 +30,10 @@ export class ExercisesComponent implements OnInit {
     protected readonly showDeleteConfirm = signal<boolean>(false);
     protected readonly isDeleting = signal<boolean>(false);
     protected readonly exerciseToDelete = signal<string>('');
+    protected readonly showEditMuscleGroupModal = signal<boolean>(false);
+    protected readonly showEditExerciseModal = signal<boolean>(false);
+    protected readonly exerciseToEdit = signal<string>('');
+    protected readonly exerciseToEditTitle = signal<string>('');
 
     async ngOnInit(): Promise<void> {
         const muscleGroupId = this.route.snapshot.paramMap.get('muscleGroupId');
@@ -97,5 +104,38 @@ export class ExercisesComponent implements OnInit {
         } finally {
             this.isDeleting.set(false);
         }
+    }
+
+    protected openEditMuscleGroupModal(): void {
+        this.showEditMuscleGroupModal.set(true);
+    }
+
+    protected closeEditMuscleGroupModal(): void {
+        this.showEditMuscleGroupModal.set(false);
+    }
+
+    protected async onMuscleGroupUpdated(updatedMuscleGroup: MuscleGroup): Promise<void> {
+        // Update the muscle group title and date
+        this.muscleGroupTitle.set(updatedMuscleGroup.title);
+        this.muscleGroupDate.set(updatedMuscleGroup.date);
+    }
+
+    protected openEditExerciseModal(exercise: Exercise): void {
+        this.exerciseToEdit.set(exercise.id);
+        this.exerciseToEditTitle.set(exercise.title);
+        this.showEditExerciseModal.set(true);
+    }
+
+    protected closeEditExerciseModal(): void {
+        this.showEditExerciseModal.set(false);
+        this.exerciseToEdit.set('');
+        this.exerciseToEditTitle.set('');
+    }
+
+    protected async onExerciseUpdated(updatedExercise: Exercise): Promise<void> {
+        // Update the exercise in the list
+        this.exercises.update(exercises =>
+            exercises.map(ex => ex.id === updatedExercise.id ? updatedExercise : ex)
+        );
     }
 }

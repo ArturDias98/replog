@@ -422,3 +422,70 @@
     justify-content: space-between;
     gap: 0.5rem;
 }
+.btn-icon-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-icon-edit:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.btn-icon-edit:active {
+    transform: translateY(0);
+}
+
+.btn-icon-edit:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-icon-edit:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.item-content .btn-icon-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.item-content .btn-icon-edit:hover {
+    background-color: rgba(0, 175, 200, 0.1);
+    color: var(--primary-color);
+}
+
+.item-content .btn-icon-edit:active {
+    background-color: rgba(0, 175, 200, 0.2);
+}
+
+.item-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

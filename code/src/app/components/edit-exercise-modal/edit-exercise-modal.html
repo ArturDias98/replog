@@ -1,0 +1,37 @@
+<div class="modal-backdrop" [class.closing]="isClosing()" (click)="onBackdropClick($event)">
+    <div class="modal-content" [class.closing]="isClosing()">
+        <div class="modal-header">
+            <h2>Edit Exercise</h2>
+            <button type="button" class="btn-close" (click)="close()" aria-label="Close modal">
+                ×
+            </button>
+        </div>
+
+        <div class="modal-description">
+            <p>Update the exercise name.</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="modal-body">
+            <div class="form-group">
+                <label for="title">Exercise Name</label>
+                <input type="text" id="title" class="form-control" [value]="title()"
+                    (input)="title.set($any($event.target).value)" placeholder="Enter exercise name" required
+                    [disabled]="isSubmitting()">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isSubmitting()">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="!title() || isSubmitting()">
+                    @if (isSubmitting()) {
+                    <span class="spinner-small"></span>
+                    Updating...
+                    } @else {
+                    Update Exercise
+                    }
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

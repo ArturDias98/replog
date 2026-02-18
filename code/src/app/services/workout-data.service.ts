@@ -409,4 +409,52 @@ export class WorkoutDataService {
             throw error;
         }
     }
+
+    async updateExercise(exerciseId: string, title: string): Promise<Exercise> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the exercise
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+            );
+
+            if (!workout) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the muscle group containing the exercise
+            const muscleGroup = workout.muscleGroup.find(mg =>
+                mg.exercises.some(ex => ex.id === exerciseId)
+            );
+
+            if (!muscleGroup) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find and update the exercise
+            const exerciseIndex = muscleGroup.exercises.findIndex(ex => ex.id === exerciseId);
+
+            if (exerciseIndex === -1) {
+                throw new Error('Exercise not found');
+            }
+
+            muscleGroup.exercises[exerciseIndex] = {
+                ...muscleGroup.exercises[exerciseIndex],
+                title: title
+            };
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+
+            return muscleGroup.exercises[exerciseIndex];
+        } catch (error) {
+            console.error('Error updating exercise:', error);
+            throw error;
+        }
+    }
 }
