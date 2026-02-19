@@ -44,16 +44,19 @@ export class AddLogModal {
 
         this.isAdding.set(true);
         try {
+            const now = new Date();
             const model: AddLogModel = {
                 exerciseId: this.exerciseId(),
                 numberReps: reps,
-                maxWeight: weight
+                maxWeight: weight,
+                date: now
             };
             await this.workoutService.addLog(model);
             const newLog: Log = {
                 id: crypto.randomUUID(),
                 numberReps: reps,
-                maxWeight: weight
+                maxWeight: weight,
+                date: now
             };
             this.logAdded.emit(newLog);
             this.close();

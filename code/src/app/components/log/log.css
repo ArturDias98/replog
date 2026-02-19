@@ -112,6 +112,21 @@
     }
 }
 
+.log-group {
+    margin-bottom: 2rem;
+}
+
+.log-group-date {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 4px;
+}
+
 .item-list {
     list-style: none;
     padding: 0;
@@ -245,6 +260,13 @@
 
 .item-actions .btn-icon-edit:active {
     background-color: rgba(0, 175, 200, 0.2);
+}
+
+.empty-state-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
 }
 
 .empty-state {

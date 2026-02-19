@@ -507,6 +507,24 @@ export class WorkoutDataService {
                 for (const muscleGroup of workout.muscleGroup) {
                     const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
                     if (exercise) {
+                        // Migrate logs without date property (add a default date)
+                        let needsSave = false;
+                        exercise.log = exercise.log.map(log => {
+                            if (!log.date) {
+                                needsSave = true;
+                                return {
+                                    ...log,
+                                    date: new Date()
+                                };
+                            }
+                            return log;
+                        });
+
+                        // Save migrated data back to storage
+                        if (needsSave) {
+                            this.saveToStorage(workouts);
+                        }
+
                         return exercise;
                     }
                 }
@@ -556,7 +574,8 @@ export class WorkoutDataService {
             exercise.log.push({
                 id: crypto.randomUUID(),
                 numberReps: model.numberReps,
-                maxWeight: model.maxWeight
+                maxWeight: model.maxWeight,
+                date: model.date
             });
 
             // Save to local storage

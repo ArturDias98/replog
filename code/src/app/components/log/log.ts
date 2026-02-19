@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
@@ -9,6 +9,11 @@ import { AddLogModal } from './add-log-modal/add-log-modal';
 import { EditLogModal } from './edit-log-modal/edit-log-modal';
 import { DeleteLogModal } from './delete-log-modal/delete-log-modal';
 import { ClearAllLogsModal } from './clear-all-logs-modal/clear-all-logs-modal';
+
+type LogGroup = {
+    date: string;
+    logs: Log[];
+};
 
 @Component({
     selector: 'app-log',
@@ -35,6 +40,38 @@ export class LogComponent implements OnInit {
     protected readonly logToEdit = signal<Log | null>(null);
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly showEditExerciseModal = signal<boolean>(false);
+
+    protected readonly groupedLogs = computed<LogGroup[]>(() => {
+        const logs = this.logs();
+        const groups = new Map<string, Log[]>();
+
+        // Group logs by date (without time)
+        logs.forEach(log => {
+            // Handle logs without date property (legacy data)
+            if (!log.date) {
+                return;
+            }
+
+            const date = new Date(log.date);
+
+            // Skip invalid dates
+            if (isNaN(date.getTime())) {
+                return;
+            }
+
+            const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+
+            if (!groups.has(dateKey)) {
+                groups.set(dateKey, []);
+            }
+            groups.get(dateKey)!.push(log);
+        });
+
+        // Convert to array and sort by date (most recent first)
+        return Array.from(groups.entries())
+            .map(([date, logs]) => ({ date, logs }))
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    });
 
     async ngOnInit(): Promise<void> {
         const exerciseId = this.route.snapshot.paramMap.get('exerciseId');
