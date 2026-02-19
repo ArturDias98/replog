@@ -3,14 +3,14 @@ import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ExerciseService } from '../../services/exercise.service';
 import { MuscleGroupService } from '../../services/muscle-group.service';
+import { LogService } from '../../services/log.service';
 import { Log } from '../../models/log';
 import { Exercise } from '../../models/exercise';
 import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
 import { AddLogModal } from './add-log-modal/add-log-modal';
 import { EditLogModal } from './edit-log-modal/edit-log-modal';
-import { DeleteLogModal } from './delete-log-modal/delete-log-modal';
-import { ClearAllLogsModal } from './clear-all-logs-modal/clear-all-logs-modal';
 import { ActionButtonsComponent } from '../action-buttons/action-buttons';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
 
 type LogGroup = {
     date: string;
@@ -19,7 +19,7 @@ type LogGroup = {
 
 @Component({
     selector: 'app-log',
-    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, DeleteLogModal, ClearAllLogsModal, ActionButtonsComponent],
+    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, ActionButtonsComponent, ConfirmationDialogComponent],
     templateUrl: './log.html',
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -29,6 +29,7 @@ export class LogComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly exerciseService = inject(ExerciseService);
     private readonly muscleGroupService = inject(MuscleGroupService);
+    private readonly logService = inject(LogService);
 
     protected readonly logs = signal<Log[]>([]);
     protected readonly isLoading = signal<boolean>(false);
@@ -39,9 +40,11 @@ export class LogComponent implements OnInit {
     protected readonly showAddLogModal = signal<boolean>(false);
     protected readonly showDeleteConfirm = signal<boolean>(false);
     protected readonly logToDelete = signal<string>('');
+    protected readonly isDeleting = signal<boolean>(false);
     protected readonly showEditLogModal = signal<boolean>(false);
     protected readonly logToEdit = signal<Log | null>(null);
     protected readonly showClearAllConfirm = signal<boolean>(false);
+    protected readonly isClearing = signal<boolean>(false);
     protected readonly showEditExerciseModal = signal<boolean>(false);
 
     protected readonly groupedLogs = computed<LogGroup[]>(() => {
@@ -131,8 +134,18 @@ export class LogComponent implements OnInit {
         this.logToDelete.set('');
     }
 
-    protected onLogDeleted(logId: string): void {
-        this.logs.update(logs => logs.filter(log => log.id !== logId));
+    protected async deleteLog(): Promise<void> {
+        const logId = this.logToDelete();
+        if (!logId) return;
+
+        this.isDeleting.set(true);
+        try {
+            await this.logService.deleteLog(this.exerciseId(), logId);
+            this.logs.update(logs => logs.filter(log => log.id !== logId));
+            this.closeDeleteModal();
+        } finally {
+            this.isDeleting.set(false);
+        }
     }
 
     protected openEditLogModal(log: Log): void {
@@ -159,8 +172,15 @@ export class LogComponent implements OnInit {
         this.showClearAllConfirm.set(false);
     }
 
-    protected onLogsCleared(): void {
-        this.logs.set([]);
+    protected async clearAllLogs(): Promise<void> {
+        this.isClearing.set(true);
+        try {
+            await this.logService.clearAllLogs(this.exerciseId());
+            this.logs.set([]);
+            this.closeClearAllModal();
+        } finally {
+            this.isClearing.set(false);
+        }
     }
 
     protected openEditExerciseModal(): void {

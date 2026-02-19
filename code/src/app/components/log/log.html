@@ -120,14 +120,17 @@
 
 <!-- Delete Confirmation Modal -->
 @if (showDeleteConfirm()) {
-<app-delete-log-modal [exerciseId]="exerciseId()" [logId]="logToDelete()" (logDeleted)="onLogDeleted($event)"
-    (closeModal)="closeDeleteModal()" />
+<app-confirmation-dialog title="Delete Log"
+    message="Are you sure you want to delete this log? This action cannot be undone." confirmText="Delete"
+    [isProcessing]="isDeleting()" processingText="Deleting..." (confirm)="deleteLog()" (cancel)="closeDeleteModal()" />
 }
 
 <!-- Clear All Confirmation Modal -->
 @if (showClearAllConfirm()) {
-<app-clear-all-logs-modal [exerciseId]="exerciseId()" (logsCleared)="onLogsCleared()"
-    (closeModal)="closeClearAllModal()" />
+<app-confirmation-dialog title="Clear All Logs"
+    message="Are you sure you want to clear all logs for this exercise? This will permanently delete all log data and cannot be undone."
+    confirmText="Clear All" [isProcessing]="isClearing()" processingText="Clearing..." (confirm)="clearAllLogs()"
+    (cancel)="closeClearAllModal()" />
 }
 
 @if (showEditExerciseModal()) {
