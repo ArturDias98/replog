@@ -16,9 +16,6 @@ export class WorkoutDataService {
     private readonly STORAGE_KEY = 'replog_workouts';
 
     async getWorkouts(): Promise<WorkOutGroup[]> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load from local storage
             const storedData = this.loadFromStorage();
@@ -57,9 +54,6 @@ export class WorkoutDataService {
     }
 
     async addWorkout(model: CreateWorkoutModel): Promise<WorkOutGroup> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -85,9 +79,6 @@ export class WorkoutDataService {
     }
 
     async updateWorkout(model: UpdateWorkoutModel): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -109,9 +100,6 @@ export class WorkoutDataService {
     }
 
     async deleteWorkout(id: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -126,9 +114,6 @@ export class WorkoutDataService {
     }
 
     async clearAllWorkouts(userId?: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Clear all workouts from local storage
             // Note: userId parameter is kept for API consistency but not used in local storage implementation
@@ -140,9 +125,6 @@ export class WorkoutDataService {
     }
 
     async getWorkoutById(id: string): Promise<WorkOutGroup | undefined> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -155,9 +137,6 @@ export class WorkoutDataService {
     }
 
     async addMuscleGroup(model: CreateMuscleGroupModel): Promise<MuscleGroup> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -195,9 +174,6 @@ export class WorkoutDataService {
     }
 
     async updateMuscleGroup(model: UpdateMuscleGroupModel): Promise<MuscleGroup> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -231,9 +207,6 @@ export class WorkoutDataService {
     }
 
     async deleteMuscleGroup(muscleGroupId: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -259,9 +232,6 @@ export class WorkoutDataService {
     }
 
     async getMuscleGroupsByWorkoutId(workoutId: string): Promise<MuscleGroup[]> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -275,9 +245,6 @@ export class WorkoutDataService {
     }
 
     async clearAllMuscleGroups(workoutId: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -299,9 +266,6 @@ export class WorkoutDataService {
     }
 
     async getMuscleGroupById(muscleGroupId: string): Promise<MuscleGroup | undefined> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -321,9 +285,6 @@ export class WorkoutDataService {
     }
 
     async getExercisesByMuscleGroupId(muscleGroupId: string): Promise<Exercise[]> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             const muscleGroup = await this.getMuscleGroupById(muscleGroupId);
             return muscleGroup?.exercises ?? [];
@@ -334,9 +295,6 @@ export class WorkoutDataService {
     }
 
     async addExercise(muscleGroupId: string, title: string): Promise<Exercise> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -375,9 +333,6 @@ export class WorkoutDataService {
     }
 
     async deleteExercise(exerciseId: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -412,9 +367,6 @@ export class WorkoutDataService {
     }
 
     async updateExercise(exerciseId: string, title: string): Promise<Exercise> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -460,9 +412,6 @@ export class WorkoutDataService {
     }
 
     async clearAllExercises(muscleGroupId: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -495,9 +444,6 @@ export class WorkoutDataService {
     }
 
     async getExerciseById(exerciseId: string): Promise<Exercise | undefined> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -538,9 +484,6 @@ export class WorkoutDataService {
     }
 
     async addLog(model: AddLogModel): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -587,9 +530,6 @@ export class WorkoutDataService {
     }
 
     async updateLog(model: UpdateLogModel): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -641,9 +581,6 @@ export class WorkoutDataService {
     }
 
     async deleteLog(exerciseId: string, logId: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
@@ -685,9 +622,6 @@ export class WorkoutDataService {
     }
 
     async clearAllLogs(exerciseId: string): Promise<void> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         try {
             // Load current workouts from storage
             const workouts = this.loadFromStorage() ?? [];
