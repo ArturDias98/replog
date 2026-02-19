@@ -59,6 +59,9 @@ export class ExercisesComponent implements OnInit {
                 this.muscleGroupTitle.set(muscleGroup.title);
                 this.muscleGroupDate.set(muscleGroup.date);
                 this.workoutId.set(muscleGroup.workoutId);
+            } else {
+                // Muscle group not found, redirect to main page
+                this.router.navigate(['/']);
             }
         } finally {
             this.isLoading.set(false);

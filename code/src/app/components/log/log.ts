@@ -102,6 +102,9 @@ export class LogComponent implements OnInit {
                 if (muscleGroup) {
                     this.exerciseDate.set(muscleGroup.date);
                 }
+            } else {
+                // Exercise not found, redirect to main page
+                this.router.navigate(['/']);
             }
         } finally {
             this.isLoading.set(false);
