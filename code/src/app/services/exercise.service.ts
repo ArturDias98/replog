@@ -60,6 +60,44 @@ export class ExerciseService {
         }
     }
 
+    async addExercises(muscleGroupId: string, titles: string[]): Promise<Exercise[]> {
+        try {
+            if (titles.length === 0) {
+                return [];
+            }
+
+            const workouts = this.storage.loadFromStorage();
+
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.id === muscleGroupId)
+            );
+
+            if (!workout) {
+                throw new Error('Muscle group not found');
+            }
+
+            const muscleGroupIndex = workout.muscleGroup.findIndex(
+                mg => mg.id === muscleGroupId
+            );
+
+            const newExercises: Exercise[] = titles.map(title => ({
+                id: crypto.randomUUID(),
+                muscleGroupId: muscleGroupId,
+                title: title.trim(),
+                log: []
+            }));
+
+            workout.muscleGroup[muscleGroupIndex].exercises.push(...newExercises);
+
+            this.storage.saveToStorage(workouts);
+
+            return newExercises;
+        } catch (error) {
+            console.error('Error adding exercises:', error);
+            throw error;
+        }
+    }
+
     async deleteExercise(exerciseId: string): Promise<void> {
         try {
             const workouts = this.storage.loadFromStorage();

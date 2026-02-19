@@ -10,9 +10,36 @@
         <div class="modal-description">
             <p>Add a new exercise to this muscle group. You'll be able to log sets, reps, and weight for this
                 exercise.</p>
+            @if (pendingExercises().length > 0) {
+            <div class="queue-info">
+                <div class="queue-header">
+                    <strong>{{ pendingExercises().length }}</strong> exercise{{ pendingExercises().length !==
+                    1 ? 's' : '' }} ready to save:
+                </div>
+                <ul class="queue-list">
+                    @for (pendingExercise of pendingExercises(); track $index) {
+                    <li class="queue-item" [class.editing]="editingIndex() === $index"
+                        (click)="editPendingExercise($index)"
+                        [class.disabled]="isSubmitting() || editingIndex() === $index">
+                        <span class="queue-item-title">{{ pendingExercise }}</span>
+                        <button type="button" class="btn-queue-remove"
+                            (click)="removePendingExercise($index); $event.stopPropagation()"
+                            [disabled]="isSubmitting() || editingIndex() === $index" aria-label="Remove from queue">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M18 6L6 18" />
+                                <path d="M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </li>
+                    }
+                </ul>
+            </div>
+            }
         </div>
 
-        <form (ngSubmit)="onSubmit()" class="modal-body">
+        <form (ngSubmit)="onSubmit()" (keydown)="onFormKeyDown($event)" class="modal-body">
             <div class="form-group">
                 <label for="title">Exercise Name</label>
                 <input type="text" id="title" class="form-control" [value]="title()"
@@ -24,12 +51,27 @@
                 <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isSubmitting()">
                     Cancel
                 </button>
-                <button type="submit" class="btn btn-primary" [disabled]="!title() || isSubmitting()">
+                @if (editingIndex() !== null) {
+                <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSubmitting()">
+                    Cancel Edit
+                </button>
+                }
+                <button type="button" class="btn btn-secondary" (click)="addToQueue()"
+                    [disabled]="!isFormValid() || isSubmitting()">
+                    @if (editingIndex() !== null) {
+                    Update
+                    } @else {
+                    Next
+                    }
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="!canSave() || isSubmitting()">
                     @if (isSubmitting()) {
                     <span class="spinner-small"></span>
                     Adding...
                     } @else {
-                    Add Exercise
+                    Add @if (pendingExercises().length > 0) {
+                    All
+                    }
                     }
                 </button>
             </div>
