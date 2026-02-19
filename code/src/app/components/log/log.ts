@@ -1,4 +1,5 @@
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { Log, AddLogModel, UpdateLogModel } from '../../models/log';
@@ -7,7 +8,7 @@ import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
 
 @Component({
     selector: 'app-log',
-    imports: [EditExerciseModal],
+    imports: [DatePipe, EditExerciseModal],
     templateUrl: './log.html',
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,6 +21,7 @@ export class LogComponent implements OnInit {
     protected readonly logs = signal<Log[]>([]);
     protected readonly isLoading = signal<boolean>(false);
     protected readonly exerciseTitle = signal<string>('');
+    protected readonly exerciseDate = signal<string>('');
     protected readonly exerciseId = signal<string>('');
     protected readonly muscleGroupId = signal<string>('');
     protected readonly showAddLogModal = signal<boolean>(false);
@@ -57,6 +59,12 @@ export class LogComponent implements OnInit {
                 this.logs.set(exercise.log);
                 this.exerciseTitle.set(exercise.title);
                 this.muscleGroupId.set(exercise.muscleGroupId);
+
+                // Load muscle group to get the date
+                const muscleGroup = await this.workoutService.getMuscleGroupById(exercise.muscleGroupId);
+                if (muscleGroup) {
+                    this.exerciseDate.set(muscleGroup.date);
+                }
             }
         } finally {
             this.isLoading.set(false);
