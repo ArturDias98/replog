@@ -45,7 +45,7 @@ export class ExerciseService {
             const newExercise: Exercise = {
                 id: crypto.randomUUID(),
                 muscleGroupId: muscleGroupId,
-                title: title,
+                title: title.trim(),
                 log: []
             };
 
@@ -117,7 +117,7 @@ export class ExerciseService {
 
             muscleGroup.exercises[exerciseIndex] = {
                 ...muscleGroup.exercises[exerciseIndex],
-                title: title
+                title: title.trim()
             };
 
             this.storage.saveToStorage(workouts);

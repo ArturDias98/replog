@@ -32,7 +32,7 @@ export class WorkoutDataService {
 
             const newWorkout: WorkOutGroup = {
                 id: crypto.randomUUID(),
-                title: model.title,
+                title: model.title.trim(),
                 date: model.date,
                 userId: model.userId,
                 muscleGroup: []
@@ -56,7 +56,7 @@ export class WorkoutDataService {
             if (index !== -1) {
                 workouts[index] = {
                     ...workouts[index],
-                    title: model.title,
+                    title: model.title.trim(),
                     date: model.date
                 };
                 this.storage.saveToStorage(workouts);

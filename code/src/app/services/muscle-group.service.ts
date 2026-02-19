@@ -24,12 +24,12 @@ export class MuscleGroupService {
             const newMuscleGroup: MuscleGroup = {
                 id: muscleGroupId,
                 workoutId: model.workoutId,
-                title: model.title,
+                title: model.title.trim(),
                 date: model.date,
                 exercises: model.exercises.map((item: CreateExerciseModel) => ({
                     id: crypto.randomUUID(),
                     muscleGroupId: muscleGroupId,
-                    title: item.title,
+                    title: item.title.trim(),
                     log: []
                 }))
             };
@@ -62,7 +62,7 @@ export class MuscleGroupService {
 
             workout.muscleGroup[muscleGroupIndex] = {
                 ...workout.muscleGroup[muscleGroupIndex],
-                title: model.title,
+                title: model.title.trim(),
                 date: model.date
             };
 
