@@ -1,7 +1,7 @@
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
-import { Log } from '../../models/log';
+import { Log, AddLogModel, UpdateLogModel } from '../../models/log';
 
 @Component({
     selector: 'app-log',
@@ -94,7 +94,12 @@ export class LogComponent implements OnInit {
 
         this.isAdding.set(true);
         try {
-            await this.workoutService.addLog(this.exerciseId(), reps, weight);
+            const model: AddLogModel = {
+                exerciseId: this.exerciseId(),
+                numberReps: reps,
+                maxWeight: weight
+            };
+            await this.workoutService.addLog(model);
             // Add the new log to the local state
             const newLog: Log = {
                 id: crypto.randomUUID(),
@@ -167,7 +172,13 @@ export class LogComponent implements OnInit {
 
         this.isEditing.set(true);
         try {
-            await this.workoutService.updateLog(this.exerciseId(), log.id, reps, weight);
+            const model: UpdateLogModel = {
+                exerciseId: this.exerciseId(),
+                logId: log.id,
+                numberReps: reps,
+                maxWeight: weight
+            };
+            await this.workoutService.updateLog(model);
             // Update the log in the local state
             this.logs.update(logs =>
                 logs.map(l => l.id === log.id ? { ...l, numberReps: reps, maxWeight: weight } : l)

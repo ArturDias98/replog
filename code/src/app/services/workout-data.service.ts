@@ -6,6 +6,7 @@ import { CreateWorkoutModel, UpdateWorkoutModel } from '../models/workout';
 import { CreateMuscleGroupModel, UpdateMuscleGroupModel, CreateExerciseModel } from '../models/muscle-group';
 import { MuscleGroup } from '../models/muscle-group';
 import { Exercise } from '../models/exercise';
+import { AddLogModel, UpdateLogModel } from '../models/log';
 
 @Injectable({
     providedIn: 'root'
@@ -518,7 +519,7 @@ export class WorkoutDataService {
         }
     }
 
-    async addLog(exerciseId: string, numberReps: number, maxWeight: number): Promise<void> {
+    async addLog(model: AddLogModel): Promise<void> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -528,7 +529,7 @@ export class WorkoutDataService {
 
             // Find the workout containing the exercise
             const workout = workouts.find(w =>
-                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === model.exerciseId))
             );
 
             if (!workout) {
@@ -537,7 +538,7 @@ export class WorkoutDataService {
 
             // Find the muscle group containing the exercise
             const muscleGroup = workout.muscleGroup.find(mg =>
-                mg.exercises.some(ex => ex.id === exerciseId)
+                mg.exercises.some(ex => ex.id === model.exerciseId)
             );
 
             if (!muscleGroup) {
@@ -545,7 +546,7 @@ export class WorkoutDataService {
             }
 
             // Find the exercise
-            const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
+            const exercise = muscleGroup.exercises.find(ex => ex.id === model.exerciseId);
 
             if (!exercise) {
                 throw new Error('Exercise not found');
@@ -554,8 +555,8 @@ export class WorkoutDataService {
             // Add new log entry
             exercise.log.push({
                 id: crypto.randomUUID(),
-                numberReps,
-                maxWeight
+                numberReps: model.numberReps,
+                maxWeight: model.maxWeight
             });
 
             // Save to local storage
@@ -566,7 +567,7 @@ export class WorkoutDataService {
         }
     }
 
-    async updateLog(exerciseId: string, logId: string, numberReps: number, maxWeight: number): Promise<void> {
+    async updateLog(model: UpdateLogModel): Promise<void> {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -576,7 +577,7 @@ export class WorkoutDataService {
 
             // Find the workout containing the exercise
             const workout = workouts.find(w =>
-                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === model.exerciseId))
             );
 
             if (!workout) {
@@ -585,7 +586,7 @@ export class WorkoutDataService {
 
             // Find the muscle group containing the exercise
             const muscleGroup = workout.muscleGroup.find(mg =>
-                mg.exercises.some(ex => ex.id === exerciseId)
+                mg.exercises.some(ex => ex.id === model.exerciseId)
             );
 
             if (!muscleGroup) {
@@ -593,14 +594,14 @@ export class WorkoutDataService {
             }
 
             // Find the exercise
-            const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
+            const exercise = muscleGroup.exercises.find(ex => ex.id === model.exerciseId);
 
             if (!exercise) {
                 throw new Error('Exercise not found');
             }
 
             // Find and update the log entry
-            const logIndex = exercise.log.findIndex(log => log.id === logId);
+            const logIndex = exercise.log.findIndex(log => log.id === model.logId);
 
             if (logIndex === -1) {
                 throw new Error('Log not found');
@@ -608,8 +609,8 @@ export class WorkoutDataService {
 
             exercise.log[logIndex] = {
                 ...exercise.log[logIndex],
-                numberReps,
-                maxWeight
+                numberReps: model.numberReps,
+                maxWeight: model.maxWeight
             };
 
             // Save to local storage

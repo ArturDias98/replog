@@ -3,3 +3,5 @@ export type Log = {
     numberReps: number;
     maxWeight: number;
 };
+
+export * from './log/index';
