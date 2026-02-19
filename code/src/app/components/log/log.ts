@@ -126,10 +126,14 @@ export class LogComponent implements OnInit {
     }
 
     protected async handleDelete(): Promise<void> {
+        const logId = this.logToDelete();
+        if (!logId) return;
+
         this.isDeleting.set(true);
         try {
-            await this.workoutService.deleteLog(this.exerciseId(), this.logToDelete());
-            await this.loadExercise();
+            await this.workoutService.deleteLog(this.exerciseId(), logId);
+            // Remove from local state
+            this.logs.update(logs => logs.filter(log => log.id !== logId));
             this.showDeleteConfirm.set(false);
             this.logToDelete.set('');
         } finally {
@@ -203,7 +207,8 @@ export class LogComponent implements OnInit {
         this.isClearing.set(true);
         try {
             await this.workoutService.clearAllLogs(this.exerciseId());
-            await this.loadExercise();
+            // Clear local state
+            this.logs.set([]);
             this.showClearAllConfirm.set(false);
         } finally {
             this.isClearing.set(false);
