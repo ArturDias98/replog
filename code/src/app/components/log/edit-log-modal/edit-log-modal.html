@@ -1,0 +1,32 @@
+<div class="modal-overlay" (click)="close()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Edit Log</h3>
+        @if (editError()) {
+        <div class="error-message">{{ editError() }}</div>
+        }
+        <form (submit)="$event.preventDefault(); handleEditLog()">
+            <div class="form-group">
+                <label for="edit-reps" class="form-label">Number of Reps</label>
+                <input id="edit-reps" type="number" class="form-input" [value]="editReps()"
+                    (input)="editReps.set($any($event.target).value)" placeholder="Enter reps" min="1" required />
+            </div>
+            <div class="form-group">
+                <label for="edit-weight" class="form-label">Max Weight (kg)</label>
+                <input id="edit-weight" type="number" class="form-input" [value]="editWeight()"
+                    (input)="editWeight.set($any($event.target).value)" placeholder="Enter weight" min="0" step="0.5"
+                    required />
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" (click)="close()" [disabled]="isEditing()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="isEditing()">
+                    @if (isEditing()) {
+                    <span class="spinner-small"></span>
+                    Saving...
+                    } @else {
+                    Save
+                    }
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

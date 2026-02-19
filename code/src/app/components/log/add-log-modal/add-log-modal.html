@@ -1,0 +1,32 @@
+<div class="modal-overlay" (click)="close()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Add Log</h3>
+        @if (addError()) {
+        <div class="error-message">{{ addError() }}</div>
+        }
+        <form (submit)="$event.preventDefault(); handleAddLog()">
+            <div class="form-group">
+                <label for="reps" class="form-label">Number of Reps</label>
+                <input id="reps" type="number" class="form-input" [value]="newReps()"
+                    (input)="newReps.set($any($event.target).value)" placeholder="Enter reps" min="1" required />
+            </div>
+            <div class="form-group">
+                <label for="weight" class="form-label">Max Weight (kg)</label>
+                <input id="weight" type="number" class="form-input" [value]="newWeight()"
+                    (input)="newWeight.set($any($event.target).value)" placeholder="Enter weight" min="0" step="0.5"
+                    required />
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" (click)="close()" [disabled]="isAdding()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="isAdding()">
+                    @if (isAdding()) {
+                    <span class="spinner-small"></span>
+                    Adding...
+                    } @else {
+                    Add
+                    }
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

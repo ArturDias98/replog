@@ -2,13 +2,17 @@ import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@ang
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
-import { Log, AddLogModel, UpdateLogModel } from '../../models/log';
+import { Log } from '../../models/log';
 import { Exercise } from '../../models/exercise';
 import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
+import { AddLogModal } from './add-log-modal/add-log-modal';
+import { EditLogModal } from './edit-log-modal/edit-log-modal';
+import { DeleteLogModal } from './delete-log-modal/delete-log-modal';
+import { ClearAllLogsModal } from './clear-all-logs-modal/clear-all-logs-modal';
 
 @Component({
     selector: 'app-log',
-    imports: [DatePipe, EditExerciseModal],
+    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, DeleteLogModal, ClearAllLogsModal],
     templateUrl: './log.html',
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,20 +30,10 @@ export class LogComponent implements OnInit {
     protected readonly muscleGroupId = signal<string>('');
     protected readonly showAddLogModal = signal<boolean>(false);
     protected readonly showDeleteConfirm = signal<boolean>(false);
-    protected readonly isDeleting = signal<boolean>(false);
     protected readonly logToDelete = signal<string>('');
     protected readonly showEditLogModal = signal<boolean>(false);
     protected readonly logToEdit = signal<Log | null>(null);
     protected readonly showClearAllConfirm = signal<boolean>(false);
-    protected readonly isClearing = signal<boolean>(false);
-    protected readonly newReps = signal<string>('');
-    protected readonly newWeight = signal<string>('');
-    protected readonly editReps = signal<string>('');
-    protected readonly editWeight = signal<string>('');
-    protected readonly addError = signal<string>('');
-    protected readonly editError = signal<string>('');
-    protected readonly isAdding = signal<boolean>(false);
-    protected readonly isEditing = signal<boolean>(false);
     protected readonly showEditExerciseModal = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
@@ -76,54 +70,15 @@ export class LogComponent implements OnInit {
     }
 
     protected openAddLogModal(): void {
-        this.newReps.set('');
-        this.newWeight.set('');
-        this.addError.set('');
         this.showAddLogModal.set(true);
     }
 
     protected closeAddLogModal(): void {
         this.showAddLogModal.set(false);
-        this.newReps.set('');
-        this.newWeight.set('');
-        this.addError.set('');
     }
 
-    protected async handleAddLog(): Promise<void> {
-        const reps = parseInt(this.newReps());
-        const weight = parseFloat(this.newWeight());
-
-        if (!this.newReps() || isNaN(reps) || reps <= 0) {
-            this.addError.set('Please enter a valid number of reps');
-            return;
-        }
-
-        if (!this.newWeight() || isNaN(weight) || weight < 0) {
-            this.addError.set('Please enter a valid weight');
-            return;
-        }
-
-        this.isAdding.set(true);
-        try {
-            const model: AddLogModel = {
-                exerciseId: this.exerciseId(),
-                numberReps: reps,
-                maxWeight: weight
-            };
-            await this.workoutService.addLog(model);
-            // Add the new log to the local state
-            const newLog: Log = {
-                id: crypto.randomUUID(),
-                numberReps: reps,
-                maxWeight: weight
-            };
-            this.logs.update(current => [...current, newLog]);
-            this.closeAddLogModal();
-        } catch (error) {
-            this.addError.set('Failed to add log. Please try again.');
-        } finally {
-            this.isAdding.set(false);
-        }
+    protected onLogAdded(newLog: Log): void {
+        this.logs.update(current => [...current, newLog]);
     }
 
     protected confirmDelete(logId: string): void {
@@ -131,87 +86,41 @@ export class LogComponent implements OnInit {
         this.showDeleteConfirm.set(true);
     }
 
-    protected cancelDelete(): void {
+    protected closeDeleteModal(): void {
         this.showDeleteConfirm.set(false);
         this.logToDelete.set('');
     }
 
-    protected async handleDelete(): Promise<void> {
-        const logId = this.logToDelete();
-        if (!logId) return;
-
-        this.isDeleting.set(true);
-        try {
-            await this.workoutService.deleteLog(this.exerciseId(), logId);
-            // Remove from local state
-            this.logs.update(logs => logs.filter(log => log.id !== logId));
-            this.showDeleteConfirm.set(false);
-            this.logToDelete.set('');
-        } finally {
-            this.isDeleting.set(false);
-        }
+    protected onLogDeleted(logId: string): void {
+        this.logs.update(logs => logs.filter(log => log.id !== logId));
     }
 
     protected openEditLogModal(log: Log): void {
         this.logToEdit.set(log);
-        this.editReps.set(log.numberReps.toString());
-        this.editWeight.set(log.maxWeight.toString());
-        this.editError.set('');
         this.showEditLogModal.set(true);
     }
 
     protected closeEditLogModal(): void {
         this.showEditLogModal.set(false);
         this.logToEdit.set(null);
-        this.editReps.set('');
-        this.editWeight.set('');
-        this.editError.set('');
     }
 
-    protected async handleEditLog(): Promise<void> {
-        const log = this.logToEdit();
-        if (!log) return;
-
-        const reps = parseInt(this.editReps());
-        const weight = parseFloat(this.editWeight());
-
-        if (!this.editReps() || isNaN(reps) || reps <= 0) {
-            this.editError.set('Please enter a valid number of reps');
-            return;
-        }
-
-        if (!this.editWeight() || isNaN(weight) || weight < 0) {
-            this.editError.set('Please enter a valid weight');
-            return;
-        }
-
-        this.isEditing.set(true);
-        try {
-            const model: UpdateLogModel = {
-                exerciseId: this.exerciseId(),
-                logId: log.id,
-                numberReps: reps,
-                maxWeight: weight
-            };
-            await this.workoutService.updateLog(model);
-            // Update the log in the local state
-            this.logs.update(logs =>
-                logs.map(l => l.id === log.id ? { ...l, numberReps: reps, maxWeight: weight } : l)
-            );
-            this.closeEditLogModal();
-        } catch (error) {
-            this.editError.set('Failed to update log. Please try again.');
-        } finally {
-            this.isEditing.set(false);
-        }
+    protected onLogUpdated(updatedLog: Log): void {
+        this.logs.update(logs =>
+            logs.map(l => l.id === updatedLog.id ? updatedLog : l)
+        );
     }
 
     protected confirmClearAll(): void {
         this.showClearAllConfirm.set(true);
     }
 
-    protected cancelClearAll(): void {
+    protected closeClearAllModal(): void {
         this.showClearAllConfirm.set(false);
+    }
+
+    protected onLogsCleared(): void {
+        this.logs.set([]);
     }
 
     protected openEditExerciseModal(): void {
@@ -224,17 +133,5 @@ export class LogComponent implements OnInit {
 
     protected onExerciseUpdated(updatedExercise: Exercise): void {
         this.exerciseTitle.set(updatedExercise.title);
-    }
-
-    protected async handleClearAll(): Promise<void> {
-        this.isClearing.set(true);
-        try {
-            await this.workoutService.clearAllLogs(this.exerciseId());
-            // Clear local state
-            this.logs.set([]);
-            this.showClearAllConfirm.set(false);
-        } finally {
-            this.isClearing.set(false);
-        }
     }
 }
