@@ -1,6 +1,6 @@
 import { Component, inject, output, signal, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { WorkoutDataService } from '../../services/workout-data.service';
+import { MuscleGroupService } from '../../services/muscle-group.service';
 import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../models/muscle-group';
 
 @Component({
@@ -10,7 +10,7 @@ import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../
     styleUrl: './add-muscle-group-modal.css'
 })
 export class AddMuscleGroupModal {
-    private readonly workoutService = inject(WorkoutDataService);
+    private readonly muscleGroupService = inject(MuscleGroupService);
 
     workoutId = input.required<string>();
 
@@ -75,7 +75,7 @@ export class AddMuscleGroupModal {
             exercises: this.exercises().filter(item => item.title.trim())
         };
 
-        this.workoutService.addMuscleGroup(model)
+        this.muscleGroupService.addMuscleGroup(model)
             .then((newMuscleGroup) => {
                 this.muscleGroupAdded.emit(newMuscleGroup);
                 this.close();

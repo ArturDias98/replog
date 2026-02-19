@@ -1,7 +1,8 @@
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { WorkoutDataService } from '../../services/workout-data.service';
+import { ExerciseService } from '../../services/exercise.service';
+import { MuscleGroupService } from '../../services/muscle-group.service';
 import { Log } from '../../models/log';
 import { Exercise } from '../../models/exercise';
 import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
@@ -25,7 +26,8 @@ type LogGroup = {
 export class LogComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly workoutService = inject(WorkoutDataService);
+    private readonly exerciseService = inject(ExerciseService);
+    private readonly muscleGroupService = inject(MuscleGroupService);
 
     protected readonly logs = signal<Log[]>([]);
     protected readonly isLoading = signal<boolean>(false);
@@ -85,14 +87,14 @@ export class LogComponent implements OnInit {
     private async loadExercise(): Promise<void> {
         this.isLoading.set(true);
         try {
-            const exercise = await this.workoutService.getExerciseById(this.exerciseId());
+            const exercise = await this.exerciseService.getExerciseById(this.exerciseId());
             if (exercise) {
                 this.logs.set(exercise.log);
                 this.exerciseTitle.set(exercise.title);
                 this.muscleGroupId.set(exercise.muscleGroupId);
 
                 // Load muscle group to get the date
-                const muscleGroup = await this.workoutService.getMuscleGroupById(exercise.muscleGroupId);
+                const muscleGroup = await this.muscleGroupService.getMuscleGroupById(exercise.muscleGroupId);
                 if (muscleGroup) {
                     this.exerciseDate.set(muscleGroup.date);
                 }

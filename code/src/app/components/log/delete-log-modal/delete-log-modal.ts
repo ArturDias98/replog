@@ -1,5 +1,5 @@
 import { Component, signal, output, inject, input } from '@angular/core';
-import { WorkoutDataService } from '../../../services/workout-data.service';
+import { LogService } from '../../../services/log.service';
 
 @Component({
     selector: 'app-delete-log-modal',
@@ -7,7 +7,7 @@ import { WorkoutDataService } from '../../../services/workout-data.service';
     styleUrl: './delete-log-modal.css'
 })
 export class DeleteLogModal {
-    private readonly workoutService = inject(WorkoutDataService);
+    private readonly logService = inject(LogService);
 
     exerciseId = input.required<string>();
     logId = input.required<string>();
@@ -24,7 +24,7 @@ export class DeleteLogModal {
     protected async handleDelete(): Promise<void> {
         this.isDeleting.set(true);
         try {
-            await this.workoutService.deleteLog(this.exerciseId(), this.logId());
+            await this.logService.deleteLog(this.exerciseId(), this.logId());
             this.logDeleted.emit(this.logId());
             this.close();
         } finally {

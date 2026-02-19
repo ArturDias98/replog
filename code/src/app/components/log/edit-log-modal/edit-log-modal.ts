@@ -1,5 +1,5 @@
 import { Component, signal, output, inject, input } from '@angular/core';
-import { WorkoutDataService } from '../../../services/workout-data.service';
+import { LogService } from '../../../services/log.service';
 import { UpdateLogModel, Log } from '../../../models/log';
 
 @Component({
@@ -8,7 +8,7 @@ import { UpdateLogModel, Log } from '../../../models/log';
     styleUrl: './edit-log-modal.css'
 })
 export class EditLogModal {
-    private readonly workoutService = inject(WorkoutDataService);
+    private readonly logService = inject(LogService);
 
     exerciseId = input.required<string>();
     log = input.required<Log>();
@@ -57,7 +57,7 @@ export class EditLogModal {
                 numberReps: reps,
                 maxWeight: weight
             };
-            await this.workoutService.updateLog(model);
+            await this.logService.updateLog(model);
             const updatedLog: Log = { ...logData, numberReps: reps, maxWeight: weight };
             this.logUpdated.emit(updatedLog);
             this.close();

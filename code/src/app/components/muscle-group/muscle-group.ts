@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
+import { MuscleGroupService } from '../../services/muscle-group.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { MuscleGroup } from '../../models/muscle-group';
 import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
@@ -18,6 +19,7 @@ export class MuscleGroupComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly workoutService = inject(WorkoutDataService);
+    private readonly muscleGroupService = inject(MuscleGroupService);
     private readonly userPreferencesService = inject(UserPreferencesService);
 
     protected readonly muscleGroups = signal<MuscleGroup[]>([]);
@@ -126,7 +128,7 @@ export class MuscleGroupComponent implements OnInit {
 
         this.isDeleting.set(true);
         try {
-            await this.workoutService.deleteMuscleGroup(muscleGroupId);
+            await this.muscleGroupService.deleteMuscleGroup(muscleGroupId);
             // Remove from local state
             this.muscleGroups.set(
                 this.muscleGroups().filter(mg => mg.id !== muscleGroupId)
@@ -158,7 +160,7 @@ export class MuscleGroupComponent implements OnInit {
     protected async clearAllMuscleGroups(): Promise<void> {
         this.isClearing.set(true);
         try {
-            await this.workoutService.clearAllMuscleGroups(this.workoutId());
+            await this.muscleGroupService.clearAllMuscleGroups(this.workoutId());
             this.muscleGroups.set([]);
             this.closeClearAllConfirm();
         } catch (error) {

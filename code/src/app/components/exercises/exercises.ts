@@ -1,7 +1,8 @@
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { WorkoutDataService } from '../../services/workout-data.service';
+import { MuscleGroupService } from '../../services/muscle-group.service';
+import { ExerciseService } from '../../services/exercise.service';
 import { Exercise } from '../../models/exercise';
 import { MuscleGroup } from '../../models/muscle-group';
 import { AddExerciseModal } from '../add-exercise-modal/add-exercise-modal';
@@ -18,7 +19,8 @@ import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
 export class ExercisesComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly workoutService = inject(WorkoutDataService);
+    private readonly muscleGroupService = inject(MuscleGroupService);
+    private readonly exerciseService = inject(ExerciseService);
 
     protected readonly exercises = signal<Exercise[]>([]);
     protected readonly isLoading = signal<boolean>(false);
@@ -49,7 +51,7 @@ export class ExercisesComponent implements OnInit {
     private async loadMuscleGroup(): Promise<void> {
         this.isLoading.set(true);
         try {
-            const muscleGroup = await this.workoutService.getMuscleGroupById(this.muscleGroupId());
+            const muscleGroup = await this.muscleGroupService.getMuscleGroupById(this.muscleGroupId());
             if (muscleGroup) {
                 this.exercises.set(muscleGroup.exercises);
                 this.muscleGroupTitle.set(muscleGroup.title);
@@ -99,7 +101,7 @@ export class ExercisesComponent implements OnInit {
 
         this.isDeleting.set(true);
         try {
-            await this.workoutService.deleteExercise(exerciseId);
+            await this.exerciseService.deleteExercise(exerciseId);
             // Remove from local state
             this.exercises.set(
                 this.exercises().filter(ex => ex.id !== exerciseId)
@@ -156,7 +158,7 @@ export class ExercisesComponent implements OnInit {
     protected async clearAllExercises(): Promise<void> {
         this.isClearing.set(true);
         try {
-            await this.workoutService.clearAllExercises(this.muscleGroupId());
+            await this.exerciseService.clearAllExercises(this.muscleGroupId());
             this.exercises.set([]);
             this.closeClearAllConfirm();
         } catch (error) {

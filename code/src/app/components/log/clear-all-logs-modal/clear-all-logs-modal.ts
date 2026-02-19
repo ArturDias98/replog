@@ -1,5 +1,5 @@
 import { Component, signal, output, inject, input } from '@angular/core';
-import { WorkoutDataService } from '../../../services/workout-data.service';
+import { LogService } from '../../../services/log.service';
 
 @Component({
     selector: 'app-clear-all-logs-modal',
@@ -7,7 +7,7 @@ import { WorkoutDataService } from '../../../services/workout-data.service';
     styleUrl: './clear-all-logs-modal.css'
 })
 export class ClearAllLogsModal {
-    private readonly workoutService = inject(WorkoutDataService);
+    private readonly logService = inject(LogService);
 
     exerciseId = input.required<string>();
 
@@ -23,7 +23,7 @@ export class ClearAllLogsModal {
     protected async handleClearAll(): Promise<void> {
         this.isClearing.set(true);
         try {
-            await this.workoutService.clearAllLogs(this.exerciseId());
+            await this.logService.clearAllLogs(this.exerciseId());
             this.logsCleared.emit();
             this.close();
         } finally {
