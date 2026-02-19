@@ -92,6 +92,19 @@ export class AddMuscleGroupModal {
         this.editingIndex.set(null);
     }
 
+    protected onFormKeyDown(event: KeyboardEvent): void {
+        // If Enter is pressed and Ctrl/Shift are not held, treat it as "Next"
+        if (event.key === 'Enter' && !event.ctrlKey && !event.shiftKey) {
+            if (this.isFormValid()) {
+                event.preventDefault();
+                this.addToQueue();
+            } else {
+                // Prevent form submission if form is invalid
+                event.preventDefault();
+            }
+        }
+    }
+
     protected addToQueue(): void {
         if (!this.isFormValid()) {
             return;

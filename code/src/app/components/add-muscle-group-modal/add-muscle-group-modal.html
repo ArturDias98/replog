@@ -39,7 +39,7 @@
             }
         </div>
 
-        <form (ngSubmit)="onSubmit()" class="modal-body">
+        <form (ngSubmit)="onSubmit()" (keydown)="onFormKeyDown($event)" class="modal-body">
             <div class="form-group">
                 <label for="title">Title</label>
                 <input type="text" id="title" class="form-control" [value]="title()"
