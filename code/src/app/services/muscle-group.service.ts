@@ -44,6 +44,47 @@ export class MuscleGroupService {
         }
     }
 
+    async addMuscleGroups(models: CreateMuscleGroupModel[]): Promise<MuscleGroup[]> {
+        try {
+            if (models.length === 0) {
+                return [];
+            }
+
+            const workouts = this.storage.loadFromStorage();
+            const workoutId = models[0].workoutId;
+
+            const workoutIndex = workouts.findIndex(w => w.id === workoutId);
+            if (workoutIndex === -1) {
+                throw new Error('Workout not found');
+            }
+
+            const newMuscleGroups: MuscleGroup[] = models.map(model => {
+                const muscleGroupId = crypto.randomUUID();
+
+                return {
+                    id: muscleGroupId,
+                    workoutId: model.workoutId,
+                    title: model.title.trim(),
+                    date: model.date,
+                    exercises: model.exercises.map((item: CreateExerciseModel) => ({
+                        id: crypto.randomUUID(),
+                        muscleGroupId: muscleGroupId,
+                        title: item.title.trim(),
+                        log: []
+                    }))
+                };
+            });
+
+            workouts[workoutIndex].muscleGroup.push(...newMuscleGroups);
+            this.storage.saveToStorage(workouts);
+
+            return newMuscleGroups;
+        } catch (error) {
+            console.error('Error adding muscle groups:', error);
+            throw error;
+        }
+    }
+
     async updateMuscleGroup(model: UpdateMuscleGroupModel): Promise<MuscleGroup> {
         try {
             const workouts = this.storage.loadFromStorage();

@@ -19,6 +19,8 @@ export class AddMuscleGroupModal {
     protected readonly exercises = signal<CreateExerciseModel[]>([]);
     protected readonly isSubmitting = signal<boolean>(false);
     protected readonly isClosing = signal<boolean>(false);
+    protected readonly pendingMuscleGroups = signal<CreateMuscleGroupModel[]>([]);
+    protected readonly editingIndex = signal<number | null>(null);
 
     muscleGroupAdded = output<MuscleGroup>();
     closeModal = output<void>();
@@ -61,12 +63,39 @@ export class AddMuscleGroupModal {
             this.exercises().every(item => item.title.trim());
     }
 
-    protected onSubmit(): void {
+    protected canSave(): boolean {
+        // Can save if current form is valid OR there are pending muscle groups
+        return this.isFormValid() || this.pendingMuscleGroups().length > 0;
+    }
+
+    protected removePendingMuscleGroup(index: number): void {
+        this.pendingMuscleGroups.update(items => items.filter((_, i) => i !== index));
+    }
+
+    protected editPendingMuscleGroup(index: number): void {
+        const pendingGroups = this.pendingMuscleGroups();
+        const groupToEdit = pendingGroups[index];
+
+        // Load the data into the form
+        this.title.set(groupToEdit.title);
+        this.date.set(groupToEdit.date);
+        this.exercises.set([...groupToEdit.exercises]);
+
+        // Track that we're editing this item
+        this.editingIndex.set(index);
+    }
+
+    protected cancelEdit(): void {
+        this.title.set('');
+        this.date.set(this.getTodayDate());
+        this.exercises.set([]);
+        this.editingIndex.set(null);
+    }
+
+    protected addToQueue(): void {
         if (!this.isFormValid()) {
             return;
         }
-
-        this.isSubmitting.set(true);
 
         const model: CreateMuscleGroupModel = {
             title: this.title(),
@@ -75,13 +104,56 @@ export class AddMuscleGroupModal {
             exercises: this.exercises().filter(item => item.title.trim())
         };
 
-        this.muscleGroupService.addMuscleGroup(model)
-            .then((newMuscleGroup) => {
-                this.muscleGroupAdded.emit(newMuscleGroup);
+        const currentEditingIndex = this.editingIndex();
+
+        if (currentEditingIndex !== null) {
+            // Update existing item
+            this.pendingMuscleGroups.update(items => {
+                const newItems = [...items];
+                newItems[currentEditingIndex] = model;
+                return newItems;
+            });
+            this.editingIndex.set(null);
+        } else {
+            // Add new item
+            this.pendingMuscleGroups.update(items => [...items, model]);
+        }
+
+        // Reset the form for the next entry
+        this.title.set('');
+        this.date.set(this.getTodayDate());
+        this.exercises.set([]);
+    }
+
+    protected onSubmit(): void {
+        if (!this.canSave()) {
+            return;
+        }
+
+        this.isSubmitting.set(true);
+
+        // Start with pending muscle groups
+        const allMuscleGroups = [...this.pendingMuscleGroups()];
+
+        // Only add current form if it's valid
+        if (this.isFormValid()) {
+            const model: CreateMuscleGroupModel = {
+                title: this.title(),
+                date: this.date(),
+                workoutId: this.workoutId(),
+                exercises: this.exercises().filter(item => item.title.trim())
+            };
+            allMuscleGroups.push(model);
+        }
+
+        this.muscleGroupService.addMuscleGroups(allMuscleGroups)
+            .then((newMuscleGroups) => {
+                // Emit all newly created muscle groups
+                newMuscleGroups.forEach(mg => this.muscleGroupAdded.emit(mg));
                 this.close();
             })
             .catch(error => {
-                console.error('Failed to add muscle group:', error);
+                console.error('Failed to add muscle groups:', error);
             })
             .finally(() => {
                 this.isSubmitting.set(false);
@@ -94,6 +166,8 @@ export class AddMuscleGroupModal {
             this.title.set('');
             this.date.set(this.getTodayDate());
             this.exercises.set([]);
+            this.pendingMuscleGroups.set([]);
+            this.editingIndex.set(null);
             this.isClosing.set(false);
             this.closeModal.emit();
         }, 200);
