@@ -56,6 +56,32 @@
     min-width: 0;
 }
 
+.btn-icon-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-icon-edit:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.btn-icon-edit:active {
+    transform: translateY(0);
+}
+
 .loading-container {
     display: flex;
     flex-direction: column;
@@ -167,39 +193,52 @@
     flex-shrink: 0;
 }
 
-.btn-icon-remove,
-.btn-icon-edit {
+.btn-icon-remove {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 36px;
     padding: 0;
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-tertiary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.btn-icon-remove {
+.btn-icon-remove:hover {
+    background-color: rgba(220, 53, 69, 0.1);
     color: var(--danger-color);
 }
 
-.btn-icon-edit {
+.btn-icon-remove:active {
+    background-color: rgba(220, 53, 69, 0.2);
+}
+
+.item-actions .btn-icon-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.item-actions .btn-icon-edit:hover {
+    background-color: rgba(0, 175, 200, 0.1);
     color: var(--primary-color);
 }
 
-.btn-icon-remove:hover {
-    background-color: var(--danger-color);
-    color: white;
-    border-color: var(--danger-color);
-}
-
-.btn-icon-edit:hover {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+.item-actions .btn-icon-edit:active {
+    background-color: rgba(0, 175, 200, 0.2);
 }
 
 .empty-state {

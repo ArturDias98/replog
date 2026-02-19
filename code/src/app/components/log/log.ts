@@ -2,10 +2,12 @@ import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@ang
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { Log, AddLogModel, UpdateLogModel } from '../../models/log';
+import { Exercise } from '../../models/exercise';
+import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
 
 @Component({
     selector: 'app-log',
-    imports: [],
+    imports: [EditExerciseModal],
     templateUrl: './log.html',
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,6 +38,7 @@ export class LogComponent implements OnInit {
     protected readonly editError = signal<string>('');
     protected readonly isAdding = signal<boolean>(false);
     protected readonly isEditing = signal<boolean>(false);
+    protected readonly showEditExerciseModal = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         const exerciseId = this.route.snapshot.paramMap.get('exerciseId');
@@ -201,6 +204,18 @@ export class LogComponent implements OnInit {
 
     protected cancelClearAll(): void {
         this.showClearAllConfirm.set(false);
+    }
+
+    protected openEditExerciseModal(): void {
+        this.showEditExerciseModal.set(true);
+    }
+
+    protected closeEditExerciseModal(): void {
+        this.showEditExerciseModal.set(false);
+    }
+
+    protected onExerciseUpdated(updatedExercise: Exercise): void {
+        this.exerciseTitle.set(updatedExercise.title);
     }
 
     protected async handleClearAll(): Promise<void> {
