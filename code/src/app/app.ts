@@ -1,6 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Location } from '@angular/common';
 import { filter, take } from 'rxjs';
+import { App as CapacitorApp } from '@capacitor/app';
 import { UserPreferencesService } from './services/user-preferences.service';
 
 @Component({
@@ -11,6 +13,7 @@ import { UserPreferencesService } from './services/user-preferences.service';
 })
 export class App implements OnInit {
   private router = inject(Router);
+  private location = inject(Location);
   private userPreferencesService = inject(UserPreferencesService);
 
   ngOnInit(): void {
@@ -24,6 +27,17 @@ export class App implements OnInit {
       // Only navigate to saved workout if user landed on the root route
       if (lastVisitedWorkoutId && event.urlAfterRedirects === '/') {
         this.router.navigate(['/muscle-group', lastVisitedWorkoutId]);
+      }
+    });
+
+    // Handle hardware back button on Android
+    CapacitorApp.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
+      if (canGoBack) {
+        // Navigate back in the app
+        this.location.back();
+      } else {
+        // Exit the app if we're at the root
+        CapacitorApp.exitApp();
       }
     });
   }
