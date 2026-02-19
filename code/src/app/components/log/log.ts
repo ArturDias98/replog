@@ -10,6 +10,7 @@ import { AddLogModal } from './add-log-modal/add-log-modal';
 import { EditLogModal } from './edit-log-modal/edit-log-modal';
 import { DeleteLogModal } from './delete-log-modal/delete-log-modal';
 import { ClearAllLogsModal } from './clear-all-logs-modal/clear-all-logs-modal';
+import { ActionButtonsComponent } from '../action-buttons/action-buttons';
 
 type LogGroup = {
     date: string;
@@ -18,7 +19,7 @@ type LogGroup = {
 
 @Component({
     selector: 'app-log',
-    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, DeleteLogModal, ClearAllLogsModal],
+    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, DeleteLogModal, ClearAllLogsModal, ActionButtonsComponent],
     templateUrl: './log.html',
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush

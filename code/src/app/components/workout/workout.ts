@@ -4,10 +4,11 @@ import { Router } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { WorkOutGroup } from '../../models/workout-group';
 import { AddWorkoutModal } from '../add-workout-modal/add-workout-modal';
+import { ActionButtonsComponent } from '../action-buttons/action-buttons';
 
 @Component({
     selector: 'app-workout',
-    imports: [DatePipe, AddWorkoutModal],
+    imports: [DatePipe, AddWorkoutModal, ActionButtonsComponent],
     templateUrl: './workout.html',
     styleUrl: './workout.css'
 })

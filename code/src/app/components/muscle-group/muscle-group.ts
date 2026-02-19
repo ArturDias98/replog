@@ -8,10 +8,11 @@ import { MuscleGroup } from '../../models/muscle-group';
 import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
 import { AddMuscleGroupModal } from '../add-muscle-group-modal/add-muscle-group-modal';
 import { EditMuscleGroupModal } from '../edit-muscle-group-modal/edit-muscle-group-modal';
+import { ActionButtonsComponent } from '../action-buttons/action-buttons';
 
 @Component({
     selector: 'app-muscle-group',
-    imports: [DatePipe, EditWorkoutModal, AddMuscleGroupModal, EditMuscleGroupModal],
+    imports: [DatePipe, EditWorkoutModal, AddMuscleGroupModal, EditMuscleGroupModal, ActionButtonsComponent],
     templateUrl: './muscle-group.html',
     styleUrl: './muscle-group.css'
 })
