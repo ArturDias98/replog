@@ -29,7 +29,7 @@
 
     <ul class="item-list">
         @for (exercise of exercises(); track exercise.id) {
-        <li class="item-card">
+        <li class="item-card" (click)="navigateToLog(exercise.id)">
             <div class="item-content">
                 <h3 class="item-title" [title]="exercise.title">{{ exercise.title }}</h3>
             </div>
@@ -37,7 +37,7 @@
                 <p class="item-subtitle">{{ exercise.log.length }} logs</p>
                 <div class="item-buttons">
                     <button class="btn-icon-remove" type="button" aria-label="Remove exercise"
-                        (click)="confirmDelete(exercise.id)">
+                        (click)="$event.stopPropagation(); confirmDelete(exercise.id)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 6h18" />
@@ -46,7 +46,7 @@
                         </svg>
                     </button>
                     <button class="btn-icon-edit" type="button" aria-label="Edit exercise"
-                        (click)="openEditExerciseModal(exercise)">
+                        (click)="$event.stopPropagation(); openEditExerciseModal(exercise)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 20h9" />
@@ -70,16 +70,6 @@
     }
 </div>
 
-@if (!isLoading() && exercises().length === 0) {
-<button class="fab" type="button" aria-label="Add exercise" (click)="openAddExerciseModal()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 5v14" />
-        <path d="M5 12h14" />
-    </svg>
-</button>
-}
-
 @if (!isLoading() && exercises().length > 0) {
 <div class="action-buttons">
     <button class="fab fab-clear" type="button" aria-label="Clear all exercises" (click)="confirmClearAll()">
@@ -102,6 +92,16 @@
         <span class="fab-label">Add Exercise</span>
     </button>
 </div>
+}
+
+@if (!isLoading() && exercises().length === 0) {
+<button class="fab" type="button" aria-label="Add exercise" (click)="openAddExerciseModal()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+    </svg>
+</button>
 }
 
 @if (showAddExerciseModal()) {

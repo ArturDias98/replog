@@ -1,0 +1,218 @@
+<div class="content-section">
+    @if (isLoading()) {
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading logs...</p>
+    </div>
+    } @else {
+    <div class="exercise-header">
+        <div class="exercise-title-row">
+            <button class="btn-icon-back" type="button" aria-label="Go back" (click)="navigateBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5" />
+                    <path d="M12 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <h2 class="exercise-title" [title]="exerciseTitle()">{{ exerciseTitle() }}</h2>
+        </div>
+    </div>
+
+    <ul class="item-list">
+        @for (log of logs(); track log.id; let idx = $index) {
+        <li class="item-card">
+            <div class="item-content">
+                <div class="log-number">
+                    <span class="log-index">{{ idx + 1 }}</span>
+                </div>
+                <div class="log-details">
+                    <div class="log-detail-row">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20v-6" />
+                            <path d="M6 20V10" />
+                            <path d="M18 20V4" />
+                        </svg>
+                        <span class="log-label">Reps:</span>
+                        <span class="log-value">{{ log.numberReps }}</span>
+                    </div>
+                    <div class="log-detail-row">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="5" r="3" />
+                            <line x1="12" y1="22" x2="12" y2="8" />
+                            <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
+                        </svg>
+                        <span class="log-label">Weight:</span>
+                        <span class="log-value">{{ log.maxWeight }} kg</span>
+                    </div>
+                </div>
+            </div>
+            <div class="item-actions">
+                <button class="btn-icon-remove" type="button" aria-label="Remove log" (click)="confirmDelete(log.id)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
+                </button>
+                <button class="btn-icon-edit" type="button" aria-label="Edit log" (click)="openEditLogModal(log)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                </button>
+            </div>
+        </li>
+        } @empty {
+        <li class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+            <p>No logs yet</p>
+            <p class="empty-subtitle">Add your first log to track your progress</p>
+        </li>
+        }
+    </ul>
+    }
+</div>
+
+@if (!isLoading() && logs().length > 0) {
+<div class="action-buttons">
+    <button class="fab fab-clear" type="button" aria-label="Clear all logs" (click)="confirmClearAll()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18" />
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+        </svg>
+        <span class="fab-label">Clear All</span>
+    </button>
+    <button class="fab fab-add" type="button" aria-label="Add log" (click)="openAddLogModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+        </svg>
+        <span class="fab-label">Add Log</span>
+    </button>
+</div>
+}
+
+@if (!isLoading() && logs().length === 0) {
+<button class="fab" type="button" aria-label="Add log" (click)="openAddLogModal()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+    </svg>
+</button>
+}
+
+<!-- Add Log Modal -->
+@if (showAddLogModal()) {
+<div class="modal-overlay" (click)="closeAddLogModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Add Log</h3>
+        @if (addError()) {
+        <div class="error-message">{{ addError() }}</div>
+        }
+        <form (submit)="$event.preventDefault(); handleAddLog()">
+            <div class="form-group">
+                <label for="reps" class="form-label">Number of Reps</label>
+                <input id="reps" type="number" class="form-input" [value]="newReps()"
+                    (input)="newReps.set($any($event.target).value)" placeholder="Enter reps" min="1" required />
+            </div>
+            <div class="form-group">
+                <label for="weight" class="form-label">Max Weight (kg)</label>
+                <input id="weight" type="number" class="form-input" [value]="newWeight()"
+                    (input)="newWeight.set($any($event.target).value)" placeholder="Enter weight" min="0" step="0.5"
+                    required />
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" (click)="closeAddLogModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+}
+
+<!-- Edit Log Modal -->
+@if (showEditLogModal() && logToEdit()) {
+<div class="modal-overlay" (click)="closeEditLogModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Edit Log</h3>
+        @if (editError()) {
+        <div class="error-message">{{ editError() }}</div>
+        }
+        <form (submit)="$event.preventDefault(); handleEditLog()">
+            <div class="form-group">
+                <label for="edit-reps" class="form-label">Number of Reps</label>
+                <input id="edit-reps" type="number" class="form-input" [value]="editReps()"
+                    (input)="editReps.set($any($event.target).value)" placeholder="Enter reps" min="1" required />
+            </div>
+            <div class="form-group">
+                <label for="edit-weight" class="form-label">Max Weight (kg)</label>
+                <input id="edit-weight" type="number" class="form-input" [value]="editWeight()"
+                    (input)="editWeight.set($any($event.target).value)" placeholder="Enter weight" min="0" step="0.5"
+                    required />
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" (click)="closeEditLogModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteConfirm()) {
+<div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Delete Log</h3>
+        <p class="modal-message">Are you sure you want to delete this log? This action cannot be undone.</p>
+        <div class="modal-buttons">
+            <button type="button" class="btn-cancel" (click)="cancelDelete()" [disabled]="isDeleting()">
+                Cancel
+            </button>
+            <button type="button" class="btn-danger" (click)="handleDelete()" [disabled]="isDeleting()">
+                @if (isDeleting()) {
+                <span>Deleting...</span>
+                } @else {
+                <span>Delete</span>
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Clear All Confirmation Modal -->
+@if (showClearAllConfirm()) {
+<div class="modal-overlay" (click)="cancelClearAll()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Clear All Logs</h3>
+        <p class="modal-message">Are you sure you want to clear all logs? This action cannot be undone.</p>
+        <div class="modal-buttons">
+            <button type="button" class="btn-cancel" (click)="cancelClearAll()" [disabled]="isClearing()">
+                Cancel
+            </button>
+            <button type="button" class="btn-danger" (click)="handleClearAll()" [disabled]="isClearing()">
+                @if (isClearing()) {
+                <span>Clearing...</span>
+                } @else {
+                <span>Clear All</span>
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}

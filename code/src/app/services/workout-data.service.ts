@@ -492,4 +492,219 @@ export class WorkoutDataService {
             throw error;
         }
     }
+
+    async getExerciseById(exerciseId: string): Promise<Exercise | undefined> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the exercise
+            for (const workout of workouts) {
+                for (const muscleGroup of workout.muscleGroup) {
+                    const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
+                    if (exercise) {
+                        return exercise;
+                    }
+                }
+            }
+
+            return undefined;
+        } catch (error) {
+            console.error('Error loading exercise:', error);
+            return undefined;
+        }
+    }
+
+    async addLog(exerciseId: string, numberReps: number, maxWeight: number): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the exercise
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+            );
+
+            if (!workout) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the muscle group containing the exercise
+            const muscleGroup = workout.muscleGroup.find(mg =>
+                mg.exercises.some(ex => ex.id === exerciseId)
+            );
+
+            if (!muscleGroup) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the exercise
+            const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
+
+            if (!exercise) {
+                throw new Error('Exercise not found');
+            }
+
+            // Add new log entry
+            exercise.log.push({
+                id: crypto.randomUUID(),
+                numberReps,
+                maxWeight
+            });
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error adding log:', error);
+            throw error;
+        }
+    }
+
+    async updateLog(exerciseId: string, logId: string, numberReps: number, maxWeight: number): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the exercise
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+            );
+
+            if (!workout) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the muscle group containing the exercise
+            const muscleGroup = workout.muscleGroup.find(mg =>
+                mg.exercises.some(ex => ex.id === exerciseId)
+            );
+
+            if (!muscleGroup) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the exercise
+            const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
+
+            if (!exercise) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find and update the log entry
+            const logIndex = exercise.log.findIndex(log => log.id === logId);
+
+            if (logIndex === -1) {
+                throw new Error('Log not found');
+            }
+
+            exercise.log[logIndex] = {
+                ...exercise.log[logIndex],
+                numberReps,
+                maxWeight
+            };
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error updating log:', error);
+            throw error;
+        }
+    }
+
+    async deleteLog(exerciseId: string, logId: string): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the exercise
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+            );
+
+            if (!workout) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the muscle group containing the exercise
+            const muscleGroup = workout.muscleGroup.find(mg =>
+                mg.exercises.some(ex => ex.id === exerciseId)
+            );
+
+            if (!muscleGroup) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the exercise
+            const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
+
+            if (!exercise) {
+                throw new Error('Exercise not found');
+            }
+
+            // Remove the log entry
+            exercise.log = exercise.log.filter(log => log.id !== logId);
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error deleting log:', error);
+            throw error;
+        }
+    }
+
+    async clearAllLogs(exerciseId: string): Promise<void> {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Load current workouts from storage
+            const workouts = this.loadFromStorage() ?? [];
+
+            // Find the workout containing the exercise
+            const workout = workouts.find(w =>
+                w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
+            );
+
+            if (!workout) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the muscle group containing the exercise
+            const muscleGroup = workout.muscleGroup.find(mg =>
+                mg.exercises.some(ex => ex.id === exerciseId)
+            );
+
+            if (!muscleGroup) {
+                throw new Error('Exercise not found');
+            }
+
+            // Find the exercise
+            const exercise = muscleGroup.exercises.find(ex => ex.id === exerciseId);
+
+            if (!exercise) {
+                throw new Error('Exercise not found');
+            }
+
+            // Clear all log entries
+            exercise.log = [];
+
+            // Save to local storage
+            this.saveToStorage(workouts);
+        } catch (error) {
+            console.error('Error clearing logs:', error);
+            throw error;
+        }
+    }
 }

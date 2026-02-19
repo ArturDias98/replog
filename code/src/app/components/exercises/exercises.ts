@@ -65,6 +65,10 @@ export class ExercisesComponent implements OnInit {
         this.router.navigate(['/muscle-group', this.workoutId()]);
     }
 
+    protected navigateToLog(exerciseId: string): void {
+        this.router.navigate(['/log', exerciseId]);
+    }
+
     protected openAddExerciseModal(): void {
         this.showAddExerciseModal.set(true);
     }

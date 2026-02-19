@@ -76,12 +76,12 @@
     border-radius: 12px;
     padding: 1rem 1.25rem;
     border: 1px solid var(--border-color);
-    cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+    cursor: pointer;
 }
 
 .item-card:hover {
@@ -89,6 +89,10 @@
     border-color: var(--primary-color);
     transform: translateX(4px);
     box-shadow: 0 4px 12px var(--shadow);
+}
+
+.item-card:hover .item-title {
+    color: var(--primary-color);
 }
 
 .item-card:active {
@@ -206,7 +210,7 @@
     transform: scale(1.05);
 }
 
-/* Action buttons container - tab bar style */
+/* Action buttons container - tab bar style - Updated */
 .action-buttons {
     position: fixed;
     bottom: 0;
@@ -258,6 +262,21 @@
 
 .action-buttons .fab-add:active {
     background-color: rgba(0, 175, 200, 0.2);
+    transform: none;
+}
+
+.action-buttons .fab-clear {
+    color: var(--danger-color);
+}
+
+.action-buttons .fab-clear:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-hover);
+    transform: none;
+}
+
+.action-buttons .fab-clear:active {
+    background-color: rgba(220, 53, 69, 0.2);
     transform: none;
 }
 
@@ -422,6 +441,7 @@
     justify-content: space-between;
     gap: 0.5rem;
 }
+
 .btn-icon-edit {
     display: flex;
     align-items: center;
@@ -488,19 +508,4 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.action-buttons .fab-clear {
-    color: var(--danger-color);
-}
-
-.action-buttons .fab-clear:hover {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: var(--danger-hover);
-    transform: none;
-}
-
-.action-buttons .fab-clear:active {
-    background-color: rgba(220, 53, 69, 0.2);
-    transform: none;
 }
