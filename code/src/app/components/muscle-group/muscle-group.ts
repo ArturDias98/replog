@@ -1,6 +1,7 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { App } from '@capacitor/app';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
@@ -17,7 +18,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     templateUrl: './muscle-group.html',
     styleUrl: './muscle-group.css'
 })
-export class MuscleGroupComponent implements OnInit {
+export class MuscleGroupComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly workoutService = inject(WorkoutDataService);
@@ -41,6 +42,8 @@ export class MuscleGroupComponent implements OnInit {
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
 
+    private backButtonListener?: any;
+
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('workoutId');
         if (workoutId) {
@@ -48,6 +51,16 @@ export class MuscleGroupComponent implements OnInit {
             this.userPreferencesService.setLastVisitedWorkout(workoutId);
             await this.loadWorkout();
         }
+
+        // Handle hardware back button - navigate to workout page
+        this.backButtonListener = await App.addListener('backButton', () => {
+            this.navigateBack();
+        });
+    }
+
+    ngOnDestroy(): void {
+        // Remove back button listener
+        this.backButtonListener?.remove();
     }
 
     private async loadWorkout(): Promise<void> {

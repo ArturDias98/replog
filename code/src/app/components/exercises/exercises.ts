@@ -1,6 +1,7 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { App } from '@capacitor/app';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { ExerciseService } from '../../services/exercise.service';
 import { Exercise } from '../../models/exercise';
@@ -18,7 +19,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     styleUrl: './exercises.css',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExercisesComponent implements OnInit {
+export class ExercisesComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly muscleGroupService = inject(MuscleGroupService);
@@ -41,6 +42,8 @@ export class ExercisesComponent implements OnInit {
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
 
+    private backButtonListener?: any;
+
     async ngOnInit(): Promise<void> {
         const muscleGroupId = this.route.snapshot.paramMap.get('muscleGroupId');
 
@@ -48,6 +51,16 @@ export class ExercisesComponent implements OnInit {
             this.muscleGroupId.set(muscleGroupId);
             await this.loadMuscleGroup();
         }
+
+        // Handle hardware back button - navigate to muscle group page
+        this.backButtonListener = await App.addListener('backButton', () => {
+            this.navigateBack();
+        });
+    }
+
+    ngOnDestroy(): void {
+        // Remove back button listener
+        this.backButtonListener?.remove();
     }
 
     private async loadMuscleGroup(): Promise<void> {

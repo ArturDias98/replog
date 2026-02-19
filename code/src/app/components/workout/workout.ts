@@ -1,6 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { App } from '@capacitor/app';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { WorkOutGroup } from '../../models/workout-group';
 import { AddWorkoutModal } from '../add-workout-modal/add-workout-modal';
@@ -13,7 +14,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     templateUrl: './workout.html',
     styleUrl: './workout.css'
 })
-export class Workout implements OnInit {
+export class Workout implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly workoutService = inject(WorkoutDataService);
 
@@ -26,8 +27,20 @@ export class Workout implements OnInit {
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
 
+    private backButtonListener?: any;
+
     async ngOnInit(): Promise<void> {
         await this.loadWorkouts();
+
+        // Handle hardware back button - exit app when on main page
+        this.backButtonListener = await App.addListener('backButton', () => {
+            App.exitApp();
+        });
+    }
+
+    ngOnDestroy(): void {
+        // Remove back button listener
+        this.backButtonListener?.remove();
     }
 
     protected openAddModal(): void {

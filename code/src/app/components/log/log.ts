@@ -1,6 +1,7 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { App } from '@capacitor/app';
 import { ExerciseService } from '../../services/exercise.service';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { LogService } from '../../services/log.service';
@@ -24,7 +25,7 @@ type LogGroup = {
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LogComponent implements OnInit {
+export class LogComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly exerciseService = inject(ExerciseService);
@@ -46,6 +47,8 @@ export class LogComponent implements OnInit {
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
     protected readonly showEditExerciseModal = signal<boolean>(false);
+
+    private backButtonListener?: any;
 
     protected readonly groupedLogs = computed<LogGroup[]>(() => {
         const logs = this.logs();
@@ -86,6 +89,16 @@ export class LogComponent implements OnInit {
             this.exerciseId.set(exerciseId);
             await this.loadExercise();
         }
+
+        // Handle hardware back button - navigate to exercises page
+        this.backButtonListener = await App.addListener('backButton', () => {
+            this.navigateBack();
+        });
+    }
+
+    ngOnDestroy(): void {
+        // Remove back button listener
+        this.backButtonListener?.remove();
     }
 
     private async loadExercise(): Promise<void> {
