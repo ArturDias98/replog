@@ -26,6 +26,19 @@
         <p class="workout-date">{{ workoutDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
 
+    @if (muscleGroups().length === 0) {
+    <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+        <h2 class="empty-title">No Muscle Groups Yet</h2>
+        <p class="empty-description">Start organizing your workout by adding your first muscle group.</p>
+        <button type="button" class="btn btn-primary" (click)="openAddModal()">
+            Add Muscle Group
+        </button>
+    </div>
+    } @else {
     <ul class="item-list">
         @for (group of muscleGroups(); track group.id) {
         <li class="item-card" (click)="navigateToExercises(group.id)">
@@ -55,6 +68,7 @@
         </li>
         }
     </ul>
+    }
     }
 </div>
 
