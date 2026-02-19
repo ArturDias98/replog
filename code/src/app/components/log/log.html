@@ -136,8 +136,16 @@
                     required />
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn-cancel" (click)="closeAddLogModal()">Cancel</button>
-                <button type="submit" class="btn-primary">Add</button>
+                <button type="button" class="btn-cancel" (click)="closeAddLogModal()"
+                    [disabled]="isAdding()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="isAdding()">
+                    @if (isAdding()) {
+                    <span class="spinner-small"></span>
+                    Adding...
+                    } @else {
+                    Add
+                    }
+                </button>
             </div>
         </form>
     </div>
@@ -165,8 +173,16 @@
                     required />
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn-cancel" (click)="closeEditLogModal()">Cancel</button>
-                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" class="btn-cancel" (click)="closeEditLogModal()"
+                    [disabled]="isEditing()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="isEditing()">
+                    @if (isEditing()) {
+                    <span class="spinner-small"></span>
+                    Saving...
+                    } @else {
+                    Save
+                    }
+                </button>
             </div>
         </form>
     </div>

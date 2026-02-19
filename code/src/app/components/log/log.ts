@@ -2,7 +2,6 @@ import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@ang
 import { Router, ActivatedRoute } from '@angular/router';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { Log } from '../../models/log';
-import { Exercise } from '../../models/exercise';
 
 @Component({
     selector: 'app-log',
@@ -35,6 +34,8 @@ export class LogComponent implements OnInit {
     protected readonly editWeight = signal<string>('');
     protected readonly addError = signal<string>('');
     protected readonly editError = signal<string>('');
+    protected readonly isAdding = signal<boolean>(false);
+    protected readonly isEditing = signal<boolean>(false);
 
     async ngOnInit(): Promise<void> {
         const exerciseId = this.route.snapshot.paramMap.get('exerciseId');
@@ -91,12 +92,21 @@ export class LogComponent implements OnInit {
             return;
         }
 
+        this.isAdding.set(true);
         try {
             await this.workoutService.addLog(this.exerciseId(), reps, weight);
-            await this.loadExercise();
+            // Add the new log to the local state
+            const newLog: Log = {
+                id: crypto.randomUUID(),
+                numberReps: reps,
+                maxWeight: weight
+            };
+            this.logs.update(current => [...current, newLog]);
             this.closeAddLogModal();
         } catch (error) {
             this.addError.set('Failed to add log. Please try again.');
+        } finally {
+            this.isAdding.set(false);
         }
     }
 
@@ -155,12 +165,18 @@ export class LogComponent implements OnInit {
             return;
         }
 
+        this.isEditing.set(true);
         try {
             await this.workoutService.updateLog(this.exerciseId(), log.id, reps, weight);
-            await this.loadExercise();
+            // Update the log in the local state
+            this.logs.update(logs =>
+                logs.map(l => l.id === log.id ? { ...l, numberReps: reps, maxWeight: weight } : l)
+            );
             this.closeEditLogModal();
         } catch (error) {
             this.editError.set('Failed to update log. Please try again.');
+        } finally {
+            this.isEditing.set(false);
         }
     }
 
