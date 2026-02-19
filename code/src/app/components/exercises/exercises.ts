@@ -9,10 +9,11 @@ import { AddExerciseModal } from '../add-exercise-modal/add-exercise-modal';
 import { EditMuscleGroupModal } from '../edit-muscle-group-modal/edit-muscle-group-modal';
 import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
 import { ActionButtonsComponent } from '../action-buttons/action-buttons';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
 
 @Component({
     selector: 'app-exercises',
-    imports: [DatePipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent],
+    imports: [DatePipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent, ConfirmationDialogComponent],
     templateUrl: './exercises.html',
     styleUrl: './exercises.css',
     changeDetection: ChangeDetectionStrategy.OnPush

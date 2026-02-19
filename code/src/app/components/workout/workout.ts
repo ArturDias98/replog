@@ -5,10 +5,11 @@ import { WorkoutDataService } from '../../services/workout-data.service';
 import { WorkOutGroup } from '../../models/workout-group';
 import { AddWorkoutModal } from '../add-workout-modal/add-workout-modal';
 import { ActionButtonsComponent } from '../action-buttons/action-buttons';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
 
 @Component({
     selector: 'app-workout',
-    imports: [DatePipe, AddWorkoutModal, ActionButtonsComponent],
+    imports: [DatePipe, AddWorkoutModal, ActionButtonsComponent, ConfirmationDialogComponent],
     templateUrl: './workout.html',
     styleUrl: './workout.css'
 })
