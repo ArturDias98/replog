@@ -79,7 +79,14 @@
     flex-direction: column;
     gap: 0.25rem;
     min-width: 0;
+}
+
+.item-content:first-child {
     flex: 1;
+}
+
+.item-content:last-child {
+    flex-shrink: 0;
 }
 
 .item-title {
