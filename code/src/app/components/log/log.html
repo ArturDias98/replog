@@ -22,6 +22,15 @@
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                 </svg>
             </button>
+            <button class="btn-icon-remove" type="button" aria-label="Delete exercise"
+                (click)="confirmDeleteExercise()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+            </button>
         </div>
         <p class="exercise-date">{{ exerciseDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
@@ -136,4 +145,11 @@
 @if (showEditExerciseModal()) {
 <app-edit-exercise-modal [exerciseId]="exerciseId()" [initialTitle]="exerciseTitle()"
     (exerciseUpdated)="onExerciseUpdated($event)" (closeModal)="closeEditExerciseModal()" />
+}
+
+@if (showDeleteExerciseConfirm()) {
+<app-confirmation-dialog title="Delete Exercise"
+    message="Are you sure you want to delete this entire exercise? This will permanently delete the exercise and all its logs and cannot be undone."
+    confirmText="Delete" [isProcessing]="isDeletingExercise()" processingText="Deleting..." (confirm)="deleteExercise()"
+    (cancel)="closeDeleteExerciseConfirm()" />
 }

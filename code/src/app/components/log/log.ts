@@ -47,6 +47,8 @@ export class LogComponent implements OnInit, OnDestroy {
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
     protected readonly showEditExerciseModal = signal<boolean>(false);
+    protected readonly showDeleteExerciseConfirm = signal<boolean>(false);
+    protected readonly isDeletingExercise = signal<boolean>(false);
 
     private backButtonListener?: any;
 
@@ -209,5 +211,31 @@ export class LogComponent implements OnInit, OnDestroy {
 
     protected onExerciseUpdated(updatedExercise: Exercise): void {
         this.exerciseTitle.set(updatedExercise.title);
+    }
+
+    protected confirmDeleteExercise(): void {
+        this.showDeleteExerciseConfirm.set(true);
+    }
+
+    protected closeDeleteExerciseConfirm(): void {
+        this.showDeleteExerciseConfirm.set(false);
+    }
+
+    protected async deleteExercise(): Promise<void> {
+        const exerciseId = this.exerciseId();
+        if (!exerciseId) {
+            return;
+        }
+
+        this.isDeletingExercise.set(true);
+        try {
+            await this.exerciseService.deleteExercise(exerciseId);
+            // Navigate back to the exercises list after deletion
+            this.router.navigate(['/exercises', this.muscleGroupId()]);
+        } catch (error) {
+            console.error('Error deleting exercise:', error);
+        } finally {
+            this.isDeletingExercise.set(false);
+        }
     }
 }
