@@ -29,16 +29,5 @@ export class App implements OnInit {
         this.router.navigate(['/muscle-group', lastVisitedWorkoutId]);
       }
     });
-
-    // Handle hardware back button on Android
-    CapacitorApp.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
-      if (canGoBack) {
-        // Navigate back in the app
-        this.location.back();
-      } else {
-        // Exit the app if we're at the root
-        CapacitorApp.exitApp();
-      }
-    });
   }
 }
