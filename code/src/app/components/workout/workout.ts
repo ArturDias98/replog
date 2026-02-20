@@ -51,11 +51,6 @@ export class Workout implements OnInit, OnDestroy {
         this.showAddModal.set(false);
     }
 
-    protected confirmDelete(workoutId: string): void {
-        this.workoutToDelete.set(workoutId);
-        this.showDeleteConfirm.set(true);
-    }
-
     protected closeDeleteConfirm(): void {
         this.showDeleteConfirm.set(false);
         this.workoutToDelete.set(null);
