@@ -1,8 +1,31 @@
 /* Component-specific styles */
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.content-section {
+    flex: 1;
+    overflow: hidden;
+    margin-bottom: 0;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.loading-container {
+    flex: 1;
+}
+
 .exercise-header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .exercise-title-row {
@@ -195,4 +218,82 @@
 
 .btn-cancel:hover {
     background: var(--bg-tertiary);
+}
+
+/* Virtual scroll viewport */
+.virtual-scroll-viewport {
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.virtual-scroll-viewport::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.virtual-scroll-viewport {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.virtual-scroll-item {
+    margin-bottom: 0.5rem;
+}
+
+.virtual-scroll-item .log-group-date {
+    margin-bottom: 0.5rem;
+}
+
+.virtual-scroll-item .item-card {
+    margin-bottom: 0;
+}
+
+.viewport-spacer {
+    height: 10rem;
+    width: 100%;
+}
+
+.empty-state-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Scroll to top button */
+.scroll-to-top-btn {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.scroll-to-top-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px var(--shadow);
+}
+
+.scroll-to-top-btn:active {
+    background-color: var(--primary-active);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
 }

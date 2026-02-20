@@ -1,4 +1,27 @@
 /* Component-specific styles */
+:host {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+:host::-webkit-scrollbar {
+    display: none;
+}
+
+:host {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.content-section {
+    padding: 2rem 1.5rem;
+    padding-bottom: 10rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
 .section-header {
     display: flex;
     justify-content: flex-end;

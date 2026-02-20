@@ -1,5 +1,11 @@
 /* App Component Styles */
 
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .top-bar {
     background-color: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
@@ -53,10 +59,15 @@
 }
 
 .main-content {
-    padding: 2rem 1.5rem;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-content .container {
-    max-width: 800px;
-    margin: 0 auto;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }

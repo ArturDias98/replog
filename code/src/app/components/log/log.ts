@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy, computed, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { App } from '@capacitor/app';
@@ -12,15 +12,21 @@ import { AddLogModal } from './add-log-modal/add-log-modal';
 import { EditLogModal } from './edit-log-modal/edit-log-modal';
 import { ActionButtonsComponent } from '../action-buttons/action-buttons';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
+import { ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 type LogGroup = {
     date: string;
     logs: Log[];
 };
 
+type VirtualScrollItem =
+    | { type: 'header'; date: string }
+    | { type: 'log'; log: Log }
+    | { type: 'spacer' };
+
 @Component({
     selector: 'app-log',
-    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, ActionButtonsComponent, ConfirmationDialogComponent],
+    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, ActionButtonsComponent, ConfirmationDialogComponent, ScrollingModule],
     templateUrl: './log.html',
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -49,6 +55,9 @@ export class LogComponent implements OnInit, OnDestroy {
     protected readonly showEditExerciseModal = signal<boolean>(false);
     protected readonly showDeleteExerciseConfirm = signal<boolean>(false);
     protected readonly isDeletingExercise = signal<boolean>(false);
+    protected readonly showScrollToTop = signal<boolean>(false);
+
+    protected readonly viewport = viewChild<CdkVirtualScrollViewport>('viewport');
 
     private backButtonListener?: any;
 
@@ -82,6 +91,29 @@ export class LogComponent implements OnInit, OnDestroy {
         return Array.from(groups.entries())
             .map(([date, logs]) => ({ date, logs }))
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    });
+
+    protected readonly virtualScrollItems = computed<VirtualScrollItem[]>(() => {
+        const groups = this.groupedLogs();
+        const items: VirtualScrollItem[] = [];
+
+        // Flatten the grouped structure for virtual scrolling
+        groups.forEach(group => {
+            // Add date header
+            items.push({ type: 'header', date: group.date });
+
+            // Add all logs for this date
+            group.logs.forEach(log => {
+                items.push({ type: 'log', log });
+            });
+        });
+
+        // Add spacer at the end for action buttons clearance
+        if (items.length > 0) {
+            items.push({ type: 'spacer' });
+        }
+
+        return items;
     });
 
     async ngOnInit(): Promise<void> {
@@ -236,6 +268,21 @@ export class LogComponent implements OnInit, OnDestroy {
             console.error('Error deleting exercise:', error);
         } finally {
             this.isDeletingExercise.set(false);
+        }
+    }
+
+    protected onScroll(): void {
+        const vp = this.viewport();
+        if (vp) {
+            const offset = vp.measureScrollOffset('top');
+            this.showScrollToTop.set(offset > 300);
+        }
+    }
+
+    protected scrollToTop(): void {
+        const vp = this.viewport();
+        if (vp) {
+            vp.scrollToIndex(0, 'smooth');
         }
     }
 }
