@@ -21,9 +21,6 @@ export class Workout implements OnInit, OnDestroy {
     protected readonly items = signal<WorkOutGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);
     protected readonly showAddModal = signal<boolean>(false);
-    protected readonly showDeleteConfirm = signal<boolean>(false);
-    protected readonly workoutToDelete = signal<string | null>(null);
-    protected readonly isDeleting = signal<boolean>(false);
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
 
@@ -49,28 +46,6 @@ export class Workout implements OnInit, OnDestroy {
 
     protected closeAddModal(): void {
         this.showAddModal.set(false);
-    }
-
-    protected closeDeleteConfirm(): void {
-        this.showDeleteConfirm.set(false);
-        this.workoutToDelete.set(null);
-    }
-
-    protected async deleteWorkout(): Promise<void> {
-        const id = this.workoutToDelete();
-        if (!id) return;
-
-        this.isDeleting.set(true);
-        try {
-            await this.workoutService.deleteWorkout(id);
-            // Update items list directly without showing loading state
-            this.items.set(this.items().filter(item => item.id !== id));
-            this.closeDeleteConfirm();
-        } catch (error) {
-            console.error('Failed to delete workout:', error);
-        } finally {
-            this.isDeleting.set(false);
-        }
     }
 
     protected async onWorkoutAdded(workoutId: string): Promise<void> {

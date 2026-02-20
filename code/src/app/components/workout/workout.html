@@ -46,13 +46,6 @@
 <app-add-workout-modal (workoutAdded)="onWorkoutAdded($event)" (closeModal)="closeAddModal()" />
 }
 
-@if (showDeleteConfirm()) {
-<app-confirmation-dialog title="Delete Workout"
-    message="Are you sure you want to delete this workout? This action cannot be undone." confirmText="Delete"
-    [isProcessing]="isDeleting()" processingText="Deleting..." (confirm)="deleteWorkout()"
-    (cancel)="closeDeleteConfirm()" />
-}
-
 @if (showClearAllConfirm()) {
 <app-confirmation-dialog title="Clear All Workouts"
     message="Are you sure you want to clear all workouts? This will permanently delete all workout data and cannot be undone."
