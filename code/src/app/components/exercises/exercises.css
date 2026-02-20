@@ -12,6 +12,24 @@
     min-width: 0;
 }
 
+.muscle-group-title-row .btn-icon-remove {
+    width: 32px;
+    height: 32px;
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.muscle-group-title-row .btn-icon-remove:hover {
+    background-color: var(--danger-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--shadow);
+}
+
+.muscle-group-title-row .btn-icon-remove:active {
+    background-color: var(--danger-active);
+    transform: translateY(0);
+}
+
 
 
 .muscle-group-title {

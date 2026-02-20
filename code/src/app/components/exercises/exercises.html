@@ -23,6 +23,15 @@
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                 </svg>
             </button>
+            <button class="btn-icon-remove" type="button" aria-label="Delete muscle group"
+                (click)="confirmDeleteMuscleGroup()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+            </button>
         </div>
         <p class="muscle-group-date">{{ muscleGroupDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
@@ -108,4 +117,11 @@
     message="Are you sure you want to clear all exercises from this muscle group? This will permanently delete all exercise data and cannot be undone."
     confirmText="Clear All" [isProcessing]="isClearing()" processingText="Clearing..." (confirm)="clearAllExercises()"
     (cancel)="closeClearAllConfirm()" />
+}
+
+@if (showDeleteMuscleGroupConfirm()) {
+<app-confirmation-dialog title="Delete Muscle Group"
+    message="Are you sure you want to delete this entire muscle group? This will permanently delete the muscle group and all its exercises and cannot be undone."
+    confirmText="Delete" [isProcessing]="isDeletingMuscleGroup()" processingText="Deleting..."
+    (confirm)="deleteMuscleGroup()" (cancel)="closeDeleteMuscleGroupConfirm()" />
 }

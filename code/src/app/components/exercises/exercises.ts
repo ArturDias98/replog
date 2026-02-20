@@ -41,6 +41,8 @@ export class ExercisesComponent implements OnInit, OnDestroy {
     protected readonly exerciseToEditTitle = signal<string>('');
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
+    protected readonly showDeleteMuscleGroupConfirm = signal<boolean>(false);
+    protected readonly isDeletingMuscleGroup = signal<boolean>(false);
 
     private backButtonListener?: any;
 
@@ -183,6 +185,32 @@ export class ExercisesComponent implements OnInit, OnDestroy {
             console.error('Error clearing exercises:', error);
         } finally {
             this.isClearing.set(false);
+        }
+    }
+
+    protected confirmDeleteMuscleGroup(): void {
+        this.showDeleteMuscleGroupConfirm.set(true);
+    }
+
+    protected closeDeleteMuscleGroupConfirm(): void {
+        this.showDeleteMuscleGroupConfirm.set(false);
+    }
+
+    protected async deleteMuscleGroup(): Promise<void> {
+        const muscleGroupId = this.muscleGroupId();
+        if (!muscleGroupId) {
+            return;
+        }
+
+        this.isDeletingMuscleGroup.set(true);
+        try {
+            await this.muscleGroupService.deleteMuscleGroup(muscleGroupId);
+            // Navigate back to the muscle group list after deletion
+            this.router.navigate(['/muscle-group', this.workoutId()]);
+        } catch (error) {
+            console.error('Error deleting muscle group:', error);
+        } finally {
+            this.isDeletingMuscleGroup.set(false);
         }
     }
 }
