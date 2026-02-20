@@ -22,6 +22,14 @@
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                 </svg>
             </button>
+            <button class="btn-icon-remove" type="button" aria-label="Delete workout" (click)="confirmDeleteWorkout()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+            </button>
         </div>
         <p class="workout-date">{{ workoutDate() | date: 'dd/MM/yyyy' }}</p>
     </div>
@@ -47,23 +55,6 @@
             </div>
             <div class="item-content">
                 <p class="item-date">{{ group.date | date: 'dd/MM/yyyy' }}</p>
-                <button class="btn-icon-edit" type="button" aria-label="Edit muscle group"
-                    (click)="openEditMuscleGroupModal(group); $event.stopPropagation()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                    </svg>
-                </button>
-                <button class="btn-icon-remove" type="button" aria-label="Remove muscle group"
-                    (click)="confirmDelete(group.id); $event.stopPropagation()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                    </svg>
-                </button>
             </div>
         </li>
         }
@@ -92,22 +83,16 @@
     (closeModal)="closeAddModal()" />
 }
 
-@if (showEditMuscleGroupModal()) {
-<app-edit-muscle-group-modal [muscleGroupId]="muscleGroupToEdit()" [initialTitle]="muscleGroupTitle()"
-    [initialDate]="muscleGroupDate()" (muscleGroupUpdated)="onMuscleGroupUpdated($event)"
-    (closeModal)="closeEditMuscleGroupModal()" />
-}
-
-@if (showDeleteConfirm()) {
-<app-confirmation-dialog title="Delete Muscle Group"
-    message="Are you sure you want to delete this muscle group? This action cannot be undone." confirmText="Delete"
-    [isProcessing]="isDeleting()" processingText="Deleting..." (confirm)="deleteMuscleGroup()"
-    (cancel)="closeDeleteConfirm()" />
-}
-
 @if (showClearAllConfirm()) {
 <app-confirmation-dialog title="Clear All Muscle Groups"
     message="Are you sure you want to clear all muscle groups from this workout? This will permanently delete all muscle group data and cannot be undone."
     confirmText="Clear All" [isProcessing]="isClearing()" processingText="Clearing..."
     (confirm)="clearAllMuscleGroups()" (cancel)="closeClearAllConfirm()" />
+}
+
+@if (showDeleteWorkoutConfirm()) {
+<app-confirmation-dialog title="Delete Workout"
+    message="Are you sure you want to delete this entire workout? This will permanently delete the workout and all its muscle groups and cannot be undone."
+    confirmText="Delete" [isProcessing]="isDeletingWorkout()" processingText="Deleting..." (confirm)="deleteWorkout()"
+    (cancel)="closeDeleteWorkoutConfirm()" />
 }
