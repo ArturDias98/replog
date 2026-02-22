@@ -43,7 +43,7 @@
                 <h3 class="item-title" [title]="exercise.title">{{ exercise.title }}</h3>
             </div>
             <div class="item-content">
-                <p class="item-subtitle">{{ 'exercises.logCount' | transloco: { count: exercise.log.length } }}</p>
+                <p class="item-subtitle">{{ exercise.log.length }} {{ exercise.log.length === 1 ? ('exercises.logSingular' | transloco) : ('exercises.logPlural' | transloco) }}</p>
             </div>
         </li>
         } @empty {

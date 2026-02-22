@@ -34,7 +34,6 @@
     "@capacitor/app": "^8.0.1",
     "@capacitor/core": "^8.1.0",
     "@jsverse/transloco": "^8.2.1",
-    "@jsverse/transloco-messageformat": "^8.2.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

@@ -2,7 +2,6 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode } from
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTransloco } from '@jsverse/transloco';
-import { provideTranslocoMessageformat } from '@jsverse/transloco-messageformat';
 import { registerLocaleData } from '@angular/common';
 import localePtBr from '@angular/common/locales/pt';
 
@@ -25,6 +24,5 @@ export const appConfig: ApplicationConfig = {
             },
             loader: TranslocoHttpLoader,
         }),
-        provideTranslocoMessageformat(),
     ]
 };

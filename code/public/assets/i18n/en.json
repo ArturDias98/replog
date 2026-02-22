@@ -76,7 +76,8 @@
     "removeExerciseAriaLabel": "Remove exercise",
     "fillExercisesTooltip": "Fill in all exercises before adding more",
     "addAnotherTooltip": "Add another exercise",
-    "queueReadyToSave": "{count, plural, one {muscle group ready to save:} other {muscle groups ready to save:}}",
+    "queueReadyToSaveSingular": "muscle group ready to save:",
+    "queueReadyToSavePlural": "muscle groups ready to save:",
     "removeFromQueueAriaLabel": "Remove from queue"
   },
   "editMuscleGroup": {
@@ -88,7 +89,8 @@
     "loading": "Loading exercises...",
     "emptyTitle": "No exercises yet",
     "emptySubtitle": "Add your first exercise to get started",
-    "logCount": "{count, plural, one {1 log} other {# logs}}",
+    "logSingular": "log",
+    "logPlural": "logs",
     "clearAllLabel": "Clear All",
     "addLabel": "Add Exercise",
     "clearAllAriaLabel": "Clear all exercises",
@@ -108,7 +110,8 @@
     "description": "Add a new exercise to this muscle group. You'll be able to log sets, reps, and weight for this exercise.",
     "nameLabel": "Exercise Name",
     "namePlaceholder": "Enter exercise name",
-    "queueReadyToSave": "{count, plural, one {exercise ready to save:} other {exercises ready to save:}}",
+    "queueReadyToSaveSingular": "exercise ready to save:",
+    "queueReadyToSavePlural": "exercises ready to save:",
     "removeFromQueueAriaLabel": "Remove from queue"
   },
   "editExercise": {

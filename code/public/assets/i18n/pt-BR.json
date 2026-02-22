@@ -76,7 +76,8 @@
     "removeExerciseAriaLabel": "Remover exercício",
     "fillExercisesTooltip": "Preencha todos os exercícios antes de adicionar mais",
     "addAnotherTooltip": "Adicionar outro exercício",
-    "queueReadyToSave": "{count, plural, one {grupo muscular pronto para salvar:} other {grupos musculares prontos para salvar:}}",
+    "queueReadyToSaveSingular": "grupo muscular pronto para salvar:",
+    "queueReadyToSavePlural": "grupos musculares prontos para salvar:",
     "removeFromQueueAriaLabel": "Remover da fila"
   },
   "editMuscleGroup": {
@@ -88,7 +89,8 @@
     "loading": "Carregando exercícios...",
     "emptyTitle": "Nenhum exercício ainda",
     "emptySubtitle": "Adicione seu primeiro exercício para começar",
-    "logCount": "{count, plural, one {1 registro} other {# registros}}",
+    "logSingular": "registro",
+    "logPlural": "registros",
     "clearAllLabel": "Limpar Tudo",
     "addLabel": "Adicionar Exercício",
     "clearAllAriaLabel": "Limpar todos os exercícios",
@@ -108,7 +110,8 @@
     "description": "Adicione um novo exercício a este grupo muscular. Você poderá registrar séries, repetições e peso para este exercício.",
     "nameLabel": "Nome do Exercício",
     "namePlaceholder": "Digite o nome do exercício",
-    "queueReadyToSave": "{count, plural, one {exercício pronto para salvar:} other {exercícios prontos para salvar:}}",
+    "queueReadyToSaveSingular": "exercício pronto para salvar:",
+    "queueReadyToSavePlural": "exercícios prontos para salvar:",
     "removeFromQueueAriaLabel": "Remover da fila"
   },
   "editExercise": {

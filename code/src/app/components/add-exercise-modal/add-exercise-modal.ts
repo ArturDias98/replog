@@ -14,9 +14,12 @@ export class AddExerciseModal {
     private readonly exerciseService = inject(ExerciseService);
     private readonly translocoService = inject(TranslocoService);
 
-    protected readonly queueLabel = computed(() =>
-        this.translocoService.translate('addExercise.queueReadyToSave', { count: this.pendingExercises().length })
-    );
+    protected readonly queueLabel = computed(() => {
+        const count = this.pendingExercises().length;
+        return this.translocoService.translate(
+            count === 1 ? 'addExercise.queueReadyToSaveSingular' : 'addExercise.queueReadyToSavePlural'
+        );
+    });
 
     muscleGroupId = input.required<string>();
 
