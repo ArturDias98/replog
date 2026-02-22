@@ -38,53 +38,6 @@
 
 
 
-.item-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    cursor: pointer;
-}
-
-.item-card:hover {
-    background-color: var(--bg-tertiary);
-    transform: translateX(4px);
-}
-
-.item-content {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.item-content:first-child {
-    flex: 1;
-    min-width: 0;
-}
-
-.item-content:last-child {
-    flex-shrink: 0;
-    margin-right: 0.5rem;
-}
-
-.item-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.item-date {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-
 
 
 

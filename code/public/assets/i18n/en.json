@@ -34,7 +34,9 @@
     "clearAllAriaLabel": "Clear all workouts",
     "addAriaLabel": "Add workout",
     "confirmClearTitle": "Clear All Workouts",
-    "confirmClearMessage": "Are you sure you want to clear all workouts? This will permanently delete all workout data and cannot be undone."
+    "confirmClearMessage": "Are you sure you want to clear all workouts? This will permanently delete all workout data and cannot be undone.",
+    "confirmDeleteTitle": "Delete Workout",
+    "confirmDeleteMessage": "Are you sure you want to delete this workout? This action cannot be undone."
   },
   "addWorkout": {
     "modalTitle": "New Workout",
@@ -62,7 +64,9 @@
     "confirmClearTitle": "Clear All Muscle Groups",
     "confirmClearMessage": "Are you sure you want to clear all muscle groups from this workout? This will permanently delete all muscle group data and cannot be undone.",
     "confirmDeleteTitle": "Delete Workout",
-    "confirmDeleteMessage": "Are you sure you want to delete this entire workout? This will permanently delete the workout and all its muscle groups and cannot be undone."
+    "confirmDeleteMessage": "Are you sure you want to delete this entire workout? This will permanently delete the workout and all its muscle groups and cannot be undone.",
+    "confirmDeleteItemTitle": "Delete Muscle Group",
+    "confirmDeleteItemMessage": "Are you sure you want to delete this muscle group? This action cannot be undone."
   },
   "addMuscleGroup": {
     "modalTitle": "New Muscle",

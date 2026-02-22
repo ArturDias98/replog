@@ -1,37 +1,34 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { MuscleGroupService } from '../../services/muscle-group.service';
-import { UpdateMuscleGroupModel, MuscleGroup } from '../../models/muscle-group';
+import { ExerciseService } from '../../../services/exercise.service';
+import { Exercise } from '../../../models/exercise';
 
 @Component({
-    selector: 'app-edit-muscle-group-modal',
+    selector: 'app-edit-exercise-modal',
     imports: [TranslocoPipe],
-    templateUrl: './edit-muscle-group-modal.html',
-    styleUrl: './edit-muscle-group-modal.css',
+    templateUrl: './edit-exercise-modal.html',
+    styleUrl: './edit-exercise-modal.css',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditMuscleGroupModal {
-    private readonly muscleGroupService = inject(MuscleGroupService);
+export class EditExerciseModal {
+    private readonly exerciseService = inject(ExerciseService);
 
-    muscleGroupId = input.required<string>();
+    exerciseId = input.required<string>();
     initialTitle = input.required<string>();
-    initialDate = input.required<string>();
 
     protected readonly title = signal<string>('');
-    protected readonly date = signal<string>('');
     protected readonly isSubmitting = signal<boolean>(false);
     protected readonly isClosing = signal<boolean>(false);
 
-    muscleGroupUpdated = output<MuscleGroup>();
+    exerciseUpdated = output<Exercise>();
     closeModal = output<void>();
 
     ngOnInit(): void {
         this.title.set(this.initialTitle());
-        this.date.set(this.initialDate());
     }
 
     protected isFormValid(): boolean {
-        return !!(this.title() && this.date());
+        return !!this.title();
     }
 
     protected onSubmit(): void {
@@ -41,19 +38,13 @@ export class EditMuscleGroupModal {
 
         this.isSubmitting.set(true);
 
-        const model: UpdateMuscleGroupModel = {
-            muscleGroupId: this.muscleGroupId(),
-            title: this.title(),
-            date: this.date()
-        };
-
-        this.muscleGroupService.updateMuscleGroup(model)
-            .then((updatedMuscleGroup) => {
-                this.muscleGroupUpdated.emit(updatedMuscleGroup);
+        this.exerciseService.updateExercise(this.exerciseId(), this.title())
+            .then((updatedExercise) => {
+                this.exerciseUpdated.emit(updatedExercise);
                 this.close();
             })
             .catch(error => {
-                console.error('Failed to update muscle group:', error);
+                console.error('Failed to update exercise:', error);
             })
             .finally(() => {
                 this.isSubmitting.set(false);

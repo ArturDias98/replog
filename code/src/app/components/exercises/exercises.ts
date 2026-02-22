@@ -8,15 +8,17 @@ import { ExerciseService } from '../../services/exercise.service';
 import { I18nService } from '../../services/i18n.service';
 import { Exercise } from '../../models/exercise';
 import { MuscleGroup } from '../../models/muscle-group';
-import { AddExerciseModal } from '../add-exercise-modal/add-exercise-modal';
-import { EditMuscleGroupModal } from '../edit-muscle-group-modal/edit-muscle-group-modal';
-import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
-import { ActionButtonsComponent } from '../action-buttons/action-buttons';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
+import { AddExerciseModal } from './add-exercise-modal/add-exercise-modal';
+import { EditMuscleGroupModal } from '../muscle-group/edit-muscle-group-modal/edit-muscle-group-modal';
+import { EditExerciseModal } from './edit-exercise-modal/edit-exercise-modal';
+import { ActionButtonsComponent } from '../shared/action-buttons/action-buttons';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog';
+import { ItemListComponent } from '../shared/item-list/item-list';
+import { ItemCardComponent } from '../shared/item-list/item-card';
 
 @Component({
     selector: 'app-exercises',
-    imports: [DatePipe, TranslocoPipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent, ConfirmationDialogComponent],
+    imports: [DatePipe, TranslocoPipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent, ConfirmationDialogComponent, ItemListComponent, ItemCardComponent],
     templateUrl: './exercises.html',
     styleUrl: './exercises.css',
     changeDetection: ChangeDetectionStrategy.OnPush

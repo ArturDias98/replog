@@ -8,14 +8,16 @@ import { MuscleGroupService } from '../../services/muscle-group.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { I18nService } from '../../services/i18n.service';
 import { MuscleGroup } from '../../models/muscle-group';
-import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
-import { AddMuscleGroupModal } from '../add-muscle-group-modal/add-muscle-group-modal';
-import { ActionButtonsComponent } from '../action-buttons/action-buttons';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
+import { EditWorkoutModal } from '../workout/edit-workout-modal/edit-workout-modal';
+import { AddMuscleGroupModal } from './add-muscle-group-modal/add-muscle-group-modal';
+import { ActionButtonsComponent } from '../shared/action-buttons/action-buttons';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog';
+import { ItemListComponent } from '../shared/item-list/item-list';
+import { ItemCardComponent } from '../shared/item-list/item-card';
 
 @Component({
     selector: 'app-muscle-group',
-    imports: [DatePipe, TranslocoPipe, EditWorkoutModal, AddMuscleGroupModal, ActionButtonsComponent, ConfirmationDialogComponent],
+    imports: [DatePipe, TranslocoPipe, EditWorkoutModal, AddMuscleGroupModal, ActionButtonsComponent, ConfirmationDialogComponent, ItemListComponent, ItemCardComponent],
     templateUrl: './muscle-group.html',
     styleUrl: './muscle-group.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -39,6 +41,9 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     protected readonly isClearing = signal<boolean>(false);
     protected readonly showDeleteWorkoutConfirm = signal<boolean>(false);
     protected readonly isDeletingWorkout = signal<boolean>(false);
+    protected readonly muscleGroupItemToDelete = signal<string>('');
+    protected readonly showDeleteItemConfirm = signal<boolean>(false);
+    protected readonly isDeletingItem = signal<boolean>(false);
 
     private backButtonListener?: any;
 
@@ -111,6 +116,32 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
 
     protected navigateToExercises(muscleGroupId: string): void {
         this.router.navigate(['/exercises', muscleGroupId]);
+    }
+
+    protected confirmDeleteMuscleGroupById(muscleGroupId: string): void {
+        this.muscleGroupItemToDelete.set(muscleGroupId);
+        this.showDeleteItemConfirm.set(true);
+    }
+
+    protected closeDeleteItemConfirm(): void {
+        this.showDeleteItemConfirm.set(false);
+        this.muscleGroupItemToDelete.set('');
+    }
+
+    protected async deleteMuscleGroupItem(): Promise<void> {
+        const muscleGroupId = this.muscleGroupItemToDelete();
+        if (!muscleGroupId) return;
+
+        this.isDeletingItem.set(true);
+        try {
+            await this.muscleGroupService.deleteMuscleGroup(muscleGroupId);
+            this.muscleGroups.update(groups => groups.filter(g => g.id !== muscleGroupId));
+            this.closeDeleteItemConfirm();
+        } catch (error) {
+            console.error('Error deleting muscle group:', error);
+        } finally {
+            this.isDeletingItem.set(false);
+        }
     }
 
     protected confirmClearAll(): void {

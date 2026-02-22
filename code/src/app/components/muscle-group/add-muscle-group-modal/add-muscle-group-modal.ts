@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal, input } from '@angular/core';
 import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
-import { MuscleGroupService } from '../../services/muscle-group.service';
-import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../models/muscle-group';
+import { MuscleGroupService } from '../../../services/muscle-group.service';
+import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../../models/muscle-group';
 
 @Component({
     selector: 'app-add-muscle-group-modal',

@@ -6,13 +6,15 @@ import { App } from '@capacitor/app';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { I18nService } from '../../services/i18n.service';
 import { WorkOutGroup } from '../../models/workout-group';
-import { AddWorkoutModal } from '../add-workout-modal/add-workout-modal';
-import { ActionButtonsComponent } from '../action-buttons/action-buttons';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
+import { AddWorkoutModal } from './add-workout-modal/add-workout-modal';
+import { ActionButtonsComponent } from '../shared/action-buttons/action-buttons';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog';
+import { ItemListComponent } from '../shared/item-list/item-list';
+import { ItemCardComponent } from '../shared/item-list/item-card';
 
 @Component({
     selector: 'app-workout',
-    imports: [DatePipe, TranslocoPipe, AddWorkoutModal, ActionButtonsComponent, ConfirmationDialogComponent],
+    imports: [DatePipe, TranslocoPipe, AddWorkoutModal, ActionButtonsComponent, ConfirmationDialogComponent, ItemListComponent, ItemCardComponent],
     templateUrl: './workout.html',
     styleUrl: './workout.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,6 +29,9 @@ export class Workout implements OnInit, OnDestroy {
     protected readonly showAddModal = signal<boolean>(false);
     protected readonly showClearAllConfirm = signal<boolean>(false);
     protected readonly isClearing = signal<boolean>(false);
+    protected readonly workoutToDelete = signal<string>('');
+    protected readonly showDeleteConfirm = signal<boolean>(false);
+    protected readonly isDeleting = signal<boolean>(false);
 
     private backButtonListener?: any;
 
@@ -68,6 +73,32 @@ export class Workout implements OnInit, OnDestroy {
 
     protected navigateToMuscleGroups(workoutId: string): void {
         this.router.navigate(['muscle-group', workoutId]);
+    }
+
+    protected confirmDeleteWorkoutById(workoutId: string): void {
+        this.workoutToDelete.set(workoutId);
+        this.showDeleteConfirm.set(true);
+    }
+
+    protected closeDeleteConfirm(): void {
+        this.showDeleteConfirm.set(false);
+        this.workoutToDelete.set('');
+    }
+
+    protected async deleteWorkout(): Promise<void> {
+        const workoutId = this.workoutToDelete();
+        if (!workoutId) return;
+
+        this.isDeleting.set(true);
+        try {
+            await this.workoutService.deleteWorkout(workoutId);
+            this.items.update(items => items.filter(item => item.id !== workoutId));
+            this.closeDeleteConfirm();
+        } catch (error) {
+            console.error('Failed to delete workout:', error);
+        } finally {
+            this.isDeleting.set(false);
+        }
     }
 
     protected confirmClearAll(): void {

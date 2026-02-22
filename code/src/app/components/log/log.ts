@@ -9,11 +9,11 @@ import { LogService } from '../../services/log.service';
 import { I18nService } from '../../services/i18n.service';
 import { Log } from '../../models/log';
 import { Exercise } from '../../models/exercise';
-import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
+import { EditExerciseModal } from '../exercises/edit-exercise-modal/edit-exercise-modal';
 import { AddLogModal } from './add-log-modal/add-log-modal';
 import { EditLogModal } from './edit-log-modal/edit-log-modal';
-import { ActionButtonsComponent } from '../action-buttons/action-buttons';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog';
+import { ActionButtonsComponent } from '../shared/action-buttons/action-buttons';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog';
 import { ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 type LogGroup = {

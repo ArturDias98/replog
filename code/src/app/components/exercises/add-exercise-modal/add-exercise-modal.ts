@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal, input } from '@angular/core';
 import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
-import { ExerciseService } from '../../services/exercise.service';
-import { Exercise } from '../../models/exercise';
+import { ExerciseService } from '../../../services/exercise.service';
+import { Exercise } from '../../../models/exercise';
 
 @Component({
     selector: 'app-add-exercise-modal',

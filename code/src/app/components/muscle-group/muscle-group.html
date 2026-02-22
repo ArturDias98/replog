@@ -47,18 +47,15 @@
         </button>
     </div>
     } @else {
-    <ul class="item-list">
+    <app-item-list>
         @for (group of muscleGroups(); track group.id) {
-        <li class="item-card" (click)="navigateToExercises(group.id)">
-            <div class="item-content">
-                <h3 class="item-title" [title]="group.title">{{ group.title }}</h3>
-            </div>
-            <div class="item-content">
-                <p class="item-date">{{ group.date | date: 'dd/MM/yyyy' : undefined : i18n.locale() }}</p>
-            </div>
-        </li>
+        <app-item-card
+            [title]="group.title"
+            [subtitle]="(group.date | date: 'dd/MM/yyyy' : undefined : i18n.locale()) ?? ''"
+            (itemClick)="navigateToExercises(group.id)"
+            (itemDelete)="confirmDeleteMuscleGroupById(group.id)" />
         }
-    </ul>
+    </app-item-list>
     }
     }
 </div>
@@ -87,6 +84,17 @@
 @if (showAddModal()) {
 <app-add-muscle-group-modal [workoutId]="workoutId()" (muscleGroupAdded)="onMuscleGroupAdded($event)"
     (closeModal)="closeAddModal()" />
+}
+
+@if (showDeleteItemConfirm()) {
+<app-confirmation-dialog
+    [title]="'muscleGroup.confirmDeleteItemTitle' | transloco"
+    [message]="'muscleGroup.confirmDeleteItemMessage' | transloco"
+    [confirmText]="'common.delete' | transloco"
+    [isProcessing]="isDeletingItem()"
+    [processingText]="'common.deleting' | transloco"
+    (confirm)="deleteMuscleGroupItem()"
+    (cancel)="closeDeleteItemConfirm()" />
 }
 
 @if (showClearAllConfirm()) {

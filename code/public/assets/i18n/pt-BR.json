@@ -34,7 +34,9 @@
     "clearAllAriaLabel": "Limpar todos os treinos",
     "addAriaLabel": "Adicionar treino",
     "confirmClearTitle": "Limpar Todos os Treinos",
-    "confirmClearMessage": "Tem certeza que deseja limpar todos os treinos? Isso excluirá permanentemente todos os dados de treino e não poderá ser desfeito."
+    "confirmClearMessage": "Tem certeza que deseja limpar todos os treinos? Isso excluirá permanentemente todos os dados de treino e não poderá ser desfeito.",
+    "confirmDeleteTitle": "Excluir Treino",
+    "confirmDeleteMessage": "Tem certeza que deseja excluir este treino? Esta ação não pode ser desfeita."
   },
   "addWorkout": {
     "modalTitle": "Novo Treino",
@@ -62,7 +64,9 @@
     "confirmClearTitle": "Limpar Todos os Grupos Musculares",
     "confirmClearMessage": "Tem certeza que deseja limpar todos os grupos musculares deste treino? Isso excluirá permanentemente todos os dados dos grupos musculares e não poderá ser desfeito.",
     "confirmDeleteTitle": "Excluir Treino",
-    "confirmDeleteMessage": "Tem certeza que deseja excluir este treino inteiro? Isso excluirá permanentemente o treino e todos os seus grupos musculares e não poderá ser desfeito."
+    "confirmDeleteMessage": "Tem certeza que deseja excluir este treino inteiro? Isso excluirá permanentemente o treino e todos os seus grupos musculares e não poderá ser desfeito.",
+    "confirmDeleteItemTitle": "Excluir Grupo Muscular",
+    "confirmDeleteItemMessage": "Tem certeza que deseja excluir este grupo muscular? Esta ação não pode ser desfeita."
   },
   "addMuscleGroup": {
     "modalTitle": "Novo Músculo",
