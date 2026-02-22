@@ -1,9 +1,11 @@
 import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { ExerciseService } from '../../services/exercise.service';
+import { I18nService } from '../../services/i18n.service';
 import { Exercise } from '../../models/exercise';
 import { MuscleGroup } from '../../models/muscle-group';
 import { AddExerciseModal } from '../add-exercise-modal/add-exercise-modal';
@@ -14,7 +16,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 
 @Component({
     selector: 'app-exercises',
-    imports: [DatePipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent, ConfirmationDialogComponent],
+    imports: [DatePipe, TranslocoPipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent, ConfirmationDialogComponent],
     templateUrl: './exercises.html',
     styleUrl: './exercises.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -24,6 +26,7 @@ export class ExercisesComponent implements OnInit, OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly muscleGroupService = inject(MuscleGroupService);
     private readonly exerciseService = inject(ExerciseService);
+    protected readonly i18n = inject(I18nService);
 
     protected readonly exercises = signal<Exercise[]>([]);
     protected readonly isLoading = signal<boolean>(false);

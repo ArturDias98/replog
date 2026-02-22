@@ -1,10 +1,12 @@
-import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
+import { I18nService } from '../../services/i18n.service';
 import { MuscleGroup } from '../../models/muscle-group';
 import { EditWorkoutModal } from '../edit-workout-modal/edit-workout-modal';
 import { AddMuscleGroupModal } from '../add-muscle-group-modal/add-muscle-group-modal';
@@ -13,9 +15,10 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 
 @Component({
     selector: 'app-muscle-group',
-    imports: [DatePipe, EditWorkoutModal, AddMuscleGroupModal, ActionButtonsComponent, ConfirmationDialogComponent],
+    imports: [DatePipe, TranslocoPipe, EditWorkoutModal, AddMuscleGroupModal, ActionButtonsComponent, ConfirmationDialogComponent],
     templateUrl: './muscle-group.html',
-    styleUrl: './muscle-group.css'
+    styleUrl: './muscle-group.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MuscleGroupComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
@@ -23,6 +26,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     private readonly workoutService = inject(WorkoutDataService);
     private readonly muscleGroupService = inject(MuscleGroupService);
     private readonly userPreferencesService = inject(UserPreferencesService);
+    protected readonly i18n = inject(I18nService);
 
     protected readonly muscleGroups = signal<MuscleGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);

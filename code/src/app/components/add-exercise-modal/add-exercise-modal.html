@@ -1,20 +1,18 @@
 <div class="modal-backdrop" [class.closing]="isClosing()" (click)="onBackdropClick($event)">
     <div class="modal-content" [class.closing]="isClosing()">
         <div class="modal-header">
-            <h2>New Exercise</h2>
-            <button type="button" class="btn-close" (click)="close()" aria-label="Close modal">
+            <h2>{{ 'addExercise.modalTitle' | transloco }}</h2>
+            <button type="button" class="btn-close" (click)="close()" [attr.aria-label]="'common.closeModal' | transloco">
                 ×
             </button>
         </div>
 
         <div class="modal-description">
-            <p>Add a new exercise to this muscle group. You'll be able to log sets, reps, and weight for this
-                exercise.</p>
+            <p>{{ 'addExercise.description' | transloco }}</p>
             @if (pendingExercises().length > 0) {
             <div class="queue-info">
                 <div class="queue-header">
-                    <strong>{{ pendingExercises().length }}</strong> exercise{{ pendingExercises().length !==
-                    1 ? 's' : '' }} ready to save:
+                    <span class="queue-count">{{ pendingExercises().length }}</span> {{ queueLabel() }}
                 </div>
                 <ul class="queue-list">
                     @for (pendingExercise of pendingExercises(); track $index) {
@@ -24,7 +22,8 @@
                         <span class="queue-item-title">{{ pendingExercise }}</span>
                         <button type="button" class="btn-queue-remove"
                             (click)="removePendingExercise($index); $event.stopPropagation()"
-                            [disabled]="isSubmitting() || editingIndex() === $index" aria-label="Remove from queue">
+                            [disabled]="isSubmitting() || editingIndex() === $index"
+                            [attr.aria-label]="'addExercise.removeFromQueueAriaLabel' | transloco">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round">
@@ -39,38 +38,40 @@
             }
         </div>
 
-        <form (ngSubmit)="onSubmit()" (keydown)="onFormKeyDown($event)" class="modal-body">
+        <form (submit)="$event.preventDefault(); onSubmit()" (keydown)="onFormKeyDown($event)" class="modal-body" novalidate>
             <div class="form-group">
-                <label for="title">Exercise Name</label>
+                <label for="title">{{ 'addExercise.nameLabel' | transloco }}</label>
                 <input type="text" id="title" class="form-control" [value]="title()"
-                    (input)="title.set($any($event.target).value)" placeholder="Enter exercise name" required
+                    (input)="title.set($any($event.target).value)" [placeholder]="'addExercise.namePlaceholder' | transloco" required
                     [disabled]="isSubmitting()">
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isSubmitting()">
-                    Cancel
+                    {{ 'common.cancel' | transloco }}
                 </button>
                 @if (editingIndex() !== null) {
                 <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="isSubmitting()">
-                    Cancel Edit
+                    {{ 'common.cancelEdit' | transloco }}
                 </button>
                 }
                 <button type="button" class="btn btn-secondary" (click)="addToQueue()"
                     [disabled]="!isFormValid() || isSubmitting()">
                     @if (editingIndex() !== null) {
-                    Update
+                    {{ 'common.update' | transloco }}
                     } @else {
-                    Next
+                    {{ 'common.next' | transloco }}
                     }
                 </button>
                 <button type="submit" class="btn btn-primary" [disabled]="!canSave() || isSubmitting()">
                     @if (isSubmitting()) {
                     <span class="spinner-small"></span>
-                    Adding...
+                    {{ 'common.adding' | transloco }}
                     } @else {
-                    Add @if (pendingExercises().length > 0) {
-                    All
+                    @if (pendingExercises().length > 0) {
+                    {{ 'common.addAll' | transloco }}
+                    } @else {
+                    {{ 'common.add' | transloco }}
                     }
                     }
                 </button>

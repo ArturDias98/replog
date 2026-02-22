@@ -1,13 +1,14 @@
-import { Component, inject, output, signal, input } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, output, signal, input } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { UpdateMuscleGroupModel, MuscleGroup } from '../../models/muscle-group';
 
 @Component({
     selector: 'app-edit-muscle-group-modal',
-    imports: [FormsModule],
+    imports: [TranslocoPipe],
     templateUrl: './edit-muscle-group-modal.html',
-    styleUrl: './edit-muscle-group-modal.css'
+    styleUrl: './edit-muscle-group-modal.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditMuscleGroupModal {
     private readonly muscleGroupService = inject(MuscleGroupService);

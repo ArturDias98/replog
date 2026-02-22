@@ -1,14 +1,18 @@
-import { Component, signal, output, inject, input } from '@angular/core';
+import { Component, signal, output, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
 import { LogService } from '../../../services/log.service';
 import { UpdateLogModel, Log } from '../../../models/log';
 
 @Component({
     selector: 'app-edit-log-modal',
+    imports: [TranslocoPipe],
     templateUrl: './edit-log-modal.html',
-    styleUrl: './edit-log-modal.css'
+    styleUrl: './edit-log-modal.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditLogModal {
     private readonly logService = inject(LogService);
+    private readonly translocoService = inject(TranslocoService);
 
     exerciseId = input.required<string>();
     log = input.required<Log>();
@@ -37,15 +41,15 @@ export class EditLogModal {
     protected async handleEditLog(): Promise<void> {
         const logData = this.log();
         const reps = parseInt(this.editReps());
-        const weight = parseFloat(this.editWeight());
+        const weight = parseFloat(this.editWeight().replace(',', '.'));
 
         if (!this.editReps() || isNaN(reps) || reps <= 0) {
-            this.editError.set('Please enter a valid number of reps');
+            this.editError.set(this.translocoService.translate('editLog.errorReps'));
             return;
         }
 
         if (!this.editWeight() || isNaN(weight) || weight < 0) {
-            this.editError.set('Please enter a valid weight');
+            this.editError.set(this.translocoService.translate('editLog.errorWeight'));
             return;
         }
 
@@ -62,7 +66,7 @@ export class EditLogModal {
             this.logUpdated.emit(updatedLog);
             this.close();
         } catch (error) {
-            this.editError.set('Failed to update log. Please try again.');
+            this.editError.set(this.translocoService.translate('editLog.errorFailed'));
         } finally {
             this.isEditing.set(false);
         }

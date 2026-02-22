@@ -8,5 +8,9 @@ export const routes: Routes = [
     { path: '', component: Workout },
     { path: 'muscle-group/:workoutId', component: MuscleGroupComponent },
     { path: 'exercises/:muscleGroupId', component: ExercisesComponent },
-    { path: 'log/:exerciseId', component: LogComponent }
+    { path: 'log/:exerciseId', component: LogComponent },
+    {
+        path: 'settings',
+        loadComponent: () => import('./components/settings/settings').then(m => m.SettingsComponent)
+    }
 ];

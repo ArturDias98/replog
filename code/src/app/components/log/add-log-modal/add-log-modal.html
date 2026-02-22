@@ -1,29 +1,31 @@
 <div class="modal-overlay" (click)="close()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3 class="modal-title">Add Log</h3>
+        <h3 class="modal-title">{{ 'addLog.modalTitle' | transloco }}</h3>
         @if (addError()) {
         <div class="error-message">{{ addError() }}</div>
         }
         <form (submit)="$event.preventDefault(); handleAddLog()">
             <div class="form-group">
-                <label for="reps" class="form-label">Number of Reps</label>
+                <label for="reps" class="form-label">{{ 'addLog.repsLabel' | transloco }}</label>
                 <input id="reps" type="number" class="form-input" [value]="newReps()"
-                    (input)="newReps.set($any($event.target).value)" placeholder="Enter reps" min="1" required />
+                    (input)="newReps.set($any($event.target).value)"
+                    [placeholder]="'addLog.repsPlaceholder' | transloco" min="1" required />
             </div>
             <div class="form-group">
-                <label for="weight" class="form-label">Max Weight (kg)</label>
-                <input id="weight" type="number" class="form-input" [value]="newWeight()"
-                    (input)="newWeight.set($any($event.target).value)" placeholder="Enter weight" min="0" step="0.5"
+                <label for="weight" class="form-label">{{ 'addLog.weightLabel' | transloco }}</label>
+                <input id="weight" type="text" inputmode="decimal" class="form-input" [value]="newWeight()"
+                    (input)="newWeight.set($any($event.target).value)"
+                    [placeholder]="'addLog.weightPlaceholder' | transloco"
                     required />
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn-cancel" (click)="close()" [disabled]="isAdding()">Cancel</button>
+                <button type="button" class="btn-cancel" (click)="close()" [disabled]="isAdding()">{{ 'common.cancel' | transloco }}</button>
                 <button type="submit" class="btn-primary" [disabled]="isAdding()">
                     @if (isAdding()) {
                     <span class="spinner-small"></span>
-                    Adding...
+                    {{ 'common.adding' | transloco }}
                     } @else {
-                    Add
+                    {{ 'common.add' | transloco }}
                     }
                 </button>
             </div>

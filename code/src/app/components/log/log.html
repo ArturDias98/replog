@@ -2,12 +2,12 @@
     @if (isLoading()) {
     <div class="loading-container">
         <div class="spinner"></div>
-        <p>Loading logs...</p>
+        <p>{{ 'log.loading' | transloco }}</p>
     </div>
     } @else {
     <div class="exercise-header">
         <div class="exercise-title-row">
-            <button class="btn-icon-back" type="button" aria-label="Go back" (click)="navigateBack()">
+            <button class="btn-icon-back" type="button" [attr.aria-label]="'log.goBackAriaLabel' | transloco" (click)="navigateBack()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 12H5" />
@@ -15,14 +15,14 @@
                 </svg>
             </button>
             <h2 class="exercise-title" [title]="exerciseTitle()">{{ exerciseTitle() }}</h2>
-            <button class="btn-icon-edit" type="button" aria-label="Edit exercise" (click)="openEditExerciseModal()">
+            <button class="btn-icon-edit" type="button" [attr.aria-label]="'log.editExerciseAriaLabel' | transloco" (click)="openEditExerciseModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 20h9" />
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                 </svg>
             </button>
-            <button class="btn-icon-remove" type="button" aria-label="Delete exercise"
+            <button class="btn-icon-remove" type="button" [attr.aria-label]="'log.deleteExerciseAriaLabel' | transloco"
                 (click)="confirmDeleteExercise()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -32,7 +32,7 @@
                 </svg>
             </button>
         </div>
-        <p class="exercise-date">{{ exerciseDate() | date: 'dd/MM/yyyy' }}</p>
+        <p class="exercise-date">{{ exerciseDate() | date: 'dd/MM/yyyy' : undefined : i18n.locale() }}</p>
     </div>
 
     @if (virtualScrollItems().length > 0) {
@@ -40,7 +40,7 @@
         (scrolledIndexChange)="onScroll()">
         <div *cdkVirtualFor="let item of virtualScrollItems()" class="virtual-scroll-item">
             @if (item.type === 'header') {
-            <h3 class="log-group-date">{{ item.date | date: 'EEEE, dd/MM/yyyy' }}</h3>
+            <h3 class="log-group-date">{{ item.date | date: 'EEEE, dd/MM/yyyy' : undefined : i18n.locale() }}</h3>
             } @else if (item.type === 'spacer') {
             <div class="viewport-spacer"></div>
             } @else {
@@ -55,7 +55,7 @@
                                 <path d="M6 20V10" />
                                 <path d="M18 20V4" />
                             </svg>
-                            <span class="log-label">Reps:</span>
+                            <span class="log-label">{{ 'log.repsLabel' | transloco }}</span>
                             <span class="log-value">{{ item.log.numberReps }}</span>
                         </div>
                         <div class="log-detail-row">
@@ -66,13 +66,13 @@
                                 <line x1="12" y1="22" x2="12" y2="8" />
                                 <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
                             </svg>
-                            <span class="log-label">Weight:</span>
-                            <span class="log-value">{{ item.log.maxWeight }} kg</span>
+                            <span class="log-label">{{ 'log.weightLabel' | transloco }}</span>
+                            <span class="log-value">{{ item.log.maxWeight | number: '1.1-2' : i18n.locale() }} {{ 'log.weightUnit' | transloco }}</span>
                         </div>
                     </div>
                 </div>
                 <div class="item-actions">
-                    <button class="btn-icon-remove" type="button" aria-label="Remove log"
+                    <button class="btn-icon-remove" type="button" [attr.aria-label]="'log.removeLogAriaLabel' | transloco"
                         (click)="confirmDelete(item.log.id)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -81,7 +81,7 @@
                             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                         </svg>
                     </button>
-                    <button class="btn-icon-edit" type="button" aria-label="Edit log"
+                    <button class="btn-icon-edit" type="button" [attr.aria-label]="'log.editLogAriaLabel' | transloco"
                         (click)="openEditLogModal(item.log)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -96,7 +96,7 @@
     </cdk-virtual-scroll-viewport>
 
     @if (showScrollToTop()) {
-    <button class="scroll-to-top-btn" type="button" aria-label="Scroll to top" (click)="scrollToTop()">
+    <button class="scroll-to-top-btn" type="button" [attr.aria-label]="'log.scrollToTopAriaLabel' | transloco" (click)="scrollToTop()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 19V5" />
@@ -113,8 +113,8 @@
                 <line x1="18" y1="20" x2="18" y2="4" />
                 <line x1="6" y1="20" x2="6" y2="16" />
             </svg>
-            <p>No logs yet</p>
-            <p class="empty-subtitle">Add your first log to track your progress</p>
+            <p>{{ 'log.emptyTitle' | transloco }}</p>
+            <p class="empty-subtitle">{{ 'log.emptySubtitle' | transloco }}</p>
         </div>
     </div>
     }
@@ -122,38 +122,48 @@
 </div>
 
 @if (!isLoading() && logs().length > 0) {
-<app-action-buttons [showClearAll]="true" clearAllLabel="Clear All" addLabel="Add Log"
-    clearAllAriaLabel="Clear all logs" addAriaLabel="Add log" (clearAllClick)="confirmClearAll()"
+<app-action-buttons [showClearAll]="true"
+    [clearAllLabel]="'log.clearAllLabel' | transloco"
+    [addLabel]="'log.addLabel' | transloco"
+    [clearAllAriaLabel]="'log.clearAllAriaLabel' | transloco"
+    [addAriaLabel]="'log.addAriaLabel' | transloco"
+    (clearAllClick)="confirmClearAll()"
     (addClick)="openAddLogModal()" />
 }
 
 @if (!isLoading() && logs().length === 0) {
-<app-action-buttons [showClearAll]="false" addAriaLabel="Add log" (addClick)="openAddLogModal()" />
+<app-action-buttons [showClearAll]="false"
+    [addAriaLabel]="'log.addAriaLabel' | transloco"
+    (addClick)="openAddLogModal()" />
 }
 
-<!-- Add Log Modal -->
 @if (showAddLogModal()) {
 <app-add-log-modal [exerciseId]="exerciseId()" (logAdded)="onLogAdded($event)" (closeModal)="closeAddLogModal()" />
 }
 
-<!-- Edit Log Modal -->
 @if (showEditLogModal() && logToEdit()) {
 <app-edit-log-modal [exerciseId]="exerciseId()" [log]="logToEdit()!" (logUpdated)="onLogUpdated($event)"
     (closeModal)="closeEditLogModal()" />
 }
 
-<!-- Delete Confirmation Modal -->
 @if (showDeleteConfirm()) {
-<app-confirmation-dialog title="Delete Log"
-    message="Are you sure you want to delete this log? This action cannot be undone." confirmText="Delete"
-    [isProcessing]="isDeleting()" processingText="Deleting..." (confirm)="deleteLog()" (cancel)="closeDeleteModal()" />
+<app-confirmation-dialog
+    [title]="'log.confirmDeleteTitle' | transloco"
+    [message]="'log.confirmDeleteMessage' | transloco"
+    [confirmText]="'common.delete' | transloco"
+    [isProcessing]="isDeleting()"
+    [processingText]="'common.deleting' | transloco"
+    (confirm)="deleteLog()" (cancel)="closeDeleteModal()" />
 }
 
-<!-- Clear All Confirmation Modal -->
 @if (showClearAllConfirm()) {
-<app-confirmation-dialog title="Clear All Logs"
-    message="Are you sure you want to clear all logs for this exercise? This will permanently delete all log data and cannot be undone."
-    confirmText="Clear All" [isProcessing]="isClearing()" processingText="Clearing..." (confirm)="clearAllLogs()"
+<app-confirmation-dialog
+    [title]="'log.confirmClearTitle' | transloco"
+    [message]="'log.confirmClearMessage' | transloco"
+    [confirmText]="'common.clearAll' | transloco"
+    [isProcessing]="isClearing()"
+    [processingText]="'common.clearing' | transloco"
+    (confirm)="clearAllLogs()"
     (cancel)="closeClearAllModal()" />
 }
 
@@ -163,8 +173,12 @@
 }
 
 @if (showDeleteExerciseConfirm()) {
-<app-confirmation-dialog title="Delete Exercise"
-    message="Are you sure you want to delete this entire exercise? This will permanently delete the exercise and all its logs and cannot be undone."
-    confirmText="Delete" [isProcessing]="isDeletingExercise()" processingText="Deleting..." (confirm)="deleteExercise()"
+<app-confirmation-dialog
+    [title]="'log.confirmDeleteExerciseTitle' | transloco"
+    [message]="'log.confirmDeleteExerciseMessage' | transloco"
+    [confirmText]="'common.delete' | transloco"
+    [isProcessing]="isDeletingExercise()"
+    [processingText]="'common.deleting' | transloco"
+    (confirm)="deleteExercise()"
     (cancel)="closeDeleteExerciseConfirm()" />
 }

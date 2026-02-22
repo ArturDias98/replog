@@ -1,16 +1,22 @@
-import { Component, inject, output, signal, input } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, input } from '@angular/core';
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../models/muscle-group';
 
 @Component({
     selector: 'app-add-muscle-group-modal',
-    imports: [FormsModule],
+    imports: [TranslocoPipe],
     templateUrl: './add-muscle-group-modal.html',
-    styleUrl: './add-muscle-group-modal.css'
+    styleUrl: './add-muscle-group-modal.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddMuscleGroupModal {
     private readonly muscleGroupService = inject(MuscleGroupService);
+    private readonly translocoService = inject(TranslocoService);
+
+    protected readonly queueLabel = computed(() =>
+        this.translocoService.translate('addMuscleGroup.queueReadyToSave', { count: this.pendingMuscleGroups().length })
+    );
 
     workoutId = input.required<string>();
 

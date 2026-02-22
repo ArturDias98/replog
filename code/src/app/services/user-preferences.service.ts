@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserPreferences } from '../models/user-preferences';
+import { UserPreferences, Language } from '../models/user-preferences';
 
 @Injectable({
     providedIn: 'root'
@@ -35,11 +35,28 @@ export class UserPreferencesService {
     }
 
     /**
+     * Get the saved language preference
+     */
+    getLanguage(): Language {
+        return this.loadFromStorage().language ?? 'en';
+    }
+
+    /**
+     * Set the language preference
+     */
+    setLanguage(language: Language): void {
+        const preferences = this.loadFromStorage();
+        preferences.language = language;
+        this.saveToStorage(preferences);
+    }
+
+    /**
      * Clear all preferences
      */
     clearAllPreferences(): void {
         const defaultPreferences: UserPreferences = {
-            lastVisitedWorkoutId: null
+            lastVisitedWorkoutId: null,
+            language: 'en'
         };
         this.saveToStorage(defaultPreferences);
     }
@@ -60,7 +77,8 @@ export class UserPreferencesService {
 
         // Return default preferences
         return {
-            lastVisitedWorkoutId: null
+            lastVisitedWorkoutId: null,
+            language: 'en'
         };
     }
 

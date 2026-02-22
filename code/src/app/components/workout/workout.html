@@ -2,7 +2,7 @@
     @if (isLoading()) {
     <div class="loading-container">
         <div class="spinner"></div>
-        <p>Loading workouts...</p>
+        <p>{{ 'workout.loading' | transloco }}</p>
     </div>
     } @else if (items().length === 0) {
     <div class="empty-state">
@@ -13,10 +13,10 @@
             <line x1="12" y1="18" x2="12" y2="12" />
             <line x1="9" y1="15" x2="15" y2="15" />
         </svg>
-        <h2 class="empty-title">No Workouts Yet</h2>
-        <p class="empty-description">Start tracking your fitness journey by adding your first workout.</p>
+        <h2 class="empty-title">{{ 'workout.emptyTitle' | transloco }}</h2>
+        <p class="empty-description">{{ 'workout.emptyDescription' | transloco }}</p>
         <button type="button" class="btn btn-primary" (click)="openAddModal()">
-            Add Workout
+            {{ 'workout.addButton' | transloco }}
         </button>
     </div>
     } @else {
@@ -28,7 +28,7 @@
                 <h3 class="item-title" [title]="item.title">{{ item.title }}</h3>
             </div>
             <div class="item-content">
-                <p class="item-date">{{ item.date | date: 'dd/MM/yyyy' }}</p>
+                <p class="item-date">{{ item.date | date: 'dd/MM/yyyy' : undefined : i18n.locale() }}</p>
             </div>
         </li>
         }
@@ -37,8 +37,12 @@
 </div>
 
 @if (!isLoading() && items().length > 0) {
-<app-action-buttons [showClearAll]="true" clearAllLabel="Clear All" addLabel="Add Workout"
-    clearAllAriaLabel="Clear all workouts" addAriaLabel="Add workout" (clearAllClick)="confirmClearAll()"
+<app-action-buttons [showClearAll]="true"
+    [clearAllLabel]="'common.clearAll' | transloco"
+    [addLabel]="'workout.addButton' | transloco"
+    [clearAllAriaLabel]="'workout.clearAllAriaLabel' | transloco"
+    [addAriaLabel]="'workout.addAriaLabel' | transloco"
+    (clearAllClick)="confirmClearAll()"
     (addClick)="openAddModal()" />
 }
 
@@ -47,8 +51,12 @@
 }
 
 @if (showClearAllConfirm()) {
-<app-confirmation-dialog title="Clear All Workouts"
-    message="Are you sure you want to clear all workouts? This will permanently delete all workout data and cannot be undone."
-    confirmText="Clear All" [isProcessing]="isClearing()" processingText="Clearing..." (confirm)="clearAllWorkouts()"
+<app-confirmation-dialog
+    [title]="'workout.confirmClearTitle' | transloco"
+    [message]="'workout.confirmClearMessage' | transloco"
+    [confirmText]="'common.clearAll' | transloco"
+    [isProcessing]="isClearing()"
+    [processingText]="'common.clearing' | transloco"
+    (confirm)="clearAllWorkouts()"
     (cancel)="closeClearAllConfirm()" />
 }

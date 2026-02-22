@@ -1,10 +1,12 @@
 import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy, computed, viewChild } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { ExerciseService } from '../../services/exercise.service';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { LogService } from '../../services/log.service';
+import { I18nService } from '../../services/i18n.service';
 import { Log } from '../../models/log';
 import { Exercise } from '../../models/exercise';
 import { EditExerciseModal } from '../edit-exercise-modal/edit-exercise-modal';
@@ -26,7 +28,7 @@ type VirtualScrollItem =
 
 @Component({
     selector: 'app-log',
-    imports: [DatePipe, EditExerciseModal, AddLogModal, EditLogModal, ActionButtonsComponent, ConfirmationDialogComponent, ScrollingModule],
+    imports: [DatePipe, DecimalPipe, TranslocoPipe, EditExerciseModal, AddLogModal, EditLogModal, ActionButtonsComponent, ConfirmationDialogComponent, ScrollingModule],
     templateUrl: './log.html',
     styleUrl: './log.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,6 +39,7 @@ export class LogComponent implements OnInit, OnDestroy {
     private readonly exerciseService = inject(ExerciseService);
     private readonly muscleGroupService = inject(MuscleGroupService);
     private readonly logService = inject(LogService);
+    protected readonly i18n = inject(I18nService);
 
     protected readonly logs = signal<Log[]>([]);
     protected readonly isLoading = signal<boolean>(false);

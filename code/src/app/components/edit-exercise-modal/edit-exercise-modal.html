@@ -1,34 +1,34 @@
 <div class="modal-backdrop" [class.closing]="isClosing()" (click)="onBackdropClick($event)">
     <div class="modal-content" [class.closing]="isClosing()">
         <div class="modal-header">
-            <h2>Edit Exercise</h2>
-            <button type="button" class="btn-close" (click)="close()" aria-label="Close modal">
+            <h2>{{ 'editExercise.modalTitle' | transloco }}</h2>
+            <button type="button" class="btn-close" (click)="close()" [attr.aria-label]="'common.closeModal' | transloco">
                 ×
             </button>
         </div>
 
         <div class="modal-description">
-            <p>Update the exercise name.</p>
+            <p>{{ 'editExercise.description' | transloco }}</p>
         </div>
 
-        <form (ngSubmit)="onSubmit()" class="modal-body">
+        <form (submit)="$event.preventDefault(); onSubmit()" class="modal-body">
             <div class="form-group">
-                <label for="title">Exercise Name</label>
+                <label for="title">{{ 'editExercise.nameLabel' | transloco }}</label>
                 <input type="text" id="title" class="form-control" [value]="title()"
-                    (input)="title.set($any($event.target).value)" placeholder="Enter exercise name" required
+                    (input)="title.set($any($event.target).value)" [placeholder]="'editExercise.namePlaceholder' | transloco" required
                     [disabled]="isSubmitting()">
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="isSubmitting()">
-                    Cancel
+                    {{ 'common.cancel' | transloco }}
                 </button>
                 <button type="submit" class="btn btn-primary" [disabled]="!title() || isSubmitting()">
                     @if (isSubmitting()) {
                     <span class="spinner-small"></span>
-                    Updating...
+                    {{ 'common.updating' | transloco }}
                     } @else {
-                    Update Exercise
+                    {{ 'common.update' | transloco }}
                     }
                 </button>
             </div>

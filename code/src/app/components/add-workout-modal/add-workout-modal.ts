@@ -1,13 +1,14 @@
-import { Component, inject, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { CreateWorkoutModel } from '../../models/workout';
 
 @Component({
     selector: 'app-add-workout-modal',
-    imports: [FormsModule],
+    imports: [TranslocoPipe],
     templateUrl: './add-workout-modal.html',
-    styleUrl: './add-workout-modal.css'
+    styleUrl: './add-workout-modal.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddWorkoutModal {
     private readonly workoutService = inject(WorkoutDataService);

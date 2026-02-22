@@ -1,8 +1,10 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { WorkoutDataService } from '../../services/workout-data.service';
+import { I18nService } from '../../services/i18n.service';
 import { WorkOutGroup } from '../../models/workout-group';
 import { AddWorkoutModal } from '../add-workout-modal/add-workout-modal';
 import { ActionButtonsComponent } from '../action-buttons/action-buttons';
@@ -10,13 +12,15 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 
 @Component({
     selector: 'app-workout',
-    imports: [DatePipe, AddWorkoutModal, ActionButtonsComponent, ConfirmationDialogComponent],
+    imports: [DatePipe, TranslocoPipe, AddWorkoutModal, ActionButtonsComponent, ConfirmationDialogComponent],
     templateUrl: './workout.html',
-    styleUrl: './workout.css'
+    styleUrl: './workout.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Workout implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly workoutService = inject(WorkoutDataService);
+    protected readonly i18n = inject(I18nService);
 
     protected readonly items = signal<WorkOutGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);

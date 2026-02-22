@@ -1,15 +1,19 @@
-import { Component, signal, output, inject, input } from '@angular/core';
+import { Component, signal, output, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
 import { LogService } from '../../../services/log.service';
 import { AddLogModel } from '../../../models/log';
 import { Log } from '../../../models/log';
 
 @Component({
     selector: 'app-add-log-modal',
+    imports: [TranslocoPipe],
     templateUrl: './add-log-modal.html',
-    styleUrl: './add-log-modal.css'
+    styleUrl: './add-log-modal.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddLogModal {
     private readonly logService = inject(LogService);
+    private readonly translocoService = inject(TranslocoService);
 
     exerciseId = input.required<string>();
 
@@ -30,15 +34,15 @@ export class AddLogModal {
 
     protected async handleAddLog(): Promise<void> {
         const reps = parseInt(this.newReps());
-        const weight = parseFloat(this.newWeight());
+        const weight = parseFloat(this.newWeight().replace(',', '.'));
 
         if (!this.newReps() || isNaN(reps) || reps <= 0) {
-            this.addError.set('Please enter a valid number of reps');
+            this.addError.set(this.translocoService.translate('addLog.errorReps'));
             return;
         }
 
         if (!this.newWeight() || isNaN(weight) || weight < 0) {
-            this.addError.set('Please enter a valid weight');
+            this.addError.set(this.translocoService.translate('addLog.errorWeight'));
             return;
         }
 
@@ -61,7 +65,7 @@ export class AddLogModal {
             this.logAdded.emit(newLog);
             this.close();
         } catch (error) {
-            this.addError.set('Failed to add log. Please try again.');
+            this.addError.set(this.translocoService.translate('addLog.errorFailed'));
         } finally {
             this.isAdding.set(false);
         }
