@@ -24,7 +24,19 @@
     "language": "Language",
     "languageEn": "English",
     "languagePtBR": "Português (BR)",
-    "openSettings": "Open settings"
+    "openSettings": "Open settings",
+    "dataTitle": "Data",
+    "exportButton": "Export Data",
+    "exporting": "Exporting...",
+    "exportSuccess": "Data exported successfully!",
+    "exportEmpty": "No workout data to export.",
+    "exportError": "Failed to export data. Please try again.",
+    "importButton": "Import Data",
+    "importing": "Importing...",
+    "importSuccess": "{{count}} workout(s) imported successfully!",
+    "importAllDuplicates": "All workouts in the file already exist.",
+    "importInvalidFile": "Invalid file. Please select a valid RepLog backup file.",
+    "importError": "Failed to import data. Please try again."
   },
   "workout": {
     "loading": "Loading workouts...",
