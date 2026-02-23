@@ -33,35 +33,30 @@ export class SettingsComponent {
         this.i18n.setLanguage(lang);
     }
 
-    protected exportData(): void {
+    protected async exportData(): Promise<void> {
         if (this.exporting()) return;
 
+        this.exporting.set(true);
         this.clearMessage();
 
-        const file = this.exportImportService.prepareExportFile();
+        try {
+            const result = await this.exportImportService.exportWorkouts();
 
-        if (!file) {
-            this.showMessage('settings.exportEmpty', 'error');
-            return;
-        }
-
-        if (this.exportImportService.canUseWebShare(file)) {
-            this.exporting.set(true);
-            navigator.share({ files: [file] })
-                .then(() => this.showMessage('settings.exportSuccess', 'success'))
-                .catch((error) => {
-                    if (error instanceof DOMException && error.name === 'AbortError') {
-                        this.showMessage('settings.exportSuccess', 'success');
-                    } else {
-                        // Fall back to download if share fails (e.g. user gesture not recognized)
-                        this.exportImportService.downloadFile(file);
-                        this.showMessage('settings.exportSuccess', 'success');
-                    }
-                })
-                .finally(() => this.exporting.set(false));
-        } else {
-            this.exportImportService.downloadFile(file);
-            this.showMessage('settings.exportSuccess', 'success');
+            switch (result.status) {
+                case 'success':
+                    this.showMessage('settings.exportSuccess', 'success');
+                    break;
+                case 'empty':
+                    this.showMessage('settings.exportEmpty', 'error');
+                    break;
+                case 'error':
+                    this.showMessage('settings.exportError', 'error');
+                    break;
+            }
+        } catch {
+            this.showMessage('settings.exportError', 'error');
+        } finally {
+            this.exporting.set(false);
         }
     }
 

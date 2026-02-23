@@ -1,4 +1,7 @@
 import { Injectable, inject } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { StorageService } from './storage.service';
 import { WorkOutGroup } from '../models/workout-group';
 
@@ -17,38 +20,30 @@ export type ImportResult =
 export class ExportImportService {
     private readonly storage = inject(StorageService);
 
-    prepareExportFile(): File | null {
+    async exportWorkouts(): Promise<ExportResult> {
         const workouts = this.storage.loadFromStorage();
 
         if (workouts.length === 0) {
-            return null;
+            return { status: 'empty' };
         }
 
-        const jsonString = JSON.stringify(workouts, null, 2);
-        const fileName = this.generateFileName();
-        return new File([jsonString], fileName, { type: 'application/json' });
-    }
+        try {
+            const jsonString = JSON.stringify(workouts, null, 2);
+            const fileName = this.generateFileName();
 
-    canUseWebShare(file: File): boolean {
-        return (
-            typeof navigator.share === 'function' &&
-            typeof navigator.canShare === 'function' &&
-            navigator.canShare({ files: [file] })
-        );
-    }
+            if (Capacitor.isNativePlatform()) {
+                await this.shareViaNative(jsonString, fileName);
+            } else {
+                this.downloadViaAnchor(jsonString, fileName);
+            }
 
-    downloadFile(file: File): void {
-        const url = URL.createObjectURL(file);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = file.name;
-        anchor.style.display = 'none';
-        document.body.appendChild(anchor);
-        anchor.click();
-        setTimeout(() => {
-            document.body.removeChild(anchor);
-            URL.revokeObjectURL(url);
-        }, 100);
+            return { status: 'success' };
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Unknown error',
+            };
+        }
     }
 
     async importWorkouts(file: File): Promise<ImportResult> {
@@ -80,6 +75,35 @@ export class ExportImportService {
         } catch {
             return { status: 'invalid_file' };
         }
+    }
+
+    private async shareViaNative(jsonString: string, fileName: string): Promise<void> {
+        const writeResult = await Filesystem.writeFile({
+            path: fileName,
+            data: jsonString,
+            directory: Directory.Cache,
+            encoding: Encoding.UTF8,
+        });
+
+        await Share.share({
+            files: [writeResult.uri],
+            dialogTitle: 'RepLog Backup',
+        });
+    }
+
+    private downloadViaAnchor(jsonString: string, fileName: string): void {
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        anchor.style.display = 'none';
+        document.body.appendChild(anchor);
+        anchor.click();
+        setTimeout(() => {
+            document.body.removeChild(anchor);
+            URL.revokeObjectURL(url);
+        }, 100);
     }
 
     private generateFileName(): string {
