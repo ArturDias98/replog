@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install @angular/service-worker)",
+      "Bash(npm install @angular/service-worker@21.1.1)"
+    ]
+  }
+}
