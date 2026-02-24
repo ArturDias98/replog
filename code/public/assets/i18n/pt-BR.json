@@ -17,7 +17,8 @@
     "saving": "Salvando...",
     "adding": "Adicionando...",
     "updating": "Atualizando...",
-    "closeModal": "Fechar modal"
+    "closeModal": "Fechar modal",
+    "reorder": "Reordenar item"
   },
   "settings": {
     "title": "Configurações",

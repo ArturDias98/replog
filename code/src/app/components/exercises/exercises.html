@@ -36,13 +36,15 @@
         <p class="muscle-group-date">{{ muscleGroupDate() | date: 'dd/MM/yyyy' : undefined : i18n.locale() }}</p>
     </div>
 
-    <app-item-list>
-        @for (exercise of exercises(); track exercise.id) {
-        <app-item-card
+    <app-item-list (itemDropped)="onItemDropped($event)">
+        @for (exercise of exercises(); track exercise.id; let i = $index) {
+        <app-item-card cdkDrag [cdkDragBoundary]="'.item-list'"
             [title]="exercise.title"
             [subtitle]="exercise.log.length + ' ' + (exercise.log.length === 1 ? ('exercises.logSingular' | transloco) : ('exercises.logPlural' | transloco))"
             (itemClick)="navigateToLog(exercise.id)"
-            (itemDelete)="confirmDelete(exercise.id)" />
+            (itemDelete)="confirmDelete(exercise.id)"
+            (moveUp)="onMoveItem(i, 'up')"
+            (moveDown)="onMoveItem(i, 'down')" />
         } @empty {
         <li class="empty-state">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"

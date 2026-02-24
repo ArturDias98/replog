@@ -3,7 +3,10 @@
     overflow: hidden;
     touch-action: pan-y;
     padding: 0;
+    border-left: 3px solid var(--primary-color);
     cursor: pointer;
+    align-items: stretch;
+    justify-content: flex-start;
 }
 
 :host(:hover) {
@@ -16,12 +19,52 @@
     color: var(--primary-color);
 }
 
+/* Drag handle */
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    flex-shrink: 0;
+    cursor: grab;
+    color: var(--primary-color);
+    background: var(--bg-secondary);
+    position: relative;
+    z-index: 1;
+    border: none;
+    padding: 0;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s ease;
+}
+
+.drag-handle:hover {
+    color: var(--primary-hover);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.drag-handle:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.drag-handle svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Delete hint */
 .delete-hint {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    padding-right: 1.25rem;
     background: var(--danger-color);
     color: #fff;
     pointer-events: none;
@@ -32,17 +75,21 @@
     height: 1.5rem;
 }
 
+/* Card inner */
 .card-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-    padding: 1rem 1.25rem;
+    flex: 1;
+    min-width: 0;
+    padding: 1rem 1.25rem 1rem 0.75rem;
     background: var(--bg-secondary);
     position: relative;
+    z-index: 1;
 }
 
-:host(:hover) .card-inner {
+:host(:hover) .card-inner,
+:host(:hover) .drag-handle {
     background: var(--bg-tertiary);
 }
 
@@ -75,4 +122,21 @@
     font-size: 0.875rem;
     color: var(--text-secondary);
     margin: 0;
+}
+
+/* CDK drag states */
+:host(.cdk-drag-placeholder) {
+    opacity: 0.3;
+    border: 2px dashed var(--primary-color);
+    background: transparent;
+}
+
+:host(.cdk-drag-placeholder) .card-inner,
+:host(.cdk-drag-placeholder) .drag-handle,
+:host(.cdk-drag-placeholder) .delete-hint {
+    visibility: hidden;
+}
+
+:host(.cdk-drag-animating) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }

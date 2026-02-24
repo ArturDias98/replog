@@ -98,6 +98,20 @@ export class ExerciseService {
         }
     }
 
+    async reorderExercises(muscleGroupId: string, previousIndex: number, currentIndex: number): Promise<void> {
+        const workouts = this.storage.loadFromStorage();
+        for (const workout of workouts) {
+            const mg = workout.muscleGroup.find(mg => mg.id === muscleGroupId);
+            if (mg) {
+                const [moved] = mg.exercises.splice(previousIndex, 1);
+                mg.exercises.splice(currentIndex, 0, moved);
+                this.storage.saveToStorage(workouts);
+                return;
+            }
+        }
+        throw new Error('Muscle group not found');
+    }
+
     async deleteExercise(exerciseId: string): Promise<void> {
         try {
             const workouts = this.storage.loadFromStorage();

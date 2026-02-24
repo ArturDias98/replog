@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
+import { CdkDragHandle } from '@angular/cdk/drag-drop';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 const SWIPE_THRESHOLD = 80;
 const SWIPE_DEAD_ZONE = 10;
@@ -6,9 +8,10 @@ const SWIPE_DEAD_ZONE = 10;
 @Component({
     selector: 'app-item-card',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [CdkDragHandle, TranslocoPipe],
     host: {
         class: 'item-card',
-        role: 'button',
+        role: 'listitem',
         tabindex: '0',
         '[class.is-swiping]': 'isSwiping()',
         '(keydown.enter)': 'itemClick.emit()',
@@ -21,6 +24,22 @@ const SWIPE_DEAD_ZONE = 10;
     },
     styleUrl: './item-card.css',
     template: `
+        <button class="drag-handle"
+                cdkDragHandle
+                type="button"
+                [attr.aria-label]="'common.reorder' | transloco"
+                aria-roledescription="drag handle"
+                (keydown.arrowUp)="moveUp.emit(); $event.preventDefault()"
+                (keydown.arrowDown)="moveDown.emit(); $event.preventDefault()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="9" cy="6" r="1.5"/>
+                <circle cx="15" cy="6" r="1.5"/>
+                <circle cx="9" cy="12" r="1.5"/>
+                <circle cx="15" cy="12" r="1.5"/>
+                <circle cx="9" cy="18" r="1.5"/>
+                <circle cx="15" cy="18" r="1.5"/>
+            </svg>
+        </button>
         <div class="delete-hint" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M9 3v1H4v2h1v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1V4h-5V3H9zm0 5h2v9H9V8zm4 0h2v9h-2V8z"/>
@@ -43,6 +62,8 @@ export class ItemCardComponent {
     subtitle = input.required<string>();
     itemClick = output<void>();
     itemDelete = output<void>();
+    moveUp = output<void>();
+    moveDown = output<void>();
 
     private readonly el = inject(ElementRef<HTMLElement>);
 
@@ -67,6 +88,10 @@ export class ItemCardComponent {
     }
 
     onPointerDown(event: PointerEvent): void {
+        const target = event.target as HTMLElement;
+        if (target.closest('.drag-handle')) {
+            return;
+        }
         this.pointerId = event.pointerId;
         this.startX = event.clientX;
         this.startY = event.clientY;

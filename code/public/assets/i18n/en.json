@@ -17,7 +17,8 @@
     "saving": "Saving...",
     "adding": "Adding...",
     "updating": "Updating...",
-    "closeModal": "Close modal"
+    "closeModal": "Close modal",
+    "reorder": "Reorder item"
   },
   "settings": {
     "title": "Settings",

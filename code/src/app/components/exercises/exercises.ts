@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
+import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MuscleGroupService } from '../../services/muscle-group.service';
 import { ExerciseService } from '../../services/exercise.service';
 import { I18nService } from '../../services/i18n.service';
@@ -18,7 +19,7 @@ import { ItemCardComponent } from '../shared/item-list/item-card';
 
 @Component({
     selector: 'app-exercises',
-    imports: [DatePipe, TranslocoPipe, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent, ConfirmationDialogComponent, ItemListComponent, ItemCardComponent],
+    imports: [DatePipe, TranslocoPipe, CdkDrag, AddExerciseModal, EditMuscleGroupModal, EditExerciseModal, ActionButtonsComponent, ConfirmationDialogComponent, ItemListComponent, ItemCardComponent],
     templateUrl: './exercises.html',
     styleUrl: './exercises.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -106,6 +107,31 @@ export class ExercisesComponent implements OnInit, OnDestroy {
 
     protected handleExerciseAdded(exercise: Exercise): void {
         this.exercises.update(current => [...current, exercise]);
+    }
+
+    protected async onItemDropped(event: CdkDragDrop<unknown>): Promise<void> {
+        if (event.previousIndex === event.currentIndex) return;
+        this.exercises.update(exercises => {
+            const updated = [...exercises];
+            moveItemInArray(updated, event.previousIndex, event.currentIndex);
+            return updated;
+        });
+        await this.exerciseService.reorderExercises(
+            this.muscleGroupId(), event.previousIndex, event.currentIndex
+        );
+    }
+
+    protected async onMoveItem(currentIndex: number, direction: 'up' | 'down'): Promise<void> {
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (newIndex < 0 || newIndex >= this.exercises().length) return;
+        this.exercises.update(exercises => {
+            const updated = [...exercises];
+            moveItemInArray(updated, currentIndex, newIndex);
+            return updated;
+        });
+        await this.exerciseService.reorderExercises(
+            this.muscleGroupId(), currentIndex, newIndex
+        );
     }
 
     protected confirmDelete(exerciseId: string): void {

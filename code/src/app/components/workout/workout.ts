@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
+import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { I18nService } from '../../services/i18n.service';
 import { WorkOutGroup } from '../../models/workout-group';
@@ -14,7 +15,7 @@ import { ItemCardComponent } from '../shared/item-list/item-card';
 
 @Component({
     selector: 'app-workout',
-    imports: [DatePipe, TranslocoPipe, AddWorkoutModal, ActionButtonsComponent, ConfirmationDialogComponent, ItemListComponent, ItemCardComponent],
+    imports: [DatePipe, TranslocoPipe, CdkDrag, AddWorkoutModal, ActionButtonsComponent, ConfirmationDialogComponent, ItemListComponent, ItemCardComponent],
     templateUrl: './workout.html',
     styleUrl: './workout.css',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -73,6 +74,27 @@ export class Workout implements OnInit, OnDestroy {
 
     protected navigateToMuscleGroups(workoutId: string): void {
         this.router.navigate(['muscle-group', workoutId]);
+    }
+
+    protected async onItemDropped(event: CdkDragDrop<unknown>): Promise<void> {
+        if (event.previousIndex === event.currentIndex) return;
+        this.items.update(items => {
+            const updated = [...items];
+            moveItemInArray(updated, event.previousIndex, event.currentIndex);
+            return updated;
+        });
+        await this.workoutService.reorderWorkouts(event.previousIndex, event.currentIndex);
+    }
+
+    protected async onMoveItem(currentIndex: number, direction: 'up' | 'down'): Promise<void> {
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (newIndex < 0 || newIndex >= this.items().length) return;
+        this.items.update(items => {
+            const updated = [...items];
+            moveItemInArray(updated, currentIndex, newIndex);
+            return updated;
+        });
+        await this.workoutService.reorderWorkouts(currentIndex, newIndex);
     }
 
     protected confirmDeleteWorkoutById(workoutId: string): void {

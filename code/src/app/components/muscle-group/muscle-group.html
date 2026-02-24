@@ -47,13 +47,15 @@
         </button>
     </div>
     } @else {
-    <app-item-list>
-        @for (group of muscleGroups(); track group.id) {
-        <app-item-card
+    <app-item-list (itemDropped)="onItemDropped($event)">
+        @for (group of muscleGroups(); track group.id; let i = $index) {
+        <app-item-card cdkDrag [cdkDragBoundary]="'.item-list'"
             [title]="group.title"
             [subtitle]="(group.date | date: 'dd/MM/yyyy' : undefined : i18n.locale()) ?? ''"
             (itemClick)="navigateToExercises(group.id)"
-            (itemDelete)="confirmDeleteMuscleGroupById(group.id)" />
+            (itemDelete)="confirmDeleteMuscleGroupById(group.id)"
+            (moveUp)="onMoveItem(i, 'up')"
+            (moveDown)="onMoveItem(i, 'down')" />
         }
     </app-item-list>
     }

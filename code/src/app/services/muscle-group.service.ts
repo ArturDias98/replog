@@ -139,6 +139,17 @@ export class MuscleGroupService {
         }
     }
 
+    async reorderMuscleGroups(workoutId: string, previousIndex: number, currentIndex: number): Promise<void> {
+        const workouts = this.storage.loadFromStorage();
+        const workout = workouts.find(w => w.id === workoutId);
+        if (!workout) {
+            throw new Error('Workout not found');
+        }
+        const [moved] = workout.muscleGroup.splice(previousIndex, 1);
+        workout.muscleGroup.splice(currentIndex, 0, moved);
+        this.storage.saveToStorage(workouts);
+    }
+
     async getMuscleGroupsByWorkoutId(workoutId: string): Promise<MuscleGroup[]> {
         try {
             const workouts = this.storage.loadFromStorage();

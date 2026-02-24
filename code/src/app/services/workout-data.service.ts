@@ -14,9 +14,7 @@ export class WorkoutDataService {
             const storedData = this.storage.loadFromStorage();
 
             if (storedData && storedData.length > 0) {
-                return [...storedData].sort((a, b) =>
-                    new Date(b.date).getTime() - new Date(a.date).getTime()
-                );
+                return [...storedData];
             }
 
             return [];
@@ -86,6 +84,13 @@ export class WorkoutDataService {
             console.error('Error clearing workouts:', error);
             throw error;
         }
+    }
+
+    async reorderWorkouts(previousIndex: number, currentIndex: number): Promise<void> {
+        const workouts = this.storage.loadFromStorage();
+        const [moved] = workouts.splice(previousIndex, 1);
+        workouts.splice(currentIndex, 0, moved);
+        this.storage.saveToStorage(workouts);
     }
 
     async getWorkoutById(id: string): Promise<WorkOutGroup | undefined> {
