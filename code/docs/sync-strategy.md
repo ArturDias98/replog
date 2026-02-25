@@ -175,6 +175,7 @@ The `SyncService` is responsible for converting between the two model layers:
 - **Sync → UI (after pull):** Strips sync metadata from server responses and writes plain UI models back to IndexedDB.
 
 This means:
+
 - **Data Services** continue to operate on UI models only. They are not aware of sync.
 - **SyncService** wraps/unwraps the sync layer transparently.
 - The sync metadata is stored in a **separate IndexedDB object store** (not mixed into the workout data store).
@@ -197,6 +198,7 @@ This keeps the UI data clean and allows the sync layer to track metadata indepen
 Currently, delete operations remove records from arrays (e.g., `filter(w => w.id !== id)`). With sync, **deletions must be recorded**, not erased, so other devices know to delete the record too.
 
 **Approach:** When an entity is deleted:
+
 1. The Data Service removes it from IndexedDB as usual (UI stays clean).
 2. The SyncService records a `DELETE` change in the sync queue with the entity ID and timestamp.
 3. The sync metadata record for that entity gets `deletedAt` set.
@@ -729,10 +731,12 @@ Not recommended for this app — adds too much complexity.
 When a workout is deleted, all its muscle groups, exercises, and logs must also be soft-deleted.
 
 **Frontend behavior:**
+
 - When `deleteWorkout()` is called, set `deletedAt` on the workout AND on all nested muscle groups, exercises, and logs.
 - Enqueue a single `DELETE` change for the workout. The backend is responsible for cascading.
 
 **Backend behavior:**
+
 - When a workout `DELETE` is received, the backend sets `deletedAt` on all child entities in the database.
 
 ### 9.3 Orphaned Children
