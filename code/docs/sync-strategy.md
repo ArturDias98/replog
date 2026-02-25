@@ -27,7 +27,7 @@ Instead of syncing the full current state, the app records **every mutation** (c
 ### Design Principles
 
 - **Offline is the default.** The app must work fully without a network connection. Sync is additive — it never degrades the offline experience.
-- **Local storage remains the source of truth for the UI.** The UI always reads from localStorage. The backend is the source of truth for cross-device consistency.
+- **IndexedDB is the local source of truth for the UI.** The UI always reads from IndexedDB. The backend is the source of truth for cross-device consistency.
 - **Unauthenticated users are unaffected.** If a user never logs in, the app behaves exactly as it does today.
 - **Sync is eventual.** There is no requirement for real-time sync. Changes are pushed when the app comes online.
 
@@ -42,17 +42,17 @@ Instead of syncing the full current state, the app records **every mutation** (c
 │  CLIENT (Angular App)                                           │
 │                                                                 │
 │  ┌──────────────┐    ┌──────────────┐    ┌───────────────────┐  │
-│  │  UI / Comps  │───>│  Data        │───>│  localStorage     │  │
-│  │              │    │  Services    │    │  (replog_workouts) │  │
+│  │  UI / Comps  │───>│  Data        │───>│  IndexedDB        │  │
+│  │              │    │  Services    │    │  (replog-db)       │  │
 │  └──────────────┘    └──────┬───────┘    └───────────────────┘  │
 │                             │                                   │
 │                             │ records mutation                  │
 │                             ▼                                   │
 │                      ┌──────────────┐                           │
 │                      │  Sync Queue  │                           │
-│                      │  (localStorage│                          │
-│                      │  replog_sync_ │                          │
-│                      │  queue)       │                          │
+│                      │  (IndexedDB   │                          │
+│                      │  replog-db    │                          │
+│                      │  sync_queue)  │                          │
 │                      └──────┬───────┘                           │
 │                             │                                   │
 │                             │ when online + authenticated       │
@@ -78,8 +78,8 @@ Instead of syncing the full current state, the app records **every mutation** (c
 
 | Component | Responsibility |
 |---|---|
-| **Data Services** (existing) | Apply mutations to localStorage immediately. Record each mutation in the sync queue. |
-| **Sync Queue** (new) | Stores pending change events in `localStorage['replog_sync_queue']`. |
+| **Data Services** (existing) | Apply mutations to IndexedDB immediately. Record each mutation in the sync queue. |
+| **Sync Queue** (new) | Stores pending change events in IndexedDB (`sync_queue` object store). |
 | **SyncService** (new) | Manages online/offline detection, pushes queued changes, pulls server state, triggers merges. |
 | **Backend Sync Engine** (new) | Receives change events, applies them to the DB, resolves conflicts, returns merged state. |
 
@@ -87,11 +87,32 @@ Instead of syncing the full current state, the app records **every mutation** (c
 
 ## 3. Data Model Changes
 
-### 3.1 New Sync Metadata
+### 3.1 Design Principle: Separate UI Models from Sync Models
 
-Every syncable entity gains these fields:
+The existing UI models (`WorkOutGroup`, `MuscleGroup`, `Exercise`, `Log`) are **not modified**. They remain pure UI types with no sync concerns. Instead, new **sync-specific models** are created in a separate directory.
+
+```
+src/app/models/              ← UI models (unchanged)
+  workout-group.ts              WorkOutGroup
+  muscle-group.ts               MuscleGroup
+  exercise.ts                   Exercise
+  log.ts                        Log
+
+src/app/models/sync/         ← Sync models (new)
+  sync-metadata.ts              SyncMetadata
+  sync-workout.ts               SyncWorkout (extends WorkOutGroup with sync fields)
+  sync-muscle-group.ts          SyncMuscleGroup
+  sync-exercise.ts              SyncExercise
+  sync-log.ts                   SyncLog
+  sync-change.ts                SyncChange (queue entry)
+  sync-api.ts                   PushRequest, PullResponse, etc.
+```
+
+### 3.2 Sync Metadata Type
 
 ```typescript
+// src/app/models/sync/sync-metadata.ts
+
 type SyncMetadata = {
   createdAt: string;       // ISO 8601 timestamp — set once on creation
   updatedAt: string;       // ISO 8601 timestamp — updated on every mutation
@@ -99,113 +120,101 @@ type SyncMetadata = {
 };
 ```
 
-### 3.2 Updated Entity Types
+### 3.3 Sync Entity Types
 
-#### WorkOutGroup
+Each sync model wraps the corresponding UI model and adds sync metadata:
 
 ```typescript
-// BEFORE
-type WorkOutGroup = {
+// src/app/models/sync/sync-workout.ts
+import { WorkOutGroup } from '../workout-group';
+import { SyncMetadata } from './sync-metadata';
+import { SyncMuscleGroup } from './sync-muscle-group';
+
+type SyncWorkout = SyncMetadata & {
   id: string;
   title: string;
   date: string;
   userId: string;
-  muscleGroup: MuscleGroup[];
+  muscleGroup: SyncMuscleGroup[];
+  orderIndex: number;
 };
 
-// AFTER
-type WorkOutGroup = {
-  id: string;           // crypto.randomUUID() — already in place
-  title: string;
-  date: string;
-  userId: string;
-  muscleGroup: MuscleGroup[];
-  createdAt: string;    // NEW
-  updatedAt: string;    // NEW
-  deletedAt: string | null; // NEW
-};
-```
-
-#### MuscleGroup
-
-```typescript
-// BEFORE
-type MuscleGroup = {
+// src/app/models/sync/sync-muscle-group.ts
+type SyncMuscleGroup = SyncMetadata & {
   id: string;
   workoutId: string;
   title: string;
   date: string;
-  exercises: Exercise[];
+  exercises: SyncExercise[];
+  orderIndex: number;
 };
 
-// AFTER
-type MuscleGroup = {
-  id: string;
-  workoutId: string;
-  title: string;
-  date: string;
-  exercises: Exercise[];
-  createdAt: string;    // NEW
-  updatedAt: string;    // NEW
-  deletedAt: string | null; // NEW
-};
-```
-
-#### Exercise
-
-```typescript
-// BEFORE
-type Exercise = {
+// src/app/models/sync/sync-exercise.ts
+type SyncExercise = SyncMetadata & {
   id: string;
   muscleGroupId: string;
   title: string;
-  log: Log[];
+  log: SyncLog[];
+  orderIndex: number;
 };
 
-// AFTER
-type Exercise = {
-  id: string;
-  muscleGroupId: string;
-  title: string;
-  log: Log[];
-  createdAt: string;    // NEW
-  updatedAt: string;    // NEW
-  deletedAt: string | null; // NEW
-};
-```
-
-#### Log
-
-```typescript
-// BEFORE
-type Log = {
+// src/app/models/sync/sync-log.ts
+type SyncLog = SyncMetadata & {
   id: string;
   numberReps: number;
   maxWeight: number;
   date: Date;
 };
-
-// AFTER
-type Log = {
-  id: string;
-  numberReps: number;
-  maxWeight: number;
-  date: Date;
-  createdAt: string;    // NEW
-  updatedAt: string;    // NEW
-  deletedAt: string | null; // NEW
-};
 ```
 
-### 3.3 Soft Deletes
+### 3.4 Conversion Between UI and Sync Models
+
+The `SyncService` is responsible for converting between the two model layers:
+
+- **UI → Sync (before push):** Reads UI models from IndexedDB and enriches them with sync metadata to build the change queue payload.
+- **Sync → UI (after pull):** Strips sync metadata from server responses and writes plain UI models back to IndexedDB.
+
+This means:
+- **Data Services** continue to operate on UI models only. They are not aware of sync.
+- **SyncService** wraps/unwraps the sync layer transparently.
+- The sync metadata is stored in a **separate IndexedDB object store** (not mixed into the workout data store).
+
+### 3.5 Sync Metadata Storage
+
+Sync metadata is stored in its own IndexedDB object store, keyed by entity ID:
+
+```
+IndexedDB: replog-db
+  ├─ data (object store)         ← existing, holds WorkOutGroup[] (UI models)
+  ├─ sync_metadata (object store) ← NEW, holds SyncMetadata records keyed by entity ID
+  └─ sync_queue (object store)    ← NEW, holds SyncChange records
+```
+
+This keeps the UI data clean and allows the sync layer to track metadata independently.
+
+### 3.6 Soft Deletes
 
 Currently, delete operations remove records from arrays (e.g., `filter(w => w.id !== id)`). With sync, **deletions must be recorded**, not erased, so other devices know to delete the record too.
 
-**Change:** Instead of removing from the array, set `deletedAt` to the current ISO timestamp.
+**Approach:** When an entity is deleted:
+1. The Data Service removes it from IndexedDB as usual (UI stays clean).
+2. The SyncService records a `DELETE` change in the sync queue with the entity ID and timestamp.
+3. The sync metadata record for that entity gets `deletedAt` set.
 
-**UI impact:** All queries that read data must filter out records where `deletedAt !== null`. This ensures deleted records are invisible to the user but remain in storage for sync.
+**On pull from server:** If the server says an entity is deleted, the SyncService removes it from the UI data in IndexedDB and marks its sync metadata accordingly.
 
-**Cleanup:** After a successful sync, the backend confirms which deletions have been applied. The client can then physically remove soft-deleted records that have been acknowledged by the server.
+**Cleanup:** After a successful sync, sync metadata records for acknowledged deletions can be removed.
+
+### 3.7 First Login — userId Migration
+
+Anonymous workouts use a temporary `userId` with the prefix `temp-user-`. On first login:
+
+1. Load all workouts from IndexedDB.
+2. Replace `userId` on every workout where `userId.startsWith('temp-user-')` with the authenticated Google `userId`.
+3. Save updated workouts back to IndexedDB.
+4. Start the first full sync (push local data, then pull server data).
+
+After authentication, new workouts are created with the real `userId` from `AuthService` instead of the temp value.
 
 ---
 
@@ -229,11 +238,9 @@ type SyncChange = {
 };
 ```
 
-### 4.2 Storage Key
+### 4.2 Storage
 
-```
-localStorage['replog_sync_queue']  →  JSON string of SyncChange[]
-```
+The sync queue is stored in the `sync_queue` object store in IndexedDB (`replog-db`), keyed by the change `id`.
 
 ### 4.3 Queue Operations
 
@@ -656,9 +663,10 @@ Client                                    Server
 ### 8.3 User Signs Up (new account, has local data)
 
 ```
-1. User creates account and authenticates.
+1. User creates account and authenticates via Google Auth.
 2. The app detects lastSyncedAt === null (first sync).
-3. All existing local workouts are assigned the authenticated userId.
+3. All existing local workouts with userId.startsWith('temp-user-')
+   are updated to use the authenticated Google userId.
 4. The app pushes all local data as CREATE changes.
 5. Server stores everything.
 6. lastSyncedAt is set.
@@ -678,13 +686,18 @@ Client                                    Server
 ### 8.5 User Logs In (existing account, device has anonymous local data)
 
 ```
-1. User logs in. The device has local workouts with no matching userId.
-2. Ask the user: "You have local data. Do you want to merge it
-   with your account or discard it?"
-   - MERGE: assign userId to local data, then push + full pull.
-   - DISCARD: clear local data, then full pull.
+1. User logs in. The device has local workouts with
+   userId.startsWith('temp-user-').
+2. Since this is a single-user personal app, always merge:
+   - Replace temp-user-* userIds with the authenticated userId.
+   - Push local data, then full pull from server.
+   - Merge by entity ID: if same ID exists on both sides,
+     keep the one with the later updatedAt.
 3. Normal sync resumes.
 ```
+
+Note: A "merge or discard?" prompt is unnecessary for a personal workout app.
+All local data belongs to the user logging in.
 
 ---
 
@@ -750,39 +763,35 @@ If a user has hundreds of workouts, the full sync payload could be large.
 - If the push succeeds but the pull fails, `lastSyncedAt` is NOT updated. The next sync will re-pull.
 - The queue is only cleared after the server acknowledges the changes.
 
-### 9.7 localStorage Quota
+### 9.7 IndexedDB Storage
 
-localStorage has a ~5-10 MB limit. The sync queue adds to this.
+IndexedDB has much higher limits than localStorage (typically 50%+ of disk space), but the sync queue and metadata still add to storage usage.
 
-- After a successful sync, physically remove soft-deleted records from localStorage.
+- After a successful sync, remove sync metadata for acknowledged deletions.
 - Keep the sync queue lean — remove acknowledged changes immediately.
 - If quota is exceeded, notify the user and suggest syncing.
-- **Future improvement:** Migrate to IndexedDB for larger storage capacity.
 
 ---
 
 ## 10. Migration Plan
 
-### 10.1 Phase 1 — Prepare Data Models (no backend needed)
+### 10.1 Phase 1 — Sync Models + Metadata Store (no backend needed)
 
-1. Add `createdAt`, `updatedAt`, `deletedAt` to all entity types.
-2. Write a migration function that runs on app startup:
-   - For existing records without these fields, set:
-     - `createdAt` = record's `date` field (or current timestamp if no date).
-     - `updatedAt` = same as `createdAt`.
-     - `deletedAt` = `null`.
-3. Add `orderIndex` to entities that support reordering (WorkOutGroup, MuscleGroup, Exercise).
-4. Update all data services to set `updatedAt` on every mutation.
-5. Change delete operations to soft-deletes.
-6. Update all read operations to filter out soft-deleted records.
+1. Create sync model types in `src/app/models/sync/` (separate from UI models).
+2. Add `sync_metadata` and `sync_queue` object stores to IndexedDB (increment DB version).
+3. Create `SyncMetadataService` to manage per-entity sync metadata in IndexedDB.
+4. For existing records, generate initial sync metadata entries:
+   - `createdAt` = record's `date` field (or current timestamp if no date).
+   - `updatedAt` = same as `createdAt`.
+   - `deletedAt` = `null`.
+5. Add `orderIndex` tracking in sync metadata for entities that support reordering.
 
 ### 10.2 Phase 2 — Sync Queue (no backend needed)
 
 1. Create `SyncQueueService`.
 2. Integrate it into all data services — every mutation enqueues a change.
 3. The queue simply accumulates. Nothing consumes it yet.
-4. Add sync metadata storage:
-   - `localStorage['replog_sync_meta']` → `{ lastSyncedAt: string | null }`
+4. Add sync metadata storage in IndexedDB (`sync_metadata` object store).
 
 ### 10.3 Phase 3 — Authentication
 
@@ -838,19 +847,29 @@ localStorage has a ~5-10 MB limit. The sync queue adds to this.
 
 ---
 
-## Appendix A: New localStorage Keys
+## Appendix A: IndexedDB Schema
 
-| Key | Content | Description |
-|---|---|---|
-| `replog_workouts` | `WorkOutGroup[]` (JSON) | Existing — workout data with new sync metadata fields |
-| `replog_user_preferences` | `UserPreferences` (JSON) | Existing — not synced (device-specific) |
-| `replog_sync_queue` | `SyncChange[]` (JSON) | New — pending changes to push |
-| `replog_sync_meta` | `{ lastSyncedAt: string \| null }` (JSON) | New — sync state metadata |
+**Database:** `replog-db`
+
+| Object Store | Key | Content | Description |
+|---|---|---|---|
+| `data` | `id` (string) | `{ id, workouts: WorkOutGroup[] }` | Existing — UI workout data (unchanged) |
+| `sync_metadata` | `entityId` (string) | `SyncMetadata & { entityId, entityType }` | New — per-entity sync timestamps |
+| `sync_queue` | `id` (string) | `SyncChange` | New — pending changes to push |
+| `sync_meta` | `key` (string) | `{ key, value }` | New — sync state (e.g., `lastSyncedAt`) |
+
+**Separate storage (unchanged):**
+
+| Storage | Key | Content | Description |
+|---|---|---|---|
+| localStorage | `replog_user_preferences` | `UserPreferences` (JSON) | Device-specific, not synced |
 
 ## Appendix B: New TypeScript Types (Summary)
 
+All sync types live in `src/app/models/sync/`. UI models in `src/app/models/` are unchanged.
+
 ```typescript
-// --- Sync Metadata (added to all entities) ---
+// --- src/app/models/sync/sync-metadata.ts ---
 
 type SyncMetadata = {
   createdAt: string;
@@ -858,7 +877,49 @@ type SyncMetadata = {
   deletedAt: string | null;
 };
 
-// --- Sync Queue ---
+// Stored in IndexedDB sync_metadata object store
+type SyncMetadataRecord = SyncMetadata & {
+  entityId: string;
+  entityType: SyncEntityType;
+};
+
+// --- src/app/models/sync/sync-workout.ts ---
+// (Sync-enriched versions of UI models — used only by SyncService)
+
+type SyncWorkout = SyncMetadata & {
+  id: string;
+  title: string;
+  date: string;
+  userId: string;
+  muscleGroup: SyncMuscleGroup[];
+  orderIndex: number;
+};
+
+type SyncMuscleGroup = SyncMetadata & {
+  id: string;
+  workoutId: string;
+  title: string;
+  date: string;
+  exercises: SyncExercise[];
+  orderIndex: number;
+};
+
+type SyncExercise = SyncMetadata & {
+  id: string;
+  muscleGroupId: string;
+  title: string;
+  log: SyncLog[];
+  orderIndex: number;
+};
+
+type SyncLog = SyncMetadata & {
+  id: string;
+  numberReps: number;
+  maxWeight: number;
+  date: Date;
+};
+
+// --- src/app/models/sync/sync-change.ts ---
 
 type SyncChangeAction = 'CREATE' | 'UPDATE' | 'DELETE';
 
@@ -874,13 +935,7 @@ type SyncChange = {
   parentId: string | null;
 };
 
-// --- Sync Meta ---
-
-type SyncMeta = {
-  lastSyncedAt: string | null;
-};
-
-// --- Sync API ---
+// --- src/app/models/sync/sync-api.ts ---
 
 type PushRequest = {
   changes: SyncChange[];
@@ -900,11 +955,9 @@ type SyncConflict = {
 };
 
 type PullResponse = {
-  workouts: WorkOutGroup[];
+  workouts: SyncWorkout[];
   serverTimestamp: string;
 };
-
-// --- Sync Service ---
 
 type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 
