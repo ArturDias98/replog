@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthUser } from '../models/auth';
 import { StorageService } from './storage.service';
+import { environment } from '../../environments/environment';
 
 declare const google: {
     accounts: {
@@ -28,7 +29,6 @@ declare const google: {
 };
 
 const STORAGE_KEY = 'replog_auth_user';
-const GOOGLE_CLIENT_ID = '732270103233-5e5b1h3efs9ir60fv9hura3o7p39ri1i.apps.googleusercontent.com';
 
 @Injectable({
     providedIn: 'root'
@@ -58,7 +58,7 @@ export class AuthService {
         await this.gisReady;
 
         google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
+            client_id: environment.googleClientId,
             callback: (response) => this.handleCredentialResponse(response),
         });
     }

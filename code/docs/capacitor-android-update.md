@@ -8,6 +8,32 @@ This guide explains how to update and maintain the Android version of the repLog
 - Android Studio installed
 - Capacitor CLI (installed as dev dependency)
 
+## Environment Setup
+
+The app uses a `.env` file to manage configuration secrets (e.g., Google Client ID). These are **not committed to the repository**.
+
+### First-time setup
+
+1. Copy the example file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and fill in your values:
+
+   ```properties
+   GOOGLE_CLIENT_ID=your-google-client-id-here
+   ```
+
+3. The environment file is generated automatically when you run `npm start` or `npm run build`. You can also generate it manually:
+
+   ```bash
+   node scripts/set-env.js
+   ```
+
+This reads `.env` and generates `src/environments/environment.ts` (which is gitignored). In CI/CD, you can set `GOOGLE_CLIENT_ID` as a system environment variable instead of using a `.env` file.
+
 ## Project Configuration
 
 - **App ID**: `repLog.app`
