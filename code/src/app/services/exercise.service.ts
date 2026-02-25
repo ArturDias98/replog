@@ -11,7 +11,7 @@ export class ExerciseService {
     async getExercisesByMuscleGroupId(muscleGroupId: string): Promise<Exercise[]> {
         try {
             const muscleGroup = await this.getExerciseById(muscleGroupId);
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             for (const workout of workouts) {
                 const mg = workout.muscleGroup.find(mg => mg.id === muscleGroupId);
@@ -28,7 +28,7 @@ export class ExerciseService {
 
     async addExercise(muscleGroupId: string, title: string): Promise<Exercise> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.id === muscleGroupId)
@@ -51,7 +51,7 @@ export class ExerciseService {
 
             workout.muscleGroup[muscleGroupIndex].exercises.push(newExercise);
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
 
             return newExercise;
         } catch (error) {
@@ -66,7 +66,7 @@ export class ExerciseService {
                 return [];
             }
 
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.id === muscleGroupId)
@@ -89,7 +89,7 @@ export class ExerciseService {
 
             workout.muscleGroup[muscleGroupIndex].exercises.push(...newExercises);
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
 
             return newExercises;
         } catch (error) {
@@ -99,13 +99,13 @@ export class ExerciseService {
     }
 
     async reorderExercises(muscleGroupId: string, previousIndex: number, currentIndex: number): Promise<void> {
-        const workouts = this.storage.loadFromStorage();
+        const workouts = await this.storage.loadFromStorage();
         for (const workout of workouts) {
             const mg = workout.muscleGroup.find(mg => mg.id === muscleGroupId);
             if (mg) {
                 const [moved] = mg.exercises.splice(previousIndex, 1);
                 mg.exercises.splice(currentIndex, 0, moved);
-                this.storage.saveToStorage(workouts);
+                await this.storage.saveToStorage(workouts);
                 return;
             }
         }
@@ -114,7 +114,7 @@ export class ExerciseService {
 
     async deleteExercise(exerciseId: string): Promise<void> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
@@ -134,7 +134,7 @@ export class ExerciseService {
 
             muscleGroup.exercises = muscleGroup.exercises.filter(ex => ex.id !== exerciseId);
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
         } catch (error) {
             console.error('Error deleting exercise:', error);
             throw error;
@@ -143,7 +143,7 @@ export class ExerciseService {
 
     async updateExercise(exerciseId: string, title: string): Promise<Exercise> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
@@ -172,7 +172,7 @@ export class ExerciseService {
                 title: title.trim()
             };
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
 
             return muscleGroup.exercises[exerciseIndex];
         } catch (error) {
@@ -183,7 +183,7 @@ export class ExerciseService {
 
     async clearAllExercises(muscleGroupId: string): Promise<void> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.id === muscleGroupId)
@@ -201,7 +201,7 @@ export class ExerciseService {
 
             muscleGroup.exercises = [];
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
         } catch (error) {
             console.error('Error clearing exercises:', error);
             throw error;
@@ -210,7 +210,7 @@ export class ExerciseService {
 
     async getExerciseById(exerciseId: string): Promise<Exercise | undefined> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             for (const workout of workouts) {
                 for (const muscleGroup of workout.muscleGroup) {
@@ -229,7 +229,7 @@ export class ExerciseService {
                         });
 
                         if (needsSave) {
-                            this.storage.saveToStorage(workouts);
+                            await this.storage.saveToStorage(workouts);
                         }
 
                         return exercise;

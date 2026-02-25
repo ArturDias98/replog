@@ -21,7 +21,7 @@ export class ExportImportService {
     private readonly storage = inject(StorageService);
 
     async exportWorkouts(): Promise<ExportResult> {
-        const workouts = this.storage.loadFromStorage();
+        const workouts = await this.storage.loadFromStorage();
 
         if (workouts.length === 0) {
             return { status: 'empty' };
@@ -60,7 +60,7 @@ export class ExportImportService {
             }
 
             const importedWorkouts = parsed as WorkOutGroup[];
-            const currentWorkouts = this.storage.loadFromStorage();
+            const currentWorkouts = await this.storage.loadFromStorage();
             const existingIds = new Set(currentWorkouts.map((w) => w.id));
 
             const newWorkouts = importedWorkouts.filter((w) => !existingIds.has(w.id));
@@ -69,7 +69,7 @@ export class ExportImportService {
                 return { status: 'all_duplicates' };
             }
 
-            this.storage.saveToStorage([...currentWorkouts, ...newWorkouts]);
+            await this.storage.saveToStorage([...currentWorkouts, ...newWorkouts]);
 
             return { status: 'success', count: newWorkouts.length };
         } catch {

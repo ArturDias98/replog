@@ -10,7 +10,7 @@ export class LogService {
 
     async addLog(model: AddLogModel): Promise<string> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === model.exerciseId))
@@ -42,8 +42,7 @@ export class LogService {
                 date: model.date
             });
 
-            this.storage.saveToStorage(workouts);
-
+            await this.storage.saveToStorage(workouts);
             return id;
         } catch (error) {
             console.error('Error adding log:', error);
@@ -53,7 +52,7 @@ export class LogService {
 
     async updateLog(model: UpdateLogModel): Promise<void> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === model.exerciseId))
@@ -89,7 +88,7 @@ export class LogService {
                 maxWeight: model.maxWeight
             };
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
         } catch (error) {
             console.error('Error updating log:', error);
             throw error;
@@ -98,7 +97,7 @@ export class LogService {
 
     async deleteLog(exerciseId: string, logId: string): Promise<void> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
@@ -124,7 +123,7 @@ export class LogService {
 
             exercise.log = exercise.log.filter(log => log.id !== logId);
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
         } catch (error) {
             console.error('Error deleting log:', error);
             throw error;
@@ -133,7 +132,7 @@ export class LogService {
 
     async clearAllLogs(exerciseId: string): Promise<void> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const workout = workouts.find(w =>
                 w.muscleGroup.some(mg => mg.exercises.some(ex => ex.id === exerciseId))
@@ -159,7 +158,7 @@ export class LogService {
 
             exercise.log = [];
 
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
         } catch (error) {
             console.error('Error clearing logs:', error);
             throw error;

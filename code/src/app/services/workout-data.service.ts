@@ -11,7 +11,7 @@ export class WorkoutDataService {
 
     async getWorkouts(): Promise<WorkOutGroup[]> {
         try {
-            const storedData = this.storage.loadFromStorage();
+            const storedData = await this.storage.loadFromStorage();
 
             if (storedData && storedData.length > 0) {
                 return [...storedData];
@@ -26,7 +26,7 @@ export class WorkoutDataService {
 
     async addWorkout(model: CreateWorkoutModel): Promise<WorkOutGroup> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const newWorkout: WorkOutGroup = {
                 id: crypto.randomUUID(),
@@ -37,7 +37,7 @@ export class WorkoutDataService {
             };
 
             workouts.push(newWorkout);
-            this.storage.saveToStorage(workouts);
+            await this.storage.saveToStorage(workouts);
 
             return newWorkout;
         } catch (error) {
@@ -48,7 +48,7 @@ export class WorkoutDataService {
 
     async updateWorkout(model: UpdateWorkoutModel): Promise<void> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
 
             const index = workouts.findIndex(w => w.id === model.id);
             if (index !== -1) {
@@ -57,7 +57,7 @@ export class WorkoutDataService {
                     title: model.title.trim(),
                     date: model.date
                 };
-                this.storage.saveToStorage(workouts);
+                await this.storage.saveToStorage(workouts);
             }
         } catch (error) {
             console.error('Error updating workout:', error);
@@ -67,9 +67,9 @@ export class WorkoutDataService {
 
     async deleteWorkout(id: string): Promise<void> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
             const filteredWorkouts = workouts.filter(w => w.id !== id);
-            this.storage.saveToStorage(filteredWorkouts);
+            await this.storage.saveToStorage(filteredWorkouts);
         } catch (error) {
             console.error('Error deleting workout:', error);
             throw error;
@@ -79,7 +79,7 @@ export class WorkoutDataService {
     async clearAllWorkouts(userId?: string): Promise<void> {
         try {
             // Note: userId parameter is kept for API consistency but not used in local storage implementation
-            this.storage.saveToStorage([]);
+            await this.storage.saveToStorage([]);
         } catch (error) {
             console.error('Error clearing workouts:', error);
             throw error;
@@ -87,15 +87,15 @@ export class WorkoutDataService {
     }
 
     async reorderWorkouts(previousIndex: number, currentIndex: number): Promise<void> {
-        const workouts = this.storage.loadFromStorage();
+        const workouts = await this.storage.loadFromStorage();
         const [moved] = workouts.splice(previousIndex, 1);
         workouts.splice(currentIndex, 0, moved);
-        this.storage.saveToStorage(workouts);
+        await this.storage.saveToStorage(workouts);
     }
 
     async getWorkoutById(id: string): Promise<WorkOutGroup | undefined> {
         try {
-            const workouts = this.storage.loadFromStorage();
+            const workouts = await this.storage.loadFromStorage();
             return workouts.find(w => w.id === id);
         } catch (error) {
             console.error('Error loading workout:', error);
