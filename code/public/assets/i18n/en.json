@@ -182,5 +182,11 @@
     "errorReps": "Please enter a valid number of reps",
     "errorWeight": "Please enter a valid weight",
     "errorFailed": "Failed to update log. Please try again."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signInWithGoogle": "Sign in with Google",
+    "signedInAs": "Signed in as"
   }
 }

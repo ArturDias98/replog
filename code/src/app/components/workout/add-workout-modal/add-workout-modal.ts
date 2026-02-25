@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { WorkoutDataService } from '../../../services/workout-data.service';
+import { AuthService } from '../../../services/auth.service';
 import { CreateWorkoutModel } from '../../../models/workout';
 
 @Component({
@@ -12,6 +13,7 @@ import { CreateWorkoutModel } from '../../../models/workout';
 })
 export class AddWorkoutModal {
     private readonly workoutService = inject(WorkoutDataService);
+    private readonly authService = inject(AuthService);
 
     protected readonly title = signal<string>('');
     protected readonly date = signal<string>(this.getTodayDate());
@@ -36,7 +38,7 @@ export class AddWorkoutModal {
         const model: CreateWorkoutModel = {
             title: this.title(),
             date: this.date(),
-            userId: 'temp-user-' + Math.random().toString(36).substring(7) // Temporary random user ID
+            userId: this.authService.getUser()?.id ?? 'temp-user-' + crypto.randomUUID()
         };
 
         this.workoutService.addWorkout(model)

@@ -182,5 +182,11 @@
     "errorReps": "Por favor, insira um número válido de repetições",
     "errorWeight": "Por favor, insira um peso válido",
     "errorFailed": "Falha ao atualizar registro. Por favor, tente novamente."
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "signInWithGoogle": "Entrar com Google",
+    "signedInAs": "Conectado como"
   }
 }

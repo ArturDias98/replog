@@ -95,6 +95,110 @@
     outline-offset: 2px;
 }
 
+/* Auth UI */
+
+.google-btn-container {
+    display: flex;
+    align-items: center;
+}
+
+.user-menu-wrapper {
+    position: relative;
+}
+
+.btn-user-avatar {
+    background: transparent;
+    border: 2px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    transition: border-color 0.2s;
+}
+
+.btn-user-avatar:hover {
+    border-color: var(--primary-color);
+}
+
+.btn-user-avatar:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+}
+
+.user-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow);
+    min-width: 200px;
+    z-index: 200;
+    overflow: hidden;
+}
+
+.user-menu-info {
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.user-menu-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.user-menu-email {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-menu-divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 0;
+}
+
+.user-menu-item {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.user-menu-item:hover {
+    background: var(--hover-bg, rgba(0, 0, 0, 0.06));
+}
+
+.user-menu-item:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+}
+
 .main-content {
     flex: 1;
     overflow: hidden;

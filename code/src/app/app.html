@@ -14,6 +14,32 @@
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
         </a>
+        @if (currentUser(); as user) {
+          <div class="user-menu-wrapper">
+            <button
+              class="btn-user-avatar"
+              (click)="toggleUserMenu()"
+              [attr.aria-label]="'auth.signedInAs' | transloco"
+              [attr.aria-expanded]="showUserMenu()">
+              <img [src]="user.picture" [alt]="user.name" class="user-avatar" referrerpolicy="no-referrer" />
+            </button>
+            @if (showUserMenu()) {
+              <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>
+              <div class="user-menu" role="menu">
+                <div class="user-menu-info">
+                  <span class="user-menu-name">{{ user.name }}</span>
+                  <span class="user-menu-email">{{ user.email }}</span>
+                </div>
+                <hr class="user-menu-divider" />
+                <button class="user-menu-item" role="menuitem" (click)="onSignOut()">
+                  {{ 'auth.signOut' | transloco }}
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="google-btn-container" #googleBtn></div>
+        }
       </nav>
     </div>
   </div>
