@@ -20,7 +20,7 @@ function restoreBackupInitializer(): () => Promise<void> {
 
     return async () => {
         try {
-            const existingData = storageService.loadFromStorage();
+            const existingData = await storageService.loadFromStorage();
             if (existingData.length > 0) return;
 
             const backupData = await backupService.restore();
