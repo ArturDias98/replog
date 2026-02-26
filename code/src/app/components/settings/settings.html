@@ -84,4 +84,12 @@
             class="visually-hidden"
             (change)="onFileSelected($event)" />
     </div>
+
+    @if (backupUri()) {
+        <div class="settings-section data-section">
+            <p class="settings-label">{{ 'settings.backupTitle' | transloco }}</p>
+            <p class="backup-info">{{ 'settings.backupFound' | transloco }}</p>
+            <p class="backup-path">{{ backupUri() }}</p>
+        </div>
+    }
 </div>

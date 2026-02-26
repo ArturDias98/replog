@@ -5,8 +5,8 @@ import { WorkOutGroup } from '../models/workout-group';
 
 @Injectable({ providedIn: 'root' })
 export class BackupService {
-    private readonly BACKUP_PATH = 'replog-backup.json';
-    private readonly BACKUP_DIRECTORY = Directory.Data;
+    private readonly BACKUP_PATH = 'RepLog/replog-backup.json';
+    private readonly BACKUP_DIRECTORY = Directory.Documents;
 
     private writeQueue: Promise<void> = Promise.resolve();
 
@@ -29,12 +29,26 @@ export class BackupService {
             });
 
             const data = typeof result.data === 'string' ? result.data : await result.data.text();
-            const parsed: unknown = JSON.parse(data);
+            return this.parseAndValidate(data);
+        } catch {
+            return null;
+        }
+    }
 
-            if (!Array.isArray(parsed)) return null;
-            if (!parsed.every((item) => this.isValidWorkoutGroup(item))) return null;
+    async checkBackupExists(): Promise<string | null> {
+        if (!Capacitor.isNativePlatform()) return null;
 
-            return parsed as WorkOutGroup[];
+        try {
+            const uri = await Filesystem.getUri({
+                path: this.BACKUP_PATH,
+                directory: this.BACKUP_DIRECTORY,
+            });
+
+            await Filesystem.stat({
+                path: uri.uri,
+            });
+
+            return uri.uri;
         } catch {
             return null;
         }
@@ -46,7 +60,21 @@ export class BackupService {
             data: JSON.stringify(workouts),
             directory: this.BACKUP_DIRECTORY,
             encoding: Encoding.UTF8,
+            recursive: true,
         });
+    }
+
+    private parseAndValidate(data: string): WorkOutGroup[] | null {
+        try {
+            const parsed: unknown = JSON.parse(data);
+
+            if (!Array.isArray(parsed)) return null;
+            if (!parsed.every((item) => this.isValidWorkoutGroup(item))) return null;
+
+            return parsed as WorkOutGroup[];
+        } catch {
+            return null;
+        }
     }
 
     private isValidWorkoutGroup(item: unknown): item is WorkOutGroup {

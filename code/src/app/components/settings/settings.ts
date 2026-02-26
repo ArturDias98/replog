@@ -1,8 +1,9 @@
-import { Component, inject, signal, ChangeDetectionStrategy, viewChild, ElementRef } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, viewChild, ElementRef, OnInit } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../services/i18n.service';
 import { ExportImportService } from '../../services/export-import.service';
+import { BackupService } from '../../services/backup.service';
 import { Language } from '../../models/user-preferences';
 
 @Component({
@@ -12,9 +13,10 @@ import { Language } from '../../models/user-preferences';
     styleUrl: './settings.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
     protected readonly i18n = inject(I18nService);
     private readonly exportImportService = inject(ExportImportService);
+    private readonly backupService = inject(BackupService);
 
     protected readonly languages: { value: Language; labelKey: string }[] = [
         { value: 'en', labelKey: 'settings.languageEn' },
@@ -25,9 +27,15 @@ export class SettingsComponent {
 
     protected readonly exporting = signal(false);
     protected readonly importing = signal(false);
+    protected readonly backupUri = signal<string | null>(null);
     protected readonly dataMessage = signal<string | null>(null);
     protected readonly dataMessageParams = signal<Record<string, unknown>>({});
     protected readonly dataMessageType = signal<'success' | 'error' | null>(null);
+
+    async ngOnInit(): Promise<void> {
+        const uri = await this.backupService.checkBackupExists();
+        this.backupUri.set(uri);
+    }
 
     protected selectLanguage(lang: Language): void {
         this.i18n.setLanguage(lang);

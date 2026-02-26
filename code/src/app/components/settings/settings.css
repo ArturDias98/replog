@@ -124,6 +124,23 @@
     background: rgba(248, 113, 113, 0.1);
 }
 
+.backup-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.backup-path {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin: 0;
+    word-break: break-all;
+    font-family: monospace;
+    background: var(--bg-tertiary);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
 .visually-hidden {
     position: absolute;
     width: 1px;

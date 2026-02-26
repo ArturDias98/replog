@@ -37,7 +37,9 @@
     "importSuccess": "{{count}} treino(s) importado(s) com sucesso!",
     "importAllDuplicates": "Todos os treinos do arquivo já existem.",
     "importInvalidFile": "Arquivo inválido. Selecione um arquivo de backup RepLog válido.",
-    "importError": "Falha ao importar dados. Tente novamente."
+    "importError": "Falha ao importar dados. Tente novamente.",
+    "backupTitle": "Backup",
+    "backupFound": "Um arquivo de backup foi encontrado neste dispositivo. Use Importar Dados para restaurá-lo."
   },
   "workout": {
     "loading": "Carregando treinos...",
