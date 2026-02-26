@@ -55,9 +55,9 @@ export class AddLogModal {
                 maxWeight: weight,
                 date: now
             };
-            await this.logService.addLog(model);
+            const id = await this.logService.addLog(model);
             const newLog: Log = {
-                id: crypto.randomUUID(),
+                id,
                 numberReps: reps,
                 maxWeight: weight,
                 date: now

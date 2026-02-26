@@ -8,7 +8,7 @@ import { AddLogModel, UpdateLogModel } from '../models/log';
 export class LogService {
     private storage = inject(StorageService);
 
-    async addLog(model: AddLogModel): Promise<void> {
+    async addLog(model: AddLogModel): Promise<string> {
         try {
             const workouts = this.storage.loadFromStorage();
 
@@ -34,14 +34,17 @@ export class LogService {
                 throw new Error('Exercise not found');
             }
 
+            const id = crypto.randomUUID();
             exercise.log.push({
-                id: crypto.randomUUID(),
+                id,
                 numberReps: model.numberReps,
                 maxWeight: model.maxWeight,
                 date: model.date
             });
 
             this.storage.saveToStorage(workouts);
+
+            return id;
         } catch (error) {
             console.error('Error adding log:', error);
             throw error;
