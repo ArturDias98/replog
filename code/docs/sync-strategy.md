@@ -389,6 +389,179 @@ Returns all workouts for the authenticated user as `WorkOutGroup[]`. The server 
 
 The `workouts` array matches the existing `WorkOutGroup[]` structure, so the client can merge it directly into IndexedDB without transformation. If an entity was deleted on the server, it simply won't appear in the response — the client removes any local entities not present in the server data.
 
+### 5.3 Entity Sync Operations (Backend Processing)
+
+The backend stores each workout as a single DynamoDB document containing the full nested hierarchy (`workout → muscleGroup[] → exercises[] → log[]`). This means **all entity mutations resolve to reading and writing a workout item**. Child entity changes require the backend to locate the parent workout, navigate to the nested object, apply the change, and save the updated document.
+
+For child entities (muscleGroup, exercise, log), the backend locates the parent workout using:
+
+- **muscleGroup**: `parentId` = `workoutId` → direct lookup by partition key.
+- **exercise**: `parentId` = `muscleGroupId` → query the user's workouts, search nested `muscleGroup[]` for a matching `id`.
+- **log**: `parentId` = `exerciseId` → query the user's workouts, search nested `muscleGroup[].exercises[]` for a matching `id`.
+
+---
+
+#### 5.3.1 Workout
+
+| Action | Backend Processing |
+|---|---|
+| **CREATE** | Insert a new DynamoDB item with `id`, `userId` (from auth token), `title`, `date`, `orderIndex`, empty `muscleGroup: []`, and sync metadata (`createdAt = timestamp`, `updatedAt = timestamp`). If an item with the same `id` already exists, skip (duplicate create). |
+| **UPDATE** | Get item by `entityId`. Verify `userId` matches. If `deletedAt` is set, skip. If `updatedAt > change.timestamp`, skip and return conflict with server version. Otherwise, apply changed fields (`title`, `date`, `orderIndex`) and set `updatedAt = change.timestamp`. |
+| **DELETE** | Get item by `entityId`. Verify `userId` matches. If item doesn't exist or `deletedAt` is already set, skip. Otherwise, set `deletedAt = change.timestamp`. All nested children (muscle groups, exercises, logs) are implicitly deleted with the document. |
+
+**CREATE payload:**
+
+```json
+{
+  "id": "w-uuid-1",
+  "title": "Push Day",
+  "date": "2026-02-25",
+  "userId": "user-123",
+  "orderIndex": 0
+}
+```
+
+**UPDATE payload (changed fields only):**
+
+```json
+{
+  "title": "Pull Day",
+  "date": "2026-02-26",
+  "orderIndex": 2
+}
+```
+
+---
+
+#### 5.3.2 Muscle Group
+
+All operations require fetching the parent workout document and modifying the nested `muscleGroup[]` array.
+
+| Action | Backend Processing |
+|---|---|
+| **CREATE** | Get workout by `parentId` (= `workoutId`). Verify `userId` matches. If workout is deleted or not found, reject as orphaned. Check that no muscle group with the same `entityId` already exists in the array — if it does, skip. Append the new muscle group object to `muscleGroup[]`. Set `updatedAt = change.timestamp` on the workout. Save. |
+| **UPDATE** | Get workout by `parentId`. Find the muscle group in `muscleGroup[]` by `entityId`. If not found or workout is deleted, skip. If `workout.updatedAt > change.timestamp`, skip and return conflict. Apply changed fields (`title`, `date`, `orderIndex`). Set `updatedAt = change.timestamp` on the workout. Save. |
+| **DELETE** | Get workout by `parentId`. Find the muscle group in `muscleGroup[]` by `entityId`. If not found or workout is deleted, skip. Remove the muscle group (and all its nested exercises and logs) from the array. Set `updatedAt = change.timestamp` on the workout. Save. |
+
+**CREATE payload:**
+
+```json
+{
+  "id": "mg-uuid-1",
+  "workoutId": "w-uuid-1",
+  "title": "Chest",
+  "date": "2026-02-25",
+  "orderIndex": 0
+}
+```
+
+**UPDATE payload (changed fields only):**
+
+```json
+{
+  "title": "Back",
+  "date": "2026-02-26",
+  "orderIndex": 1
+}
+```
+
+---
+
+#### 5.3.3 Exercise
+
+Operations require locating the parent workout via the `muscleGroupId`, then navigating to the correct muscle group's `exercises[]` array.
+
+| Action | Backend Processing |
+|---|---|
+| **CREATE** | Find the workout containing a muscle group with `id = parentId` (= `muscleGroupId`). Verify `userId` matches. If the workout is deleted or the muscle group is not found, reject as orphaned. Check that no exercise with the same `entityId` already exists — if it does, skip. Append the new exercise object (with empty `log: []`) to the muscle group's `exercises[]`. Set `updatedAt = change.timestamp` on the workout. Save. |
+| **UPDATE** | Find the workout and muscle group containing the exercise by `entityId`. If not found or workout is deleted, skip. If `workout.updatedAt > change.timestamp`, skip and return conflict. Apply changed fields (`title`, `orderIndex`). Set `updatedAt = change.timestamp` on the workout. Save. |
+| **DELETE** | Find the workout and muscle group containing the exercise by `entityId`. If not found or workout is deleted, skip. Remove the exercise (and all its nested logs) from the `exercises[]` array. Set `updatedAt = change.timestamp` on the workout. Save. |
+
+**CREATE payload:**
+
+```json
+{
+  "id": "ex-uuid-1",
+  "muscleGroupId": "mg-uuid-1",
+  "title": "Bench Press",
+  "orderIndex": 0
+}
+```
+
+**UPDATE payload (changed fields only):**
+
+```json
+{
+  "title": "Incline Bench Press",
+  "orderIndex": 2
+}
+```
+
+---
+
+#### 5.3.4 Log
+
+Operations require locating the parent workout via the `exerciseId`, then navigating to the correct exercise's `log[]` array.
+
+| Action | Backend Processing |
+|---|---|
+| **CREATE** | Find the workout containing an exercise with `id = parentId` (= `exerciseId`). Verify `userId` matches. If the workout is deleted or the exercise is not found, reject as orphaned. Check that no log with the same `entityId` already exists — if it does, skip. Append the new log object to the exercise's `log[]`. Set `updatedAt = change.timestamp` on the workout. Save. |
+| **UPDATE** | Find the workout and exercise containing the log by `entityId`. If not found or workout is deleted, skip. If `workout.updatedAt > change.timestamp`, skip and return conflict. Apply changed fields (`numberReps`, `maxWeight`). Set `updatedAt = change.timestamp` on the workout. Save. |
+| **DELETE** | Find the workout and exercise containing the log by `entityId`. If not found or workout is deleted, skip. Remove the log from the `log[]` array. Set `updatedAt = change.timestamp` on the workout. Save. |
+
+**CREATE payload:**
+
+```json
+{
+  "id": "log-uuid-1",
+  "numberReps": 10,
+  "maxWeight": 80,
+  "date": "2026-02-25T10:00:00.000Z"
+}
+```
+
+**UPDATE payload (changed fields only):**
+
+```json
+{
+  "numberReps": 12,
+  "maxWeight": 85
+}
+```
+
+---
+
+#### 5.3.5 Processing Summary
+
+All entity changes funnel through the parent workout document. The general algorithm for processing a single change:
+
+```
+1. Resolve the parent workout:
+   - workout change → lookup by entityId
+   - muscleGroup change → lookup by parentId (workoutId)
+   - exercise change → scan user's workouts for muscleGroup with id = parentId
+   - log change → scan user's workouts for exercise with id = parentId
+
+2. Validate:
+   - Workout exists and belongs to authenticated user
+   - Workout is not soft-deleted
+   - For child entities: parent node exists in the nested structure
+
+3. Check idempotency:
+   - CREATE: skip if entity with same ID already exists
+   - UPDATE: skip if workout.updatedAt > change.timestamp (return conflict)
+   - DELETE: skip if entity not found
+
+4. Apply mutation:
+   - CREATE: append to parent array
+   - UPDATE: modify fields in-place
+   - DELETE: remove from parent array (cascades nested children)
+
+5. Set workout.updatedAt = change.timestamp
+
+6. Save the workout document back to DynamoDB
+```
+
 ---
 
 ## 6. Conflict Resolution
