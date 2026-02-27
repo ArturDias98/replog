@@ -4,15 +4,14 @@
 
 1. [Overview](#1-overview)
 2. [Architecture](#2-architecture)
-3. [Data Model Changes](#3-data-model-changes)
-4. [Change Log (Sync Queue)](#4-change-log-sync-queue)
-5. [Sync Service (Frontend)](#5-sync-service-frontend)
-6. [Backend API Contract](#6-backend-api-contract)
-7. [Conflict Resolution](#7-conflict-resolution)
-8. [Sync Flows](#8-sync-flows)
-9. [Edge Cases](#9-edge-cases)
-10. [Migration Plan](#10-migration-plan)
-11. [Security Considerations](#11-security-considerations)
+3. [Change Log (Sync Queue)](#3-change-log-sync-queue)
+4. [Sync Service (Frontend)](#4-sync-service-frontend)
+5. [Backend API Contract](#5-backend-api-contract)
+6. [Conflict Resolution](#6-conflict-resolution)
+7. [Sync Flows](#7-sync-flows)
+8. [Edge Cases](#8-edge-cases)
+9. [Migration Plan](#9-migration-plan)
+10. [Security Considerations](#10-security-considerations)
 
 ---
 
@@ -30,6 +29,7 @@ Instead of syncing the full current state, the app records **every mutation** (c
 - **IndexedDB is the local source of truth for the UI.** The UI always reads from IndexedDB. The backend is the source of truth for cross-device consistency.
 - **Unauthenticated users are unaffected.** If a user never logs in, the app behaves exactly as it does today.
 - **Sync is eventual.** There is no requirement for real-time sync. Changes are pushed when the app comes online.
+- **No sync models on the client.** The existing UI models (`WorkOutGroup`, `MuscleGroup`, `Exercise`, `Log`) are used as-is. Sync metadata (`createdAt`, `updatedAt`, `deletedAt`) is managed exclusively by the backend. The client only needs the sync queue.
 
 ---
 
@@ -81,148 +81,13 @@ Instead of syncing the full current state, the app records **every mutation** (c
 | **Data Services** (existing) | Apply mutations to IndexedDB immediately. Record each mutation in the sync queue. |
 | **Sync Queue** (new) | Stores pending change events in IndexedDB (`sync_queue` object store). |
 | **SyncService** (new) | Manages online/offline detection, pushes queued changes, pulls server state, triggers merges. |
-| **Backend Sync Engine** (new) | Receives change events, applies them to the DB, resolves conflicts, returns merged state. |
+| **Backend Sync Engine** (new) | Receives change events, applies them to the DB, resolves conflicts, returns merged state. Manages sync metadata (`createdAt`, `updatedAt`, `deletedAt`) server-side. |
 
 ---
 
-## 3. Data Model Changes
+## 3. Change Log (Sync Queue)
 
-### 3.1 Design Principle: Separate UI Models from Sync Models
-
-The existing UI models (`WorkOutGroup`, `MuscleGroup`, `Exercise`, `Log`) are **not modified**. They remain pure UI types with no sync concerns. Instead, new **sync-specific models** are created in a separate directory.
-
-```
-src/app/models/              ← UI models (unchanged)
-  workout-group.ts              WorkOutGroup
-  muscle-group.ts               MuscleGroup
-  exercise.ts                   Exercise
-  log.ts                        Log
-
-src/app/models/sync/         ← Sync models (new)
-  sync-metadata.ts              SyncMetadata
-  sync-workout.ts               SyncWorkout (extends WorkOutGroup with sync fields)
-  sync-muscle-group.ts          SyncMuscleGroup
-  sync-exercise.ts              SyncExercise
-  sync-log.ts                   SyncLog
-  sync-change.ts                SyncChange (queue entry)
-  sync-api.ts                   PushRequest, PullResponse, etc.
-```
-
-### 3.2 Sync Metadata Type
-
-```typescript
-// src/app/models/sync/sync-metadata.ts
-
-type SyncMetadata = {
-  createdAt: string;       // ISO 8601 timestamp — set once on creation
-  updatedAt: string;       // ISO 8601 timestamp — updated on every mutation
-  deletedAt: string | null; // ISO 8601 timestamp — set on soft-delete, null if alive
-};
-```
-
-### 3.3 Sync Entity Types
-
-Each sync model wraps the corresponding UI model and adds sync metadata:
-
-```typescript
-// src/app/models/sync/sync-workout.ts
-import { WorkOutGroup } from '../workout-group';
-import { SyncMetadata } from './sync-metadata';
-import { SyncMuscleGroup } from './sync-muscle-group';
-
-type SyncWorkout = SyncMetadata & {
-  id: string;
-  title: string;
-  date: string;
-  userId: string;
-  muscleGroup: SyncMuscleGroup[];
-  orderIndex: number;
-};
-
-// src/app/models/sync/sync-muscle-group.ts
-type SyncMuscleGroup = SyncMetadata & {
-  id: string;
-  workoutId: string;
-  title: string;
-  date: string;
-  exercises: SyncExercise[];
-  orderIndex: number;
-};
-
-// src/app/models/sync/sync-exercise.ts
-type SyncExercise = SyncMetadata & {
-  id: string;
-  muscleGroupId: string;
-  title: string;
-  log: SyncLog[];
-  orderIndex: number;
-};
-
-// src/app/models/sync/sync-log.ts
-type SyncLog = SyncMetadata & {
-  id: string;
-  numberReps: number;
-  maxWeight: number;
-  date: Date;
-};
-```
-
-### 3.4 Conversion Between UI and Sync Models
-
-The `SyncService` is responsible for converting between the two model layers:
-
-- **UI → Sync (before push):** Reads UI models from IndexedDB and enriches them with sync metadata to build the change queue payload.
-- **Sync → UI (after pull):** Strips sync metadata from server responses and writes plain UI models back to IndexedDB.
-
-This means:
-
-- **Data Services** continue to operate on UI models only. They are not aware of sync.
-- **SyncService** wraps/unwraps the sync layer transparently.
-- The sync metadata is stored in a **separate IndexedDB object store** (not mixed into the workout data store).
-
-### 3.5 Sync Metadata Storage
-
-Sync metadata is stored in its own IndexedDB object store, keyed by entity ID:
-
-```
-IndexedDB: replog-db
-  ├─ data (object store)         ← existing, holds WorkOutGroup[] (UI models)
-  ├─ sync_metadata (object store) ← NEW, holds SyncMetadata records keyed by entity ID
-  └─ sync_queue (object store)    ← NEW, holds SyncChange records
-```
-
-This keeps the UI data clean and allows the sync layer to track metadata independently.
-
-### 3.6 Soft Deletes
-
-Currently, delete operations remove records from arrays (e.g., `filter(w => w.id !== id)`). With sync, **deletions must be recorded**, not erased, so other devices know to delete the record too.
-
-**Approach:** When an entity is deleted:
-
-1. The Data Service removes it from IndexedDB as usual (UI stays clean).
-2. The SyncService records a `DELETE` change in the sync queue with the entity ID and timestamp.
-3. The sync metadata record for that entity gets `deletedAt` set.
-
-**On pull from server:** If the server says an entity is deleted, the SyncService removes it from the UI data in IndexedDB and marks its sync metadata accordingly.
-
-**Cleanup:** After a successful sync, sync metadata records for acknowledged deletions can be removed.
-
-### 3.7 First Login — userId Migration
-
-Anonymous workouts use a temporary `userId` with the prefix `temp-user-`. On first login:
-
-1. Load all workouts from IndexedDB.
-2. Replace `userId` on every workout where `userId.startsWith('temp-user-')` with the authenticated Google `userId`.
-3. Save updated workouts back to IndexedDB.
-4. Start the first full sync (push local data, then pull server data).
-
-After authentication, new workouts are created with the real `userId` from `AuthService` instead of the temp value.
-
----
-
-## 4. Change Log (Sync Queue)
-
-### 4.1 SyncChange Type
+### 3.1 SyncChange Type
 
 ```typescript
 type SyncChangeAction = 'CREATE' | 'UPDATE' | 'DELETE';
@@ -240,11 +105,11 @@ type SyncChange = {
 };
 ```
 
-### 4.2 Storage
+### 3.2 Storage
 
 The sync queue is stored in the `sync_queue` object store in IndexedDB (`replog-db`), keyed by the change `id`.
 
-### 4.3 Queue Operations
+### 3.3 Queue Operations
 
 ```typescript
 // SyncQueueService (new)
@@ -266,16 +131,16 @@ class SyncQueueService {
 }
 ```
 
-### 4.4 What Each Service Records
+### 3.4 What Each Service Records
 
 #### WorkoutDataService
 
 | Method | Action | data payload |
 |---|---|---|
 | `addWorkout()` | `CREATE` | Full `WorkOutGroup` (without nested muscleGroups) |
-| `updateWorkout()` | `UPDATE` | `{ title, date, updatedAt }` |
+| `updateWorkout()` | `UPDATE` | `{ title, date }` |
 | `deleteWorkout()` | `DELETE` | `null` |
-| `reorderWorkouts()` | `UPDATE` | `{ orderIndex, updatedAt }` for each affected workout |
+| `reorderWorkouts()` | `UPDATE` | `{ orderIndex }` for each affected workout |
 
 #### MuscleGroupService
 
@@ -283,9 +148,9 @@ class SyncQueueService {
 |---|---|---|---|
 | `addMuscleGroup()` | `CREATE` | Full `MuscleGroup` (without nested exercises) | `workoutId` |
 | `addMuscleGroups()` | `CREATE` (one per group) | Full `MuscleGroup` each | `workoutId` |
-| `updateMuscleGroup()` | `UPDATE` | `{ title, date, updatedAt }` | `workoutId` |
+| `updateMuscleGroup()` | `UPDATE` | `{ title, date }` | `workoutId` |
 | `deleteMuscleGroup()` | `DELETE` | `null` | `workoutId` |
-| `reorderMuscleGroups()` | `UPDATE` | `{ orderIndex, updatedAt }` for each affected group | `workoutId` |
+| `reorderMuscleGroups()` | `UPDATE` | `{ orderIndex }` for each affected group | `workoutId` |
 
 #### ExerciseService
 
@@ -293,19 +158,19 @@ class SyncQueueService {
 |---|---|---|---|
 | `addExercise()` | `CREATE` | Full `Exercise` (without logs) | `muscleGroupId` |
 | `addExercises()` | `CREATE` (one per exercise) | Full `Exercise` each | `muscleGroupId` |
-| `updateExercise()` | `UPDATE` | `{ title, updatedAt }` | `muscleGroupId` |
+| `updateExercise()` | `UPDATE` | `{ title }` | `muscleGroupId` |
 | `deleteExercise()` | `DELETE` | `null` | `muscleGroupId` |
-| `reorderExercises()` | `UPDATE` | `{ orderIndex, updatedAt }` for each affected exercise | `muscleGroupId` |
+| `reorderExercises()` | `UPDATE` | `{ orderIndex }` for each affected exercise | `muscleGroupId` |
 
 #### LogService
 
 | Method | Action | data payload | parentId |
 |---|---|---|---|
 | `addLog()` | `CREATE` | Full `Log` | `exerciseId` |
-| `updateLog()` | `UPDATE` | `{ numberReps, maxWeight, updatedAt }` | `exerciseId` |
+| `updateLog()` | `UPDATE` | `{ numberReps, maxWeight }` | `exerciseId` |
 | `deleteLog()` | `DELETE` | `null` | `exerciseId` |
 
-### 4.5 Example Queue
+### 3.5 Example Queue
 
 After a user creates a workout, adds a muscle group, and deletes an exercise while offline:
 
@@ -322,9 +187,7 @@ After a user creates a workout, adds a muscle group, and deletes an exercise whi
       "title": "Push Day",
       "date": "2026-02-25",
       "userId": "user-123",
-      "createdAt": "2026-02-25T10:00:00.000Z",
-      "updatedAt": "2026-02-25T10:00:00.000Z",
-      "deletedAt": null
+      "orderIndex": 0
     },
     "parentId": null
   },
@@ -336,12 +199,9 @@ After a user creates a workout, adds a muscle group, and deletes an exercise whi
     "timestamp": "2026-02-25T10:01:00.000Z",
     "data": {
       "id": "mg-uuid-1",
-      "workoutId": "w-uuid-1",
       "title": "Chest",
       "date": "2026-02-25",
-      "createdAt": "2026-02-25T10:01:00.000Z",
-      "updatedAt": "2026-02-25T10:01:00.000Z",
-      "deletedAt": null
+      "orderIndex": 0
     },
     "parentId": "w-uuid-1"
   },
@@ -359,9 +219,9 @@ After a user creates a workout, adds a muscle group, and deletes an exercise whi
 
 ---
 
-## 5. Sync Service (Frontend)
+## 4. Sync Service (Frontend)
 
-### 5.1 SyncService Responsibilities
+### 4.1 SyncService Responsibilities
 
 ```typescript
 class SyncService {
@@ -374,18 +234,15 @@ class SyncService {
   /** Called on app init + when online status changes */
   initialize(): void;
 
-  /** Push local changes to server, then pull server state */
+  /** Push local changes to server, then pull all server data */
   sync(): Promise<SyncResult>;
-
-  /** Full sync — pull all server data (used on first login on a new device) */
-  fullSync(): Promise<SyncResult>;
 
   /** Check if there are pending changes */
   hasPendingChanges(): boolean;
 }
 ```
 
-### 5.2 Online/Offline Detection
+### 4.2 Online/Offline Detection
 
 ```typescript
 // In SyncService.initialize()
@@ -398,17 +255,17 @@ if (navigator.onLine && this.authService.isAuthenticated()) {
 }
 ```
 
-### 5.3 Sync Trigger Points
+### 4.3 Sync Trigger Points
 
 | Trigger | Action |
 |---|---|
 | App starts + user is authenticated + online | `sync()` |
 | Browser fires `online` event + user is authenticated | `sync()` |
-| User logs in for the first time on this device | `fullSync()` |
+| User logs in for the first time on this device | `sync()` |
 | User manually triggers sync (pull-to-refresh, sync button) | `sync()` |
 | Periodic interval (optional, e.g., every 5 minutes while online) | `sync()` |
 
-### 5.4 Sync Lock
+### 4.4 Sync Lock
 
 Only one sync operation can run at a time. Use a simple boolean flag:
 
@@ -428,13 +285,13 @@ async sync(): Promise<SyncResult> {
 
 ---
 
-## 6. Backend API Contract
+## 5. Backend API Contract
 
-### 6.1 Authentication
+### 5.1 Authentication
 
 All sync endpoints require a valid auth token (JWT or session). The `userId` comes from the authenticated session, never from the client payload.
 
-### 6.2 Endpoints
+### 5.2 Endpoints
 
 #### `POST /api/sync/push`
 
@@ -484,9 +341,9 @@ Pushes local changes to the server.
 }
 ```
 
-#### `GET /api/sync/pull?since={ISO_TIMESTAMP}`
+#### `GET /api/sync/pull`
 
-Pulls all changes from the server since the given timestamp.
+Returns all workouts for the authenticated user as `WorkOutGroup[]`. The server always returns the full dataset — no incremental sync.
 
 **Response (200 OK):**
 
@@ -498,35 +355,26 @@ Pulls all changes from the server since the given timestamp.
       "title": "Push Day",
       "date": "2026-02-25",
       "userId": "user-123",
-      "createdAt": "2026-02-25T10:00:00.000Z",
-      "updatedAt": "2026-02-25T10:00:00.000Z",
-      "deletedAt": null,
-      "muscleGroups": [
+      "orderIndex": 0,
+      "muscleGroup": [
         {
           "id": "mg-uuid",
           "workoutId": "w-uuid",
           "title": "Chest",
           "date": "2026-02-25",
-          "createdAt": "...",
-          "updatedAt": "...",
-          "deletedAt": null,
+          "orderIndex": 0,
           "exercises": [
             {
               "id": "ex-uuid",
               "muscleGroupId": "mg-uuid",
               "title": "Bench Press",
-              "createdAt": "...",
-              "updatedAt": "...",
-              "deletedAt": null,
-              "logs": [
+              "orderIndex": 0,
+              "log": [
                 {
                   "id": "log-uuid",
                   "numberReps": 10,
                   "maxWeight": 80,
-                  "date": "2026-02-25T10:00:00.000Z",
-                  "createdAt": "...",
-                  "updatedAt": "...",
-                  "deletedAt": null
+                  "date": "2026-02-25T10:00:00.000Z"
                 }
               ]
             }
@@ -539,21 +387,17 @@ Pulls all changes from the server since the given timestamp.
 }
 ```
 
-#### `GET /api/sync/full`
-
-Returns the complete user dataset. Used for first-time sync on a new device.
-
-**Response:** Same structure as `GET /api/sync/pull` but includes all data, not just changes since a timestamp.
+The `workouts` array matches the existing `WorkOutGroup[]` structure, so the client can merge it directly into IndexedDB without transformation. If an entity was deleted on the server, it simply won't appear in the response — the client removes any local entities not present in the server data.
 
 ---
 
-## 7. Conflict Resolution
+## 6. Conflict Resolution
 
-### 7.1 Strategy: Last-Write-Wins (per entity)
+### 6.1 Strategy: Last-Write-Wins (per entity)
 
-When the same entity has been modified on both the client and the server since the last sync, the version with the **later `updatedAt` timestamp** wins.
+When the same entity has been modified on both the client and the server since the last sync, the version with the **later timestamp** wins. The backend tracks `updatedAt` for each entity server-side.
 
-### 7.2 Conflict Scenarios
+### 6.2 Conflict Scenarios
 
 | Scenario | Resolution |
 |---|---|
@@ -566,13 +410,13 @@ When the same entity has been modified on both the client and the server since t
 | Client updates, server has deleted | **Delete wins** — the client removes the record locally |
 | Client creates, server already has same ID | Should not happen (UUIDs), but if it does: treat as conflict, server version wins |
 
-### 7.3 Conflict Resolution on the Backend
+### 6.3 Conflict Resolution on the Backend
 
 ```
 For each incoming change:
   1. Find the entity in the database by entityId
   2. If action is CREATE:
-     - If entity doesn't exist → INSERT
+     - If entity doesn't exist → INSERT (set createdAt, updatedAt = change.timestamp)
      - If entity exists → skip (duplicate create, already applied)
   3. If action is UPDATE:
      - If entity doesn't exist → skip (orphaned update)
@@ -585,7 +429,7 @@ For each incoming change:
      - Else → set deletedAt = change.timestamp
 ```
 
-### 7.4 Client Handling of Conflict Responses
+### 6.4 Client Handling of Conflict Responses
 
 When the server returns conflicts:
 
@@ -602,9 +446,9 @@ No user-facing conflict resolution UI is needed. Since this is a single-user app
 
 ---
 
-## 8. Sync Flows
+## 7. Sync Flows
 
-### 8.1 Normal Sync (push + pull)
+### 7.1 Normal Sync (push + pull)
 
 ```
 Client                                    Server
@@ -623,19 +467,17 @@ Client                                    Server
   │  8. Apply conflict resolutions          │
   │     locally                             │
   │                                         │
-  │  9. GET /api/sync/pull?since=           │
-  │     {lastSyncedAt}                      │
+  │  9. GET /api/sync/pull                   │
   │  ─────────────────────────────────────> │
-  │                                         │  10. Query changes since
-  │                                         │      timestamp
+  │                                         │  10. Return all user
+  │                                         │      workouts
   │  <───────────────────────────────────── │
-  │  11. Merge server data into local       │
-  │      storage                            │
-  │  12. Update lastSyncedAt                │
+  │  11. Merge server workouts into local   │
+  │      IndexedDB, remove missing entities │
   │                                         │
 ```
 
-### 8.2 First Login on a New Device
+### 7.2 First Login on a New Device
 
 ```
 Client                                    Server
@@ -650,19 +492,18 @@ Client                                    Server
   │  │  <────────────────────────────────── │
   │  │                                      │
   │  └─ Then pull everything:               │
-  │     GET /api/sync/full                  │
+  │     GET /api/sync/pull                  │
   │  ─────────────────────────────────────> │
   │                                         │  5. Return all user data
   │  <───────────────────────────────────── │
   │  6. Merge: for each server entity,      │
   │     if local doesn't have it → add      │
   │     if local has it → keep newer        │
-  │     (by updatedAt)                      │
-  │  7. Set lastSyncedAt = serverTimestamp  │
+  │     (by comparing timestamps)           │
   │                                         │
 ```
 
-### 8.3 User Signs Up (new account, has local data)
+### 7.3 User Signs Up (new account, has local data)
 
 ```
 1. User creates account and authenticates via Google Auth.
@@ -675,26 +516,26 @@ Client                                    Server
 7. From now on, normal sync flow applies.
 ```
 
-### 8.4 User Logs In (existing account, device has no data)
+### 7.4 User Logs In (existing account, device has no data)
 
 ```
 1. User logs in on a new/empty device.
 2. The app detects lastSyncedAt === null and no local data.
-3. GET /api/sync/full pulls everything.
+3. GET /api/sync/pull pulls everything.
 4. Local storage is populated with server data.
 5. lastSyncedAt is set.
 ```
 
-### 8.5 User Logs In (existing account, device has anonymous local data)
+### 7.5 User Logs In (existing account, device has anonymous local data)
 
 ```
 1. User logs in. The device has local workouts with
    userId.startsWith('temp-user-').
 2. Since this is a single-user personal app, always merge:
    - Replace temp-user-* userIds with the authenticated userId.
-   - Push local data, then full pull from server.
+   - Push local data, then pull from server.
    - Merge by entity ID: if same ID exists on both sides,
-     keep the one with the later updatedAt.
+     keep the one with the later timestamp.
 3. Normal sync resumes.
 ```
 
@@ -703,13 +544,11 @@ All local data belongs to the user logging in.
 
 ---
 
-## 9. Edge Cases
+## 8. Edge Cases
 
-### 9.1 Ordering (Reorder Operations)
+### 8.1 Ordering (Reorder Operations)
 
-Currently, ordering is implicit (array index position). For sync to work with reordering:
-
-**Option A: Add an `orderIndex` field to each entity.**
+Currently, ordering is implicit (array index position). For sync to work with reordering, an `orderIndex` field must be added to entities that support reordering.
 
 ```typescript
 type WorkOutGroup = {
@@ -720,33 +559,33 @@ type WorkOutGroup = {
 
 When a reorder happens, update `orderIndex` on all affected entities and record each as an `UPDATE` change.
 
-**Option B: Use a linked-list approach with `previousId`.**
+### 8.2 Cascading Deletes
 
-Not recommended for this app — adds too much complexity.
-
-**Recommendation:** Use Option A. It's simple and works well with last-write-wins.
-
-### 9.2 Cascading Deletes
-
-When a workout is deleted, all its muscle groups, exercises, and logs must also be soft-deleted.
+When a workout is deleted, all its muscle groups, exercises, and logs must also be deleted.
 
 **Frontend behavior:**
 
-- When `deleteWorkout()` is called, set `deletedAt` on the workout AND on all nested muscle groups, exercises, and logs.
+- When `deleteWorkout()` is called, remove the workout from IndexedDB as usual.
 - Enqueue a single `DELETE` change for the workout. The backend is responsible for cascading.
 
 **Backend behavior:**
 
-- When a workout `DELETE` is received, the backend sets `deletedAt` on all child entities in the database.
+- When a workout `DELETE` is received, the backend sets `deletedAt` on the workout and all child entities (muscle groups, exercises, logs) in the database.
 
-### 9.3 Orphaned Children
+### 8.3 Soft Deletes
+
+The client does **not** track soft deletes. Deletions on the client remove records from IndexedDB immediately (UI stays clean). The sync queue records a `DELETE` change with the entity ID and timestamp, which is enough for the backend to know what was deleted.
+
+The backend manages `deletedAt` timestamps server-side. On pull, deleted entities are excluded from the response — the client removes any local entities not present in the server data.
+
+### 8.4 Orphaned Children
 
 If the client sends a `CREATE` for a muscle group whose parent workout doesn't exist on the server:
 
 - The backend rejects the change and returns it as a conflict.
 - The client should ensure parent entities are pushed before children (changes are ordered by timestamp, which naturally handles this since parents are created before children).
 
-### 9.4 Clock Skew
+### 8.5 Clock Skew
 
 Client clocks may not be perfectly synchronized. Mitigation:
 
@@ -754,97 +593,86 @@ Client clocks may not be perfectly synchronized. Mitigation:
 - For conflict resolution, the backend uses client `timestamp` as a tiebreaker but trusts its own ordering for the sequence of operations.
 - Keep conflict resolution simple (last-write-wins) so minor clock differences don't cause issues.
 
-### 9.5 Large Payloads
+### 8.6 Large Payloads
 
 If a user has hundreds of workouts, the full sync payload could be large.
 
-- Paginate `GET /api/sync/full` if needed (e.g., 50 workouts per page).
+- Paginate `GET /api/sync/pull` if needed (e.g., 50 workouts per page).
 - For `POST /api/sync/push`, batch changes (e.g., max 100 changes per request).
 
-### 9.6 Failed Sync (Network Error Mid-Sync)
+### 8.7 Failed Sync (Network Error Mid-Sync)
 
 - The push endpoint should be **idempotent**. Each change has a unique `id`. If the same change is pushed twice, the server ignores the duplicate.
 - If the push succeeds but the pull fails, `lastSyncedAt` is NOT updated. The next sync will re-pull.
 - The queue is only cleared after the server acknowledges the changes.
 
-### 9.7 IndexedDB Storage
+### 8.8 IndexedDB Storage
 
-IndexedDB has much higher limits than localStorage (typically 50%+ of disk space), but the sync queue and metadata still add to storage usage.
+IndexedDB has much higher limits than localStorage (typically 50%+ of disk space), but the sync queue still adds to storage usage.
 
-- After a successful sync, remove sync metadata for acknowledged deletions.
 - Keep the sync queue lean — remove acknowledged changes immediately.
 - If quota is exceeded, notify the user and suggest syncing.
 
 ---
 
-## 10. Migration Plan
+## 9. Migration Plan
 
-### 10.1 Phase 1 — Sync Models + Metadata Store (no backend needed)
+### 9.1 Phase 1 — Sync Queue (no backend needed)
 
-1. Create sync model types in `src/app/models/sync/` (separate from UI models).
-2. Add `sync_metadata` and `sync_queue` object stores to IndexedDB (increment DB version).
-3. Create `SyncMetadataService` to manage per-entity sync metadata in IndexedDB.
-4. For existing records, generate initial sync metadata entries:
-   - `createdAt` = record's `date` field (or current timestamp if no date).
-   - `updatedAt` = same as `createdAt`.
-   - `deletedAt` = `null`.
-5. Add `orderIndex` tracking in sync metadata for entities that support reordering.
+1. Add `sync_queue` and `sync_meta` object stores to IndexedDB (increment DB version).
+2. Create `SyncQueueService`.
+3. Add `orderIndex` field to `WorkOutGroup`, `MuscleGroup`, and `Exercise` models.
+4. Integrate `SyncQueueService` into all data services — every mutation enqueues a change.
+5. The queue simply accumulates. Nothing consumes it yet.
 
-### 10.2 Phase 2 — Sync Queue (no backend needed)
-
-1. Create `SyncQueueService`.
-2. Integrate it into all data services — every mutation enqueues a change.
-3. The queue simply accumulates. Nothing consumes it yet.
-4. Add sync metadata storage in IndexedDB (`sync_metadata` object store).
-
-### 10.3 Phase 3 — Authentication
+### 9.2 Phase 2 — Authentication
 
 1. Add authentication (login/signup).
 2. Store the auth token.
 3. Ensure `userId` is set on workouts from the authenticated user.
 
-### 10.4 Phase 4 — SyncService + Backend
+### 9.3 Phase 3 — SyncService + Backend
 
-1. Build the backend sync endpoints (`POST /api/sync/push`, `GET /api/sync/pull`, `GET /api/sync/full`).
-2. Implement `SyncService` on the frontend.
-3. Wire up online/offline detection and sync triggers.
-4. Implement the merge logic for `pull` responses.
-5. Add UI indicators for sync status (syncing, last synced, pending changes, error).
+1. Build the backend sync endpoints (`POST /api/sync/push`, `GET /api/sync/pull`).
+2. Backend manages sync metadata (`createdAt`, `updatedAt`, `deletedAt`) for all entities.
+3. Implement `SyncService` on the frontend.
+4. Wire up online/offline detection and sync triggers.
+5. Implement the merge logic for `pull` responses (merge `WorkOutGroup[]` into IndexedDB, remove entities not present in server data).
+6. Add UI indicators for sync status (syncing, last synced, pending changes, error).
 
-### 10.5 Phase 5 — Polish
+### 9.4 Phase 4 — Polish
 
 1. Add a manual "Sync Now" button.
-2. Handle the "local data + new login" merge prompt.
+2. Handle the "local data + new login" merge flow (userId migration from `temp-user-*`).
 3. Add periodic background sync.
 4. Implement sync error recovery and retry with exponential backoff.
-5. Add cleanup of acknowledged soft-deleted records.
 
 ---
 
-## 11. Security Considerations
+## 10. Security Considerations
 
-### 11.1 Authentication
+### 10.1 Authentication
 
 - All sync endpoints require a valid auth token.
 - The backend extracts `userId` from the token — the client never controls which user's data is accessed.
 
-### 11.2 Authorization
+### 10.2 Authorization
 
 - The backend must verify that every entity in a push request belongs to the authenticated user.
 - A user can only pull their own data.
 
-### 11.3 Data Validation
+### 10.3 Data Validation
 
 - The backend must validate all incoming data (types, required fields, string lengths).
 - Reject changes with entity types or fields that don't match the schema.
 - Sanitize text fields (titles) to prevent XSS if the data is ever rendered elsewhere.
 
-### 11.4 Transport Security
+### 10.4 Transport Security
 
 - All sync communication must use HTTPS.
 - Auth tokens should be stored securely (HttpOnly cookies or secure storage on native, in-memory on web).
 
-### 11.5 Rate Limiting
+### 10.5 Rate Limiting
 
 - Rate-limit the sync endpoints to prevent abuse.
 - Suggested: max 10 sync requests per minute per user.
@@ -858,7 +686,6 @@ IndexedDB has much higher limits than localStorage (typically 50%+ of disk space
 | Object Store | Key | Content | Description |
 |---|---|---|---|
 | `data` | `id` (string) | `{ id, workouts: WorkOutGroup[] }` | Existing — UI workout data (unchanged) |
-| `sync_metadata` | `entityId` (string) | `SyncMetadata & { entityId, entityType }` | New — per-entity sync timestamps |
 | `sync_queue` | `id` (string) | `SyncChange` | New — pending changes to push |
 | `sync_meta` | `key` (string) | `{ key, value }` | New — sync state (e.g., `lastSyncedAt`) |
 
@@ -870,59 +697,9 @@ IndexedDB has much higher limits than localStorage (typically 50%+ of disk space
 
 ## Appendix B: New TypeScript Types (Summary)
 
-All sync types live in `src/app/models/sync/`. UI models in `src/app/models/` are unchanged.
+Sync types live in `src/app/models/sync/`. UI models in `src/app/models/` are unchanged (except for the addition of `orderIndex`).
 
 ```typescript
-// --- src/app/models/sync/sync-metadata.ts ---
-
-type SyncMetadata = {
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-};
-
-// Stored in IndexedDB sync_metadata object store
-type SyncMetadataRecord = SyncMetadata & {
-  entityId: string;
-  entityType: SyncEntityType;
-};
-
-// --- src/app/models/sync/sync-workout.ts ---
-// (Sync-enriched versions of UI models — used only by SyncService)
-
-type SyncWorkout = SyncMetadata & {
-  id: string;
-  title: string;
-  date: string;
-  userId: string;
-  muscleGroup: SyncMuscleGroup[];
-  orderIndex: number;
-};
-
-type SyncMuscleGroup = SyncMetadata & {
-  id: string;
-  workoutId: string;
-  title: string;
-  date: string;
-  exercises: SyncExercise[];
-  orderIndex: number;
-};
-
-type SyncExercise = SyncMetadata & {
-  id: string;
-  muscleGroupId: string;
-  title: string;
-  log: SyncLog[];
-  orderIndex: number;
-};
-
-type SyncLog = SyncMetadata & {
-  id: string;
-  numberReps: number;
-  maxWeight: number;
-  date: Date;
-};
-
 // --- src/app/models/sync/sync-change.ts ---
 
 type SyncChangeAction = 'CREATE' | 'UPDATE' | 'DELETE';
@@ -959,7 +736,7 @@ type SyncConflict = {
 };
 
 type PullResponse = {
-  workouts: SyncWorkout[];
+  workouts: WorkOutGroup[];
   serverTimestamp: string;
 };
 
