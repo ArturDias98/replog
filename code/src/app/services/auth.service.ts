@@ -22,6 +22,11 @@ declare const google: {
                     width?: number;
                 }
             ): void;
+            prompt(callback?: (notification: {
+                isNotDisplayed(): boolean;
+                isSkippedMoment(): boolean;
+                isDismissedMoment(): boolean;
+            }) => void): void;
             revoke(hint: string, callback?: () => void): void;
             disableAutoSelect(): void;
         };
@@ -35,9 +40,14 @@ const TOKEN_STORAGE_KEY = 'replog_auth_token';
     providedIn: 'root'
 })
 export class AuthService {
+    private static readonly TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
+    private static readonly REFRESH_TIMEOUT_MS = 10_000;
+
     private readonly storage = inject(StorageService);
     private initialized = false;
     private onAuthChangeCallback: ((user: AuthUser | null) => void) | null = null;
+    private refreshPromise: Promise<string | null> | null = null;
+    private onCredentialRefreshResolve: ((credential: string | null) => void) | null = null;
 
     private readonly gisReady = new Promise<void>((resolve) => {
         if (typeof google !== 'undefined' && google.accounts) {
@@ -61,6 +71,7 @@ export class AuthService {
         google.accounts.id.initialize({
             client_id: environment.googleClientId,
             callback: (response) => this.handleCredentialResponse(response),
+            auto_select: true,
         });
     }
 
@@ -95,7 +106,29 @@ export class AuthService {
     }
 
     isAuthenticated(): boolean {
-        return this.getUser() !== null && this.getIdToken() !== null;
+        return this.getUser() !== null && this.getIdToken() !== null && !this.isTokenExpired();
+    }
+
+    isTokenExpired(): boolean {
+        const token = this.getIdToken();
+        if (!token) return true;
+
+        const expMs = this.getTokenExpiration(token);
+        if (expMs === null) return true;
+
+        return Date.now() >= expMs - AuthService.TOKEN_EXPIRY_BUFFER_MS;
+    }
+
+    async refreshToken(): Promise<string | null> {
+        if (this.refreshPromise) {
+            return this.refreshPromise;
+        }
+
+        this.refreshPromise = this.attemptSilentRefresh().finally(() => {
+            this.refreshPromise = null;
+        });
+
+        return this.refreshPromise;
     }
 
     signOut(): void {
@@ -129,6 +162,44 @@ export class AuthService {
         }
     }
 
+    private getTokenExpiration(token: string): number | null {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+        } catch {
+            return null;
+        }
+    }
+
+    private attemptSilentRefresh(): Promise<string | null> {
+        return new Promise<string | null>((resolve) => {
+            const timeout = setTimeout(() => {
+                this.onCredentialRefreshResolve = null;
+                resolve(null);
+            }, AuthService.REFRESH_TIMEOUT_MS);
+
+            this.onCredentialRefreshResolve = (credential: string | null) => {
+                clearTimeout(timeout);
+                this.onCredentialRefreshResolve = null;
+                resolve(credential);
+            };
+
+            try {
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
+                        clearTimeout(timeout);
+                        this.onCredentialRefreshResolve = null;
+                        resolve(null);
+                    }
+                });
+            } catch {
+                clearTimeout(timeout);
+                this.onCredentialRefreshResolve = null;
+                resolve(null);
+            }
+        });
+    }
+
     private async handleCredentialResponse(response: { credential: string }): Promise<void> {
         try {
             const payload = JSON.parse(atob(response.credential.split('.')[1]));
@@ -145,8 +216,10 @@ export class AuthService {
             await this.migrateTemporaryUserIds(user.id);
 
             this.onAuthChangeCallback?.(user);
+            this.onCredentialRefreshResolve?.(response.credential);
         } catch (error) {
             console.error('Google sign-in failed:', error);
+            this.onCredentialRefreshResolve?.(null);
         }
     }
 }
