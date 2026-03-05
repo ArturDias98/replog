@@ -9,7 +9,8 @@ import { SyncPullWorkout, SyncChange } from '../models/sync';
 
 export type SyncStatus = 'idle' | 'success' | 'error' | 'offline' | 'unauthenticated';
 
-const SYNC_INTERVAL_MS = 500;
+const SYNC_INTERVAL_MS = 1000;
+const PUSH_BATCH_SIZE = 100;
 
 @Injectable({
     providedIn: 'root',
@@ -63,8 +64,13 @@ export class SyncService {
 
         try {
             await this.ensureInitialSyncQueue();
-            await this.pushChanges();
-            await this.pullChanges();
+            const isFirstSync = (await this.syncQueue.getLastSyncedAt()) === null;
+            const didPush = await this.pushChanges();
+
+            if (didPush || isFirstSync) {
+                await this.pullChanges();
+            }
+
             this.lastSyncStatus.set('success');
         } catch (error) {
             this.handleSyncError(error);
@@ -74,27 +80,32 @@ export class SyncService {
         }
     }
 
-    private async pushChanges(): Promise<void> {
+    private async pushChanges(): Promise<boolean> {
         const pendingChanges = await this.syncQueue.getPendingChanges();
-        if (pendingChanges.length === 0) return;
+        if (pendingChanges.length === 0) return false;
 
-        const lastSyncedAt = await this.syncQueue.getLastSyncedAt() ?? new Date(0).toISOString();
+        for (let i = 0; i < pendingChanges.length; i += PUSH_BATCH_SIZE) {
+            const batch = pendingChanges.slice(i, i + PUSH_BATCH_SIZE);
+            const lastSyncedAt = await this.syncQueue.getLastSyncedAt() ?? new Date(0).toISOString();
 
-        const response = await firstValueFrom(
-            this.syncApi.push({ changes: pendingChanges, lastSyncedAt }),
-        );
+            const response = await firstValueFrom(
+                this.syncApi.push({ changes: batch, lastSyncedAt }),
+            );
 
-        if (response.acknowledgedChangeIds.length > 0) {
-            await this.syncQueue.removePendingChanges(response.acknowledgedChangeIds);
+            if (response.acknowledgedChangeIds.length > 0) {
+                await this.syncQueue.removePendingChanges(response.acknowledgedChangeIds);
+            }
+
+            if (response.conflicts.length > 0) {
+                await this.applyConflicts(response.conflicts, batch);
+                const conflictIds = response.conflicts.map(c => c.changeId);
+                await this.syncQueue.removePendingChanges(conflictIds);
+            }
+
+            await this.syncQueue.setLastSyncedAt(response.serverTimestamp);
         }
 
-        if (response.conflicts.length > 0) {
-            await this.applyConflicts(response.conflicts, pendingChanges);
-            const conflictIds = response.conflicts.map(c => c.changeId);
-            await this.syncQueue.removePendingChanges(conflictIds);
-        }
-
-        await this.syncQueue.setLastSyncedAt(response.serverTimestamp);
+        return true;
     }
 
     private async pullChanges(): Promise<void> {
