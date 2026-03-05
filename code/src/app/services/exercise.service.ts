@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { StorageService } from './storage.service';
+import { SyncQueueService } from './sync-queue.service';
 import { Exercise } from '../models/exercise';
 
 @Injectable({
@@ -7,6 +8,7 @@ import { Exercise } from '../models/exercise';
 })
 export class ExerciseService {
     private storage = inject(StorageService);
+    private syncQueue = inject(SyncQueueService);
 
     async getExercisesByMuscleGroupId(muscleGroupId: string): Promise<Exercise[]> {
         try {
@@ -53,6 +55,14 @@ export class ExerciseService {
 
             await this.storage.saveToStorage(workouts);
 
+            await this.syncQueue.recordChange('exercise', 'CREATE', {
+                id: newExercise.id,
+                workoutId: workout.id,
+                muscleGroupId: muscleGroupId,
+                title: newExercise.title,
+                orderIndex: workout.muscleGroup[muscleGroupIndex].exercises.length - 1,
+            });
+
             return newExercise;
         } catch (error) {
             console.error('Error adding exercise:', error);
@@ -80,6 +90,8 @@ export class ExerciseService {
                 mg => mg.id === muscleGroupId
             );
 
+            const existingCount = workout.muscleGroup[muscleGroupIndex].exercises.length;
+
             const newExercises: Exercise[] = titles.map(title => ({
                 id: crypto.randomUUID(),
                 muscleGroupId: muscleGroupId,
@@ -90,6 +102,16 @@ export class ExerciseService {
             workout.muscleGroup[muscleGroupIndex].exercises.push(...newExercises);
 
             await this.storage.saveToStorage(workouts);
+
+            for (let i = 0; i < newExercises.length; i++) {
+                await this.syncQueue.recordChange('exercise', 'CREATE', {
+                    id: newExercises[i].id,
+                    workoutId: workout.id,
+                    muscleGroupId: muscleGroupId,
+                    title: newExercises[i].title,
+                    orderIndex: existingCount + i,
+                });
+            }
 
             return newExercises;
         } catch (error) {
@@ -106,6 +128,19 @@ export class ExerciseService {
                 const [moved] = mg.exercises.splice(previousIndex, 1);
                 mg.exercises.splice(currentIndex, 0, moved);
                 await this.storage.saveToStorage(workouts);
+
+                const start = Math.min(previousIndex, currentIndex);
+                const end = Math.max(previousIndex, currentIndex);
+                for (let i = start; i <= end; i++) {
+                    await this.syncQueue.recordChange('exercise', 'UPDATE', {
+                        id: mg.exercises[i].id,
+                        workoutId: workout.id,
+                        muscleGroupId: muscleGroupId,
+                        title: mg.exercises[i].title,
+                        orderIndex: i,
+                    });
+                }
+
                 return;
             }
         }
@@ -135,6 +170,12 @@ export class ExerciseService {
             muscleGroup.exercises = muscleGroup.exercises.filter(ex => ex.id !== exerciseId);
 
             await this.storage.saveToStorage(workouts);
+
+            await this.syncQueue.recordChange('exercise', 'DELETE', {
+                id: exerciseId,
+                workoutId: workout.id,
+                muscleGroupId: muscleGroup.id,
+            });
         } catch (error) {
             console.error('Error deleting exercise:', error);
             throw error;
@@ -174,6 +215,14 @@ export class ExerciseService {
 
             await this.storage.saveToStorage(workouts);
 
+            await this.syncQueue.recordChange('exercise', 'UPDATE', {
+                id: exerciseId,
+                workoutId: workout.id,
+                muscleGroupId: muscleGroup.id,
+                title: title.trim(),
+                orderIndex: exerciseIndex,
+            });
+
             return muscleGroup.exercises[exerciseIndex];
         } catch (error) {
             console.error('Error updating exercise:', error);
@@ -197,6 +246,14 @@ export class ExerciseService {
 
             if (!muscleGroup) {
                 throw new Error('Muscle group not found');
+            }
+
+            for (const ex of muscleGroup.exercises) {
+                await this.syncQueue.recordChange('exercise', 'DELETE', {
+                    id: ex.id,
+                    workoutId: workout.id,
+                    muscleGroupId: muscleGroupId,
+                });
             }
 
             muscleGroup.exercises = [];

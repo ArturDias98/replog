@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { WorkOutGroup } from '../models/workout-group';
 import { CreateWorkoutModel, UpdateWorkoutModel } from '../models/workout';
 import { StorageService } from './storage.service';
+import { SyncQueueService } from './sync-queue.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class WorkoutDataService {
     private storage = inject(StorageService);
+    private syncQueue = inject(SyncQueueService);
 
     async getWorkouts(): Promise<WorkOutGroup[]> {
         try {
@@ -39,6 +41,14 @@ export class WorkoutDataService {
             workouts.push(newWorkout);
             await this.storage.saveToStorage(workouts);
 
+            await this.syncQueue.recordChange('workout', 'CREATE', {
+                id: newWorkout.id,
+                userId: newWorkout.userId,
+                title: newWorkout.title,
+                date: newWorkout.date,
+                orderIndex: workouts.length - 1,
+            });
+
             return newWorkout;
         } catch (error) {
             console.error('Error adding workout:', error);
@@ -58,6 +68,13 @@ export class WorkoutDataService {
                     date: model.date
                 };
                 await this.storage.saveToStorage(workouts);
+
+                await this.syncQueue.recordChange('workout', 'UPDATE', {
+                    id: model.id,
+                    title: model.title.trim(),
+                    date: model.date,
+                    orderIndex: index,
+                });
             }
         } catch (error) {
             console.error('Error updating workout:', error);
@@ -70,6 +87,8 @@ export class WorkoutDataService {
             const workouts = await this.storage.loadFromStorage();
             const filteredWorkouts = workouts.filter(w => w.id !== id);
             await this.storage.saveToStorage(filteredWorkouts);
+
+            await this.syncQueue.recordChange('workout', 'DELETE', { id });
         } catch (error) {
             console.error('Error deleting workout:', error);
             throw error;
@@ -78,7 +97,12 @@ export class WorkoutDataService {
 
     async clearAllWorkouts(userId?: string): Promise<void> {
         try {
-            // Note: userId parameter is kept for API consistency but not used in local storage implementation
+            const workouts = await this.storage.loadFromStorage();
+
+            for (const workout of workouts) {
+                await this.syncQueue.recordChange('workout', 'DELETE', { id: workout.id });
+            }
+
             await this.storage.saveToStorage([]);
         } catch (error) {
             console.error('Error clearing workouts:', error);
@@ -91,6 +115,17 @@ export class WorkoutDataService {
         const [moved] = workouts.splice(previousIndex, 1);
         workouts.splice(currentIndex, 0, moved);
         await this.storage.saveToStorage(workouts);
+
+        const start = Math.min(previousIndex, currentIndex);
+        const end = Math.max(previousIndex, currentIndex);
+        for (let i = start; i <= end; i++) {
+            await this.syncQueue.recordChange('workout', 'UPDATE', {
+                id: workouts[i].id,
+                title: workouts[i].title,
+                date: workouts[i].date,
+                orderIndex: i,
+            });
+        }
     }
 
     async getWorkoutById(id: string): Promise<WorkOutGroup | undefined> {

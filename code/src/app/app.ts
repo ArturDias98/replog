@@ -6,6 +6,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { App as CapacitorApp } from '@capacitor/app';
 import { UserPreferencesService } from './services/user-preferences.service';
 import { AuthService } from './services/auth.service';
+import { SyncService } from './services/sync.service';
+import { SyncQueueService } from './services/sync-queue.service';
 import { AuthUser } from './models/auth';
 
 @Component({
@@ -20,6 +22,8 @@ export class App implements OnInit {
     private readonly location = inject(Location);
     private readonly userPreferencesService = inject(UserPreferencesService);
     private readonly authService = inject(AuthService);
+    private readonly syncService = inject(SyncService);
+    private readonly syncQueue = inject(SyncQueueService);
 
     protected readonly currentUser = signal<AuthUser | null>(null);
     protected readonly showUserMenu = signal(false);
@@ -40,7 +44,12 @@ export class App implements OnInit {
 
         this.authService.onUserChange((user) => {
             this.currentUser.set(user);
+            if (user) {
+                this.syncService.sync();
+            }
         });
+
+        this.syncService.initialize();
 
         // Wait for the first navigation to complete before checking if we should redirect
         this.router.events.pipe(
@@ -56,7 +65,8 @@ export class App implements OnInit {
         });
     }
 
-    protected onSignOut(): void {
+    protected async onSignOut(): Promise<void> {
+        await this.syncQueue.clearAll();
         this.authService.signOut();
         this.currentUser.set(null);
         this.showUserMenu.set(false);

@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode, APP_INITIALIZER, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideTransloco } from '@jsverse/transloco';
 import { registerLocaleData } from '@angular/common';
@@ -11,6 +11,7 @@ import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './transloco-loader';
 import { StorageService } from './services/storage.service';
 import { BackupService } from './services/backup.service';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 registerLocaleData(localePtBr, 'pt-BR');
 
@@ -37,7 +38,7 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
         provideRouter(routes),
-        provideHttpClient(),
+        provideHttpClient(withInterceptors([authInterceptor])),
         provideTransloco({
             config: {
                 availableLangs: ['en', 'pt-BR'],

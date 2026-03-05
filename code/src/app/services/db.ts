@@ -1,5 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { WorkOutGroup } from '../models/workout-group';
+import { SyncChange } from '../models/sync';
 
 interface RepLogDB extends DBSchema {
     data: {
@@ -9,10 +10,18 @@ interface RepLogDB extends DBSchema {
             workouts: WorkOutGroup[];
         };
     };
+    sync_queue: {
+        key: string;
+        value: SyncChange;
+    };
+    sync_meta: {
+        key: string;
+        value: { id: string; value: string };
+    };
 }
 
 const DB_NAME = 'replog-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export const DATA_RECORD_KEY = 'workouts';
 
@@ -21,8 +30,14 @@ let dbPromise: Promise<IDBPDatabase<RepLogDB>> | null = null;
 export function getDb(): Promise<IDBPDatabase<RepLogDB>> {
     if (!dbPromise) {
         dbPromise = openDB<RepLogDB>(DB_NAME, DB_VERSION, {
-            upgrade(db) {
-                db.createObjectStore('data', { keyPath: 'id' });
+            upgrade(db, oldVersion) {
+                if (oldVersion < 1) {
+                    db.createObjectStore('data', { keyPath: 'id' });
+                }
+                if (oldVersion < 2) {
+                    db.createObjectStore('sync_queue', { keyPath: 'id' });
+                    db.createObjectStore('sync_meta', { keyPath: 'id' });
+                }
             },
         });
     }

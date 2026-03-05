@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { StorageService } from './storage.service';
+import { SyncQueueService } from './sync-queue.service';
 import { AddLogModel, UpdateLogModel } from '../models/log';
 
 @Injectable({
@@ -7,6 +8,7 @@ import { AddLogModel, UpdateLogModel } from '../models/log';
 })
 export class LogService {
     private storage = inject(StorageService);
+    private syncQueue = inject(SyncQueueService);
 
     async addLog(model: AddLogModel): Promise<string> {
         try {
@@ -43,6 +45,21 @@ export class LogService {
             });
 
             await this.storage.saveToStorage(workouts);
+
+            const dateStr = model.date instanceof Date
+                ? model.date.toISOString().split('T')[0]
+                : String(model.date);
+
+            await this.syncQueue.recordChange('log', 'CREATE', {
+                id,
+                workoutId: workout.id,
+                muscleGroupId: muscleGroup.id,
+                exerciseId: model.exerciseId,
+                numberReps: model.numberReps,
+                maxWeight: model.maxWeight,
+                date: dateStr,
+            });
+
             return id;
         } catch (error) {
             console.error('Error adding log:', error);
@@ -89,6 +106,15 @@ export class LogService {
             };
 
             await this.storage.saveToStorage(workouts);
+
+            await this.syncQueue.recordChange('log', 'UPDATE', {
+                id: model.logId,
+                workoutId: workout.id,
+                muscleGroupId: muscleGroup.id,
+                exerciseId: model.exerciseId,
+                numberReps: model.numberReps,
+                maxWeight: model.maxWeight,
+            });
         } catch (error) {
             console.error('Error updating log:', error);
             throw error;
@@ -124,6 +150,13 @@ export class LogService {
             exercise.log = exercise.log.filter(log => log.id !== logId);
 
             await this.storage.saveToStorage(workouts);
+
+            await this.syncQueue.recordChange('log', 'DELETE', {
+                id: logId,
+                workoutId: workout.id,
+                muscleGroupId: muscleGroup.id,
+                exerciseId: exerciseId,
+            });
         } catch (error) {
             console.error('Error deleting log:', error);
             throw error;
@@ -154,6 +187,15 @@ export class LogService {
 
             if (!exercise) {
                 throw new Error('Exercise not found');
+            }
+
+            for (const log of exercise.log) {
+                await this.syncQueue.recordChange('log', 'DELETE', {
+                    id: log.id,
+                    workoutId: workout.id,
+                    muscleGroupId: muscleGroup.id,
+                    exerciseId: exerciseId,
+                });
             }
 
             exercise.log = [];

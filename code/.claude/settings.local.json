@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(npm install @angular/service-worker)",
-      "Bash(npm install @angular/service-worker@21.1.1)"
+      "Bash(npm install @angular/service-worker@21.1.1)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

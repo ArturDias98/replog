@@ -29,6 +29,7 @@ declare const google: {
 };
 
 const STORAGE_KEY = 'replog_auth_user';
+const TOKEN_STORAGE_KEY = 'replog_auth_token';
 
 @Injectable({
     providedIn: 'root'
@@ -89,6 +90,14 @@ export class AuthService {
         }
     }
 
+    getIdToken(): string | null {
+        return localStorage.getItem(TOKEN_STORAGE_KEY);
+    }
+
+    isAuthenticated(): boolean {
+        return this.getUser() !== null && this.getIdToken() !== null;
+    }
+
     signOut(): void {
         const user = this.getUser();
         if (user) {
@@ -100,6 +109,7 @@ export class AuthService {
             }
         }
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
         this.onAuthChangeCallback?.(null);
     }
 
@@ -131,6 +141,7 @@ export class AuthService {
             };
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+            localStorage.setItem(TOKEN_STORAGE_KEY, response.credential);
             await this.migrateTemporaryUserIds(user.id);
 
             this.onAuthChangeCallback?.(user);
