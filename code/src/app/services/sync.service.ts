@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { SyncQueueService } from './sync-queue.service';
 import { SyncApiService } from './sync-api.service';
@@ -21,9 +21,9 @@ export class SyncService {
     private readonly storage = inject(StorageService);
     private readonly auth = inject(AuthService);
 
-    readonly isSyncing = signal(false);
-    readonly lastSyncStatus = signal<SyncStatus>('idle');
-    readonly pendingChangeCount = signal(0);
+    isSyncing = false;
+    lastSyncStatus: SyncStatus = 'idle';
+    pendingChangeCount = 0;
 
     private intervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -48,19 +48,19 @@ export class SyncService {
     }
 
     async sync(): Promise<void> {
-        if (this.isSyncing()) return;
+        if (this.isSyncing) return;
 
         if (!navigator.onLine) {
-            this.lastSyncStatus.set('offline');
+            this.lastSyncStatus = 'offline';
             return;
         }
 
         if (!this.auth.isAuthenticated()) {
-            this.lastSyncStatus.set('unauthenticated');
+            this.lastSyncStatus = 'unauthenticated';
             return;
         }
 
-        this.isSyncing.set(true);
+        this.isSyncing = true;
 
         try {
             await this.ensureInitialSyncQueue();
@@ -71,11 +71,11 @@ export class SyncService {
                 await this.pullChanges();
             }
 
-            this.lastSyncStatus.set('success');
+            this.lastSyncStatus = 'success';
         } catch (error) {
             this.handleSyncError(error);
         } finally {
-            this.isSyncing.set(false);
+            this.isSyncing = false;
             await this.updatePendingCount();
         }
     }
@@ -300,26 +300,26 @@ export class SyncService {
         if (error instanceof Object && 'status' in error) {
             const httpError = error as { status: number };
             if (httpError.status === 401) {
-                this.lastSyncStatus.set('unauthenticated');
+                this.lastSyncStatus = 'unauthenticated';
                 return;
             }
             if (httpError.status === 429) {
-                this.lastSyncStatus.set('error');
+                this.lastSyncStatus = 'error';
                 return;
             }
         }
 
         if (!navigator.onLine) {
-            this.lastSyncStatus.set('offline');
+            this.lastSyncStatus = 'offline';
             return;
         }
 
-        this.lastSyncStatus.set('error');
+        this.lastSyncStatus = 'error';
         console.error('Sync failed:', error);
     }
 
     private async updatePendingCount(): Promise<void> {
         const count = await this.syncQueue.getPendingChangeCount();
-        this.pendingChangeCount.set(count);
+        this.pendingChangeCount = count;
     }
 }
