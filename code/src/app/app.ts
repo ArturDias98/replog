@@ -27,6 +27,7 @@ export class App implements OnInit {
 
     protected readonly currentUser = signal<AuthUser | null>(null);
     protected readonly showUserMenu = signal(false);
+    protected readonly initialSyncLoading = signal(false);
     protected readonly googleBtnContainer = viewChild<ElementRef>('googleBtn');
 
     constructor() {
@@ -42,10 +43,24 @@ export class App implements OnInit {
         this.authService.initialize();
         this.currentUser.set(this.authService.getUser());
 
-        this.authService.onUserChange((user) => {
+        if (this.authService.getUser() && this.authService.isTokenExpired()) {
+            this.authService.refreshToken().then((token) => {
+                if (!token) {
+                    this.authService.signOut();
+                    this.currentUser.set(null);
+                }
+            });
+        }
+
+        this.authService.onUserChange(async (user) => {
             this.currentUser.set(user);
             if (user) {
-                this.syncService.sync();
+                this.initialSyncLoading.set(true);
+                try {
+                    await this.syncService.sync();
+                } finally {
+                    this.initialSyncLoading.set(false);
+                }
             }
         });
 

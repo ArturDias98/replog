@@ -6,6 +6,7 @@ import { App } from '@capacitor/app';
 import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { WorkoutDataService } from '../../services/workout-data.service';
 import { MuscleGroupService } from '../../services/muscle-group.service';
+import { StorageService } from '../../services/storage.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { I18nService } from '../../services/i18n.service';
 import { MuscleGroup } from '../../models/muscle-group';
@@ -29,6 +30,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     private readonly workoutService = inject(WorkoutDataService);
     private readonly muscleGroupService = inject(MuscleGroupService);
     private readonly userPreferencesService = inject(UserPreferencesService);
+    private readonly storageService = inject(StorageService);
     protected readonly i18n = inject(I18nService);
 
     protected readonly muscleGroups = signal<MuscleGroup[]>([]);
@@ -47,12 +49,14 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     protected readonly isDeletingItem = signal<boolean>(false);
 
     private backButtonListener?: any;
+    private unsubscribeStorage?: () => void;
 
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('workoutId');
         if (workoutId) {
             this.workoutId.set(workoutId);
             this.userPreferencesService.setLastVisitedWorkout(workoutId);
+            this.unsubscribeStorage = this.storageService.onDataChanged(() => this.loadWorkout());
             await this.loadWorkout();
         }
 
@@ -63,7 +67,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        // Remove back button listener
+        this.unsubscribeStorage?.();
         this.backButtonListener?.remove();
     }
 

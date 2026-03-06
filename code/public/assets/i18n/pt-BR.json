@@ -187,6 +187,7 @@
     "signIn": "Entrar",
     "signOut": "Sair",
     "signInWithGoogle": "Entrar com Google",
-    "signedInAs": "Conectado como"
+    "signedInAs": "Conectado como",
+    "syncingData": "Sincronizando seus dados..."
   }
 }

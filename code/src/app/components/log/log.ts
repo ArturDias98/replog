@@ -5,6 +5,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { ExerciseService } from '../../services/exercise.service';
 import { MuscleGroupService } from '../../services/muscle-group.service';
+import { StorageService } from '../../services/storage.service';
 import { LogService } from '../../services/log.service';
 import { I18nService } from '../../services/i18n.service';
 import { Log } from '../../models/log';
@@ -39,6 +40,7 @@ export class LogComponent implements OnInit, OnDestroy {
     private readonly exerciseService = inject(ExerciseService);
     private readonly muscleGroupService = inject(MuscleGroupService);
     private readonly logService = inject(LogService);
+    private readonly storageService = inject(StorageService);
     protected readonly i18n = inject(I18nService);
 
     protected readonly logs = signal<Log[]>([]);
@@ -63,6 +65,7 @@ export class LogComponent implements OnInit, OnDestroy {
     protected readonly viewport = viewChild<CdkVirtualScrollViewport>('viewport');
 
     private backButtonListener?: any;
+    private unsubscribeStorage?: () => void;
 
     protected readonly groupedLogs = computed<LogGroup[]>(() => {
         const logs = this.logs();
@@ -124,6 +127,7 @@ export class LogComponent implements OnInit, OnDestroy {
 
         if (exerciseId) {
             this.exerciseId.set(exerciseId);
+            this.unsubscribeStorage = this.storageService.onDataChanged(() => this.loadExercise());
             await this.loadExercise();
         }
 
@@ -134,7 +138,7 @@ export class LogComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        // Remove back button listener
+        this.unsubscribeStorage?.();
         this.backButtonListener?.remove();
     }
 

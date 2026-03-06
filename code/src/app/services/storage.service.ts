@@ -12,6 +12,14 @@ export class StorageService {
     private readonly STORAGE_KEY = 'replog_workouts';
     private readonly backupService = inject(BackupService);
     private migrated = false;
+    private dataChangedCallbacks: (() => void)[] = [];
+
+    onDataChanged(callback: () => void): () => void {
+        this.dataChangedCallbacks.push(callback);
+        return () => {
+            this.dataChangedCallbacks = this.dataChangedCallbacks.filter(cb => cb !== callback);
+        };
+    }
 
     async loadFromStorage(): Promise<WorkOutGroup[]> {
         await this.ensureMigrated();
@@ -30,6 +38,7 @@ export class StorageService {
             const db = await getDb();
             await db.put('data', { id: DATA_RECORD_KEY, workouts });
             await this.backupService.backup(workouts);
+            this.dataChangedCallbacks.forEach(cb => cb());
         } catch (error) {
             console.error('Error saving to IndexedDB:', error);
         }

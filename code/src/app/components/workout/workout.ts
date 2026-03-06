@@ -5,6 +5,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
 import { WorkoutDataService } from '../../services/workout-data.service';
+import { StorageService } from '../../services/storage.service';
 import { I18nService } from '../../services/i18n.service';
 import { WorkOutGroup } from '../../models/workout-group';
 import { AddWorkoutModal } from './add-workout-modal/add-workout-modal';
@@ -23,6 +24,7 @@ import { ItemCardComponent } from '../shared/item-list/item-card';
 export class Workout implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly workoutService = inject(WorkoutDataService);
+    private readonly storageService = inject(StorageService);
     protected readonly i18n = inject(I18nService);
 
     protected readonly items = signal<WorkOutGroup[]>([]);
@@ -35,8 +37,10 @@ export class Workout implements OnInit, OnDestroy {
     protected readonly isDeleting = signal<boolean>(false);
 
     private backButtonListener?: any;
+    private unsubscribeStorage?: () => void;
 
     async ngOnInit(): Promise<void> {
+        this.unsubscribeStorage = this.storageService.onDataChanged(() => this.loadWorkouts());
         await this.loadWorkouts();
 
         // Handle hardware back button - exit app when on main page
@@ -46,7 +50,7 @@ export class Workout implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        // Remove back button listener
+        this.unsubscribeStorage?.();
         this.backButtonListener?.remove();
     }
 

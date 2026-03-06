@@ -204,6 +204,17 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+.sync-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-primary);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .main-content .container {

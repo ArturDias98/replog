@@ -187,6 +187,7 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "signInWithGoogle": "Sign in with Google",
-    "signedInAs": "Signed in as"
+    "signedInAs": "Signed in as",
+    "syncingData": "Syncing your data..."
   }
 }
