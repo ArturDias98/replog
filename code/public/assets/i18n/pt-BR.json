@@ -188,6 +188,8 @@
     "signOut": "Sair",
     "signInWithGoogle": "Entrar com Google",
     "signedInAs": "Conectado como",
-    "syncingData": "Sincronizando seus dados..."
+    "syncingData": "Sincronizando seus dados...",
+    "syncError": "Falha ao sincronizar seus dados. Verifique sua conexão e tente novamente.",
+    "syncRetry": "Tentar novamente"
   }
 }

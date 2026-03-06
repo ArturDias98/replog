@@ -53,6 +53,21 @@
         <p>{{ 'auth.syncingData' | transloco }}</p>
       </div>
     </div>
+  } @else if (initialSyncError()) {
+    <div class="sync-loading-overlay" role="alert">
+      <div class="sync-error-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="sync-error-icon" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <p class="sync-error-message">{{ 'auth.syncError' | transloco }}</p>
+        <button type="button" class="btn btn-primary" (click)="retrySync()">
+          {{ 'auth.syncRetry' | transloco }}
+        </button>
+      </div>
+    </div>
   }
   <div class="container">
     <router-outlet />

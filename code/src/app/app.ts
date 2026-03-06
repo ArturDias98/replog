@@ -28,6 +28,7 @@ export class App implements OnInit {
     protected readonly currentUser = signal<AuthUser | null>(null);
     protected readonly showUserMenu = signal(false);
     protected readonly initialSyncLoading = signal(false);
+    protected readonly initialSyncError = signal(false);
     protected readonly googleBtnContainer = viewChild<ElementRef>('googleBtn');
 
     constructor() {
@@ -55,12 +56,7 @@ export class App implements OnInit {
         this.authService.onUserChange(async (user) => {
             this.currentUser.set(user);
             if (user) {
-                this.initialSyncLoading.set(true);
-                try {
-                    await this.syncService.sync();
-                } finally {
-                    this.initialSyncLoading.set(false);
-                }
+                await this.performInitialSync();
             }
         });
 
@@ -78,6 +74,23 @@ export class App implements OnInit {
                 this.router.navigate(['/muscle-group', lastVisitedWorkoutId]);
             }
         });
+    }
+
+    private async performInitialSync(): Promise<void> {
+        this.initialSyncError.set(false);
+        this.initialSyncLoading.set(true);
+        try {
+            await this.syncService.sync();
+        } finally {
+            this.initialSyncLoading.set(false);
+        }
+        if (this.syncService.lastSyncStatus !== 'success') {
+            this.initialSyncError.set(true);
+        }
+    }
+
+    protected async retrySync(): Promise<void> {
+        await this.performInitialSync();
     }
 
     protected async onSignOut(): Promise<void> {
