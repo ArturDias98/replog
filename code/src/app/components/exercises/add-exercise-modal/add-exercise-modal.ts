@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal, input } from '@angular/core';
 import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
-import { ExerciseService } from '../../../services/exercise.service';
-import { Exercise } from '../../../models/exercise';
+import { ExerciseUseCase } from '@replog/application';
+import { Exercise } from '@replog/shared';
 
 @Component({
     selector: 'app-add-exercise-modal',
@@ -11,7 +11,7 @@ import { Exercise } from '../../../models/exercise';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddExerciseModal {
-    private readonly exerciseService = inject(ExerciseService);
+    private readonly exerciseUseCase = inject(ExerciseUseCase);
     private readonly translocoService = inject(TranslocoService);
 
     protected readonly queueLabel = computed(() => {
@@ -113,7 +113,7 @@ export class AddExerciseModal {
             allExercises.push(this.title().trim());
         }
 
-        this.exerciseService.addExercises(this.muscleGroupId(), allExercises)
+        this.exerciseUseCase.addExercises(this.muscleGroupId(), allExercises)
             .then((newExercises) => {
                 // Emit all newly created exercises
                 newExercises.forEach(ex => this.exerciseAdded.emit(ex));

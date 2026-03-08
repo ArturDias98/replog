@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { MuscleGroupService } from '../../../services/muscle-group.service';
-import { UpdateMuscleGroupModel, MuscleGroup } from '../../../models/muscle-group';
+import { MuscleGroupUseCase } from '@replog/application';
+import { UpdateMuscleGroupModel, MuscleGroup } from '@replog/shared';
 
 @Component({
     selector: 'app-edit-muscle-group-modal',
@@ -11,7 +11,7 @@ import { UpdateMuscleGroupModel, MuscleGroup } from '../../../models/muscle-grou
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditMuscleGroupModal {
-    private readonly muscleGroupService = inject(MuscleGroupService);
+    private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
 
     muscleGroupId = input.required<string>();
     initialTitle = input.required<string>();
@@ -47,7 +47,7 @@ export class EditMuscleGroupModal {
             date: this.date()
         };
 
-        this.muscleGroupService.updateMuscleGroup(model)
+        this.muscleGroupUseCase.updateMuscleGroup(model)
             .then((updatedMuscleGroup) => {
                 this.muscleGroupUpdated.emit(updatedMuscleGroup);
                 this.close();

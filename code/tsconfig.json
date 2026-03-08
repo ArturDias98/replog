@@ -11,6 +11,17 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
+    "paths": {
+      "@replog/shared": [
+        "./projects/shared/src/public-api.ts"
+      ],
+      "@replog/application": [
+        "./projects/application/src/public-api.ts"
+      ],
+      "@replog/infrastructure": [
+        "./projects/infrastructure/src/public-api.ts"
+      ]
+    },
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve"
@@ -28,6 +39,24 @@
     },
     {
       "path": "./tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/shared/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/shared/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/infrastructure/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/infrastructure/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/application/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/application/tsconfig.spec.json"
     }
   ]
 }

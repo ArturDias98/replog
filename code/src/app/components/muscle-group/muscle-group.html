@@ -84,7 +84,7 @@
 }
 
 @if (showAddModal()) {
-<app-add-muscle-group-modal [workoutId]="workoutId()" (muscleGroupAdded)="onMuscleGroupAdded($event)"
+<app-add-muscle-group-modal [workoutId]="workoutId()" (muscleGroupAdded)="onMuscleGroupAdded()"
     (closeModal)="closeAddModal()" />
 }
 

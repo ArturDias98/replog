@@ -3,13 +3,8 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
-import { ExerciseService } from '../../services/exercise.service';
-import { MuscleGroupService } from '../../services/muscle-group.service';
-import { StorageService } from '../../services/storage.service';
-import { LogService } from '../../services/log.service';
-import { I18nService } from '../../services/i18n.service';
-import { Log } from '../../models/log';
-import { Exercise } from '../../models/exercise';
+import { ExerciseUseCase, MuscleGroupUseCase, StoragePort, LogUseCase, I18nUseCase } from '@replog/application';
+import { Log, Exercise } from '@replog/shared';
 import { EditExerciseModal } from '../exercises/edit-exercise-modal/edit-exercise-modal';
 import { AddLogModal } from './add-log-modal/add-log-modal';
 import { EditLogModal } from './edit-log-modal/edit-log-modal';
@@ -37,11 +32,11 @@ type VirtualScrollItem =
 export class LogComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly exerciseService = inject(ExerciseService);
-    private readonly muscleGroupService = inject(MuscleGroupService);
-    private readonly logService = inject(LogService);
-    private readonly storageService = inject(StorageService);
-    protected readonly i18n = inject(I18nService);
+    private readonly exerciseUseCase = inject(ExerciseUseCase);
+    private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
+    private readonly logUseCase = inject(LogUseCase);
+    private readonly storagePort = inject(StoragePort);
+    protected readonly i18n = inject(I18nUseCase);
 
     protected readonly logs = signal<Log[]>([]);
     protected readonly isLoading = signal<boolean>(false);
@@ -127,7 +122,7 @@ export class LogComponent implements OnInit, OnDestroy {
 
         if (exerciseId) {
             this.exerciseId.set(exerciseId);
-            this.unsubscribeStorage = this.storageService.onDataChanged(() => this.loadExercise());
+            this.unsubscribeStorage = this.storagePort.onDataChanged(() => this.loadExercise());
             await this.loadExercise();
         }
 
@@ -145,14 +140,14 @@ export class LogComponent implements OnInit, OnDestroy {
     private async loadExercise(): Promise<void> {
         this.isLoading.set(true);
         try {
-            const exercise = await this.exerciseService.getExerciseById(this.exerciseId());
+            const exercise = await this.exerciseUseCase.getExerciseById(this.exerciseId());
             if (exercise) {
                 this.logs.set(exercise.log);
                 this.exerciseTitle.set(exercise.title);
                 this.muscleGroupId.set(exercise.muscleGroupId);
 
                 // Load muscle group to get the date
-                const muscleGroup = await this.muscleGroupService.getMuscleGroupById(exercise.muscleGroupId);
+                const muscleGroup = await this.muscleGroupUseCase.getMuscleGroupById(exercise.muscleGroupId);
                 if (muscleGroup) {
                     this.exerciseDate.set(muscleGroup.date);
                 }
@@ -177,8 +172,8 @@ export class LogComponent implements OnInit, OnDestroy {
         this.showAddLogModal.set(false);
     }
 
-    protected onLogAdded(newLog: Log): void {
-        this.logs.update(current => [...current, newLog]);
+    protected onLogAdded(): void {
+        // Data reload is handled by onDataChanged listener
     }
 
     protected confirmDelete(logId: string): void {
@@ -197,7 +192,7 @@ export class LogComponent implements OnInit, OnDestroy {
 
         this.isDeleting.set(true);
         try {
-            await this.logService.deleteLog(this.exerciseId(), logId);
+            await this.logUseCase.deleteLog(this.exerciseId(), logId);
             this.logs.update(logs => logs.filter(log => log.id !== logId));
             this.closeDeleteModal();
         } finally {
@@ -232,7 +227,7 @@ export class LogComponent implements OnInit, OnDestroy {
     protected async clearAllLogs(): Promise<void> {
         this.isClearing.set(true);
         try {
-            await this.logService.clearAllLogs(this.exerciseId());
+            await this.logUseCase.clearAllLogs(this.exerciseId());
             this.logs.set([]);
             this.closeClearAllModal();
         } finally {
@@ -268,7 +263,7 @@ export class LogComponent implements OnInit, OnDestroy {
 
         this.isDeletingExercise.set(true);
         try {
-            await this.exerciseService.deleteExercise(exerciseId);
+            await this.exerciseUseCase.deleteExercise(exerciseId);
             // Navigate back to the exercises list after deletion
             this.router.navigate(['/exercises', this.muscleGroupId()]);
         } catch (error) {

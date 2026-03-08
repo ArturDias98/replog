@@ -4,12 +4,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
-import { WorkoutDataService } from '../../services/workout-data.service';
-import { MuscleGroupService } from '../../services/muscle-group.service';
-import { StorageService } from '../../services/storage.service';
-import { UserPreferencesService } from '../../services/user-preferences.service';
-import { I18nService } from '../../services/i18n.service';
-import { MuscleGroup } from '../../models/muscle-group';
+import { WorkoutUseCase, MuscleGroupUseCase, StoragePort, UserPreferencesPort, I18nUseCase } from '@replog/application';
+import { MuscleGroup } from '@replog/shared';
 import { EditWorkoutModal } from '../workout/edit-workout-modal/edit-workout-modal';
 import { AddMuscleGroupModal } from './add-muscle-group-modal/add-muscle-group-modal';
 import { ActionButtonsComponent } from '../shared/action-buttons/action-buttons';
@@ -27,11 +23,11 @@ import { ItemCardComponent } from '../shared/item-list/item-card';
 export class MuscleGroupComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly workoutService = inject(WorkoutDataService);
-    private readonly muscleGroupService = inject(MuscleGroupService);
-    private readonly userPreferencesService = inject(UserPreferencesService);
-    private readonly storageService = inject(StorageService);
-    protected readonly i18n = inject(I18nService);
+    private readonly workoutUseCase = inject(WorkoutUseCase);
+    private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
+    private readonly userPreferencesPort = inject(UserPreferencesPort);
+    private readonly storagePort = inject(StoragePort);
+    protected readonly i18n = inject(I18nUseCase);
 
     protected readonly muscleGroups = signal<MuscleGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);
@@ -55,8 +51,8 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
         const workoutId = this.route.snapshot.paramMap.get('workoutId');
         if (workoutId) {
             this.workoutId.set(workoutId);
-            this.userPreferencesService.setLastVisitedWorkout(workoutId);
-            this.unsubscribeStorage = this.storageService.onDataChanged(() => this.loadWorkout());
+            this.userPreferencesPort.setLastVisitedWorkout(workoutId);
+            this.unsubscribeStorage = this.storagePort.onDataChanged(() => this.loadWorkout());
             await this.loadWorkout();
         }
 
@@ -74,7 +70,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     private async loadWorkout(): Promise<void> {
         this.isLoading.set(true);
         try {
-            const workout = await this.workoutService.getWorkoutById(this.workoutId());
+            const workout = await this.workoutUseCase.getWorkoutById(this.workoutId());
             if (workout) {
                 this.muscleGroups.set(workout.muscleGroup);
                 this.workoutTitle.set(workout.title);
@@ -104,9 +100,8 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
         this.showAddModal.set(false);
     }
 
-    protected async onMuscleGroupAdded(newMuscleGroup: MuscleGroup): Promise<void> {
-        // Add the new muscle group to the list
-        this.muscleGroups.update(groups => [...groups, newMuscleGroup]);
+    protected onMuscleGroupAdded(): void {
+        // Data reload is handled by onDataChanged listener
     }
 
     protected onWorkoutUpdated(updatedData: { title: string; date: string }): void {
@@ -130,7 +125,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
             moveItemInArray(updated, event.previousIndex, event.currentIndex);
             return updated;
         });
-        await this.muscleGroupService.reorderMuscleGroups(
+        await this.muscleGroupUseCase.reorderMuscleGroups(
             this.workoutId(), event.previousIndex, event.currentIndex
         );
     }
@@ -143,7 +138,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
             moveItemInArray(updated, currentIndex, newIndex);
             return updated;
         });
-        await this.muscleGroupService.reorderMuscleGroups(
+        await this.muscleGroupUseCase.reorderMuscleGroups(
             this.workoutId(), currentIndex, newIndex
         );
     }
@@ -164,7 +159,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
 
         this.isDeletingItem.set(true);
         try {
-            await this.muscleGroupService.deleteMuscleGroup(muscleGroupId);
+            await this.muscleGroupUseCase.deleteMuscleGroup(muscleGroupId);
             this.muscleGroups.update(groups => groups.filter(g => g.id !== muscleGroupId));
             this.closeDeleteItemConfirm();
         } catch (error) {
@@ -185,7 +180,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     protected async clearAllMuscleGroups(): Promise<void> {
         this.isClearing.set(true);
         try {
-            await this.muscleGroupService.clearAllMuscleGroups(this.workoutId());
+            await this.muscleGroupUseCase.clearAllMuscleGroups(this.workoutId());
             this.muscleGroups.set([]);
             this.closeClearAllConfirm();
         } catch (error) {
@@ -211,7 +206,7 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
 
         this.isDeletingWorkout.set(true);
         try {
-            await this.workoutService.deleteWorkout(workoutId);
+            await this.workoutUseCase.deleteWorkout(workoutId);
             // Navigate back to the workout list after deletion
             this.router.navigate(['/']);
         } catch (error) {

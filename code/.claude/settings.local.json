@@ -6,7 +6,13 @@
       "WebFetch(domain:api.github.com)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(npx ng build)"
+      "Bash(npx ng build)",
+      "Bash(npx ng generate library shared --skip-install)",
+      "Bash(npx ng generate library infrastructure --skip-install)",
+      "Bash(npx ng generate library application --skip-install)",
+      "Bash(mkdir -p projects/shared/src/lib/entities projects/shared/src/lib/dtos/workout projects/shared/src/lib/dtos/muscle-group projects/shared/src/lib/dtos/log)",
+      "Bash(mkdir -p projects/application/src/lib/ports projects/application/src/lib/use-cases/workout projects/application/src/lib/use-cases/muscle-group projects/application/src/lib/use-cases/exercise projects/application/src/lib/use-cases/log projects/application/src/lib/use-cases/sync projects/application/src/lib/use-cases/token-refresh projects/application/src/lib/use-cases/i18n)",
+      "Bash(mkdir -p projects/infrastructure/src/lib/persistence projects/infrastructure/src/lib/sync projects/infrastructure/src/lib/auth projects/infrastructure/src/lib/backup projects/infrastructure/src/lib/preferences projects/infrastructure/src/lib/export-import)"
     ]
   }
 }

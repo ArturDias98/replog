@@ -9,24 +9,50 @@ import { Capacitor } from '@capacitor/core';
 
 import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './transloco-loader';
-import { StorageService } from './services/storage.service';
-import { BackupService } from './services/backup.service';
-import { authInterceptor } from './interceptors/auth.interceptor';
+
+import {
+    StoragePort,
+    WorkoutRepository,
+    MuscleGroupRepository,
+    ExerciseRepository,
+    LogRepository,
+    SyncQueuePort,
+    SyncApiPort,
+    AuthPort,
+    BackupPort,
+    UserPreferencesPort,
+    ExportImportPort,
+} from '@replog/application';
+
+import {
+    StorageServiceImpl,
+    WorkoutRepositoryImpl,
+    MuscleGroupRepositoryImpl,
+    ExerciseRepositoryImpl,
+    LogRepositoryImpl,
+    SyncQueueServiceImpl,
+    SyncApiServiceImpl,
+    AuthServiceImpl,
+    BackupServiceImpl,
+    UserPreferencesServiceImpl,
+    ExportImportServiceImpl,
+    authInterceptor,
+} from '@replog/infrastructure';
 
 registerLocaleData(localePtBr, 'pt-BR');
 
 function restoreBackupInitializer(): () => Promise<void> {
-    const storageService = inject(StorageService);
-    const backupService = inject(BackupService);
+    const storagePort = inject(StoragePort);
+    const backupPort = inject(BackupPort);
 
     return async () => {
         try {
-            const existingData = await storageService.loadFromStorage();
+            const existingData = await storagePort.loadAll();
             if (existingData.length > 0) return;
 
-            const backupData = await backupService.restore();
+            const backupData = await backupPort.restore();
             if (backupData && backupData.length > 0) {
-                storageService.restoreToStorage(backupData);
+                storagePort.restoreFromBackup(backupData);
             }
         } catch {
             console.warn('Backup restore during init failed');
@@ -52,6 +78,17 @@ export const appConfig: ApplicationConfig = {
             enabled: !isDevMode() && !Capacitor.isNativePlatform(),
             registrationStrategy: 'registerWhenStable:30000',
         }),
+        { provide: StoragePort, useClass: StorageServiceImpl },
+        { provide: WorkoutRepository, useClass: WorkoutRepositoryImpl },
+        { provide: MuscleGroupRepository, useClass: MuscleGroupRepositoryImpl },
+        { provide: ExerciseRepository, useClass: ExerciseRepositoryImpl },
+        { provide: LogRepository, useClass: LogRepositoryImpl },
+        { provide: SyncQueuePort, useClass: SyncQueueServiceImpl },
+        { provide: SyncApiPort, useClass: SyncApiServiceImpl },
+        { provide: AuthPort, useClass: AuthServiceImpl },
+        { provide: BackupPort, useClass: BackupServiceImpl },
+        { provide: UserPreferencesPort, useClass: UserPreferencesServiceImpl },
+        { provide: ExportImportPort, useClass: ExportImportServiceImpl },
         {
             provide: APP_INITIALIZER,
             useFactory: restoreBackupInitializer,

@@ -4,12 +4,8 @@ import { Location } from '@angular/common';
 import { filter, take } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App as CapacitorApp } from '@capacitor/app';
-import { UserPreferencesService } from './services/user-preferences.service';
-import { AuthService } from './services/auth.service';
-import { SyncService } from './services/sync.service';
-import { SyncQueueService } from './services/sync-queue.service';
-import { TokenRefreshService } from './services/token-refresh.service';
-import { AuthUser } from './models/auth';
+import { AuthUser } from '@replog/shared';
+import { AuthPort, SyncQueuePort, UserPreferencesPort, SyncUseCase, TokenRefreshUseCase } from '@replog/application';
 
 @Component({
     selector: 'app-root',
@@ -21,11 +17,11 @@ import { AuthUser } from './models/auth';
 export class App implements OnInit {
     private readonly router = inject(Router);
     private readonly location = inject(Location);
-    private readonly userPreferencesService = inject(UserPreferencesService);
-    private readonly authService = inject(AuthService);
-    private readonly syncService = inject(SyncService);
-    private readonly syncQueue = inject(SyncQueueService);
-    private readonly tokenRefreshService = inject(TokenRefreshService);
+    private readonly userPreferencesPort = inject(UserPreferencesPort);
+    private readonly authPort = inject(AuthPort);
+    private readonly syncUseCase = inject(SyncUseCase);
+    private readonly syncQueue = inject(SyncQueuePort);
+    private readonly tokenRefreshUseCase = inject(TokenRefreshUseCase);
 
     protected readonly currentUser = signal<AuthUser | null>(null);
     protected readonly showUserMenu = signal(false);
@@ -37,40 +33,40 @@ export class App implements OnInit {
         effect(() => {
             const container = this.googleBtnContainer();
             if (container) {
-                this.authService.renderButton(container.nativeElement);
+                this.authPort.renderButton(container.nativeElement);
             }
         });
     }
 
     ngOnInit(): void {
-        this.authService.initialize();
-        this.currentUser.set(this.authService.getUser());
+        this.authPort.initialize();
+        this.currentUser.set(this.authPort.getUser());
 
-        if (this.authService.getUser() && this.authService.isTokenExpired()) {
-            this.authService.refreshToken().then((token) => {
+        if (this.authPort.getUser() && this.authPort.isTokenExpired()) {
+            this.authPort.refreshToken().then((token) => {
                 if (!token) {
-                    this.authService.signOut();
+                    this.authPort.signOut();
                     this.currentUser.set(null);
                 }
             });
         }
 
-        this.authService.onUserChange(async (user) => {
+        this.authPort.onUserChange(async (user) => {
             this.currentUser.set(user);
             if (user) {
                 await this.performInitialSync();
             }
         });
 
-        this.syncService.initialize();
-        this.tokenRefreshService.initialize();
+        this.syncUseCase.initialize();
+        this.tokenRefreshUseCase.initialize();
 
         // Wait for the first navigation to complete before checking if we should redirect
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd),
             take(1)
         ).subscribe((event: NavigationEnd) => {
-            const lastVisitedWorkoutId = this.userPreferencesService.getLastVisitedWorkout();
+            const lastVisitedWorkoutId = this.userPreferencesPort.getLastVisitedWorkout();
 
             // Only navigate to saved workout if user landed on the root route
             if (lastVisitedWorkoutId && event.urlAfterRedirects === '/') {
@@ -83,11 +79,11 @@ export class App implements OnInit {
         this.initialSyncError.set(false);
         this.initialSyncLoading.set(true);
         try {
-            await this.syncService.sync();
+            await this.syncUseCase.sync();
         } finally {
             this.initialSyncLoading.set(false);
         }
-        if (this.syncService.lastSyncStatus !== 'success') {
+        if (this.syncUseCase.lastSyncStatus !== 'success') {
             this.initialSyncError.set(true);
         }
     }
@@ -98,7 +94,7 @@ export class App implements OnInit {
 
     protected async onSignOut(): Promise<void> {
         await this.syncQueue.clearAll();
-        this.authService.signOut();
+        this.authPort.signOut();
         this.currentUser.set(null);
         this.showUserMenu.set(false);
     }

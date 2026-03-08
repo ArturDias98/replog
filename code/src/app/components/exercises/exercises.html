@@ -76,7 +76,7 @@
 }
 
 @if (showAddExerciseModal()) {
-<app-add-exercise-modal [muscleGroupId]="muscleGroupId()" (exerciseAdded)="handleExerciseAdded($event)"
+<app-add-exercise-modal [muscleGroupId]="muscleGroupId()" (exerciseAdded)="handleExerciseAdded()"
     (closeModal)="closeAddExerciseModal()"></app-add-exercise-modal>
 }
 

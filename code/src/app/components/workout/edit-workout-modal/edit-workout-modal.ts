@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal, input, effect } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { WorkoutDataService } from '../../../services/workout-data.service';
-import { UpdateWorkoutModel } from '../../../models/workout';
+import { WorkoutUseCase } from '@replog/application';
+import { UpdateWorkoutModel } from '@replog/shared';
 
 @Component({
     selector: 'app-edit-workout-modal',
@@ -11,7 +11,7 @@ import { UpdateWorkoutModel } from '../../../models/workout';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditWorkoutModal {
-    private readonly workoutService = inject(WorkoutDataService);
+    private readonly workoutUseCase = inject(WorkoutUseCase);
 
     workoutId = input.required<string>();
     initialTitle = input.required<string>();
@@ -46,7 +46,7 @@ export class EditWorkoutModal {
             date: this.date()
         };
 
-        this.workoutService.updateWorkout(model)
+        this.workoutUseCase.updateWorkout(model)
             .then(() => {
                 this.workoutUpdated.emit({ title: this.title(), date: this.date() });
                 this.close();

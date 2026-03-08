@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal, input } from '@angular/core';
 import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
-import { MuscleGroupService } from '../../../services/muscle-group.service';
-import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../../models/muscle-group';
+import { MuscleGroupUseCase } from '@replog/application';
+import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '@replog/shared';
 
 @Component({
     selector: 'app-add-muscle-group-modal',
@@ -11,7 +11,7 @@ import { CreateMuscleGroupModel, CreateExerciseModel, MuscleGroup } from '../../
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddMuscleGroupModal {
-    private readonly muscleGroupService = inject(MuscleGroupService);
+    private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
     private readonly translocoService = inject(TranslocoService);
 
     protected readonly queueLabel = computed(() => {
@@ -168,7 +168,7 @@ export class AddMuscleGroupModal {
             allMuscleGroups.push(model);
         }
 
-        this.muscleGroupService.addMuscleGroups(allMuscleGroups)
+        this.muscleGroupUseCase.addMuscleGroups(allMuscleGroups)
             .then((newMuscleGroups) => {
                 // Emit all newly created muscle groups
                 newMuscleGroups.forEach(mg => this.muscleGroupAdded.emit(mg));

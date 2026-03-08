@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ExerciseService } from '../../../services/exercise.service';
-import { Exercise } from '../../../models/exercise';
+import { ExerciseUseCase } from '@replog/application';
+import { Exercise } from '@replog/shared';
 
 @Component({
     selector: 'app-edit-exercise-modal',
@@ -11,7 +11,7 @@ import { Exercise } from '../../../models/exercise';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditExerciseModal {
-    private readonly exerciseService = inject(ExerciseService);
+    private readonly exerciseUseCase = inject(ExerciseUseCase);
 
     exerciseId = input.required<string>();
     initialTitle = input.required<string>();
@@ -38,7 +38,7 @@ export class EditExerciseModal {
 
         this.isSubmitting.set(true);
 
-        this.exerciseService.updateExercise(this.exerciseId(), this.title())
+        this.exerciseUseCase.updateExercise(this.exerciseId(), this.title())
             .then((updatedExercise) => {
                 this.exerciseUpdated.emit(updatedExercise);
                 this.close();

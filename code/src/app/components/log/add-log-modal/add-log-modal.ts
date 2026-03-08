@@ -1,8 +1,7 @@
 import { Component, signal, output, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslocoService, TranslocoPipe } from '@jsverse/transloco';
-import { LogService } from '../../../services/log.service';
-import { AddLogModel } from '../../../models/log';
-import { Log } from '../../../models/log';
+import { LogUseCase } from '@replog/application';
+import { AddLogModel, Log } from '@replog/shared';
 
 @Component({
     selector: 'app-add-log-modal',
@@ -12,7 +11,7 @@ import { Log } from '../../../models/log';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddLogModal {
-    private readonly logService = inject(LogService);
+    private readonly logUseCase = inject(LogUseCase);
     private readonly translocoService = inject(TranslocoService);
 
     exerciseId = input.required<string>();
@@ -55,7 +54,7 @@ export class AddLogModal {
                 maxWeight: weight,
                 date: now
             };
-            const id = await this.logService.addLog(model);
+            const id = await this.logUseCase.addLog(model);
             const newLog: Log = {
                 id,
                 numberReps: reps,

@@ -138,7 +138,7 @@
 }
 
 @if (showAddLogModal()) {
-<app-add-log-modal [exerciseId]="exerciseId()" (logAdded)="onLogAdded($event)" (closeModal)="closeAddLogModal()" />
+<app-add-log-modal [exerciseId]="exerciseId()" (logAdded)="onLogAdded()" (closeModal)="closeAddLogModal()" />
 }
 
 @if (showEditLogModal() && logToEdit()) {

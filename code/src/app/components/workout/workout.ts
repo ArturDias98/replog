@@ -4,10 +4,8 @@ import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
-import { WorkoutDataService } from '../../services/workout-data.service';
-import { StorageService } from '../../services/storage.service';
-import { I18nService } from '../../services/i18n.service';
-import { WorkOutGroup } from '../../models/workout-group';
+import { WorkoutUseCase, StoragePort, I18nUseCase } from '@replog/application';
+import { WorkOutGroup } from '@replog/shared';
 import { AddWorkoutModal } from './add-workout-modal/add-workout-modal';
 import { ActionButtonsComponent } from '../shared/action-buttons/action-buttons';
 import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog';
@@ -23,9 +21,9 @@ import { ItemCardComponent } from '../shared/item-list/item-card';
 })
 export class Workout implements OnInit, OnDestroy {
     private readonly router = inject(Router);
-    private readonly workoutService = inject(WorkoutDataService);
-    private readonly storageService = inject(StorageService);
-    protected readonly i18n = inject(I18nService);
+    private readonly workoutUseCase = inject(WorkoutUseCase);
+    private readonly storagePort = inject(StoragePort);
+    protected readonly i18n = inject(I18nUseCase);
 
     protected readonly items = signal<WorkOutGroup[]>([]);
     protected readonly isLoading = signal<boolean>(false);
@@ -40,7 +38,7 @@ export class Workout implements OnInit, OnDestroy {
     private unsubscribeStorage?: () => void;
 
     async ngOnInit(): Promise<void> {
-        this.unsubscribeStorage = this.storageService.onDataChanged(() => this.loadWorkouts());
+        this.unsubscribeStorage = this.storagePort.onDataChanged(() => this.loadWorkouts());
         await this.loadWorkouts();
 
         // Handle hardware back button - exit app when on main page
@@ -69,7 +67,7 @@ export class Workout implements OnInit, OnDestroy {
     private async loadWorkouts(): Promise<void> {
         this.isLoading.set(true);
         try {
-            const workouts = await this.workoutService.getWorkouts();
+            const workouts = await this.workoutUseCase.getWorkouts();
             this.items.set(workouts);
         } finally {
             this.isLoading.set(false);
@@ -87,7 +85,7 @@ export class Workout implements OnInit, OnDestroy {
             moveItemInArray(updated, event.previousIndex, event.currentIndex);
             return updated;
         });
-        await this.workoutService.reorderWorkouts(event.previousIndex, event.currentIndex);
+        await this.workoutUseCase.reorderWorkouts(event.previousIndex, event.currentIndex);
     }
 
     protected async onMoveItem(currentIndex: number, direction: 'up' | 'down'): Promise<void> {
@@ -98,7 +96,7 @@ export class Workout implements OnInit, OnDestroy {
             moveItemInArray(updated, currentIndex, newIndex);
             return updated;
         });
-        await this.workoutService.reorderWorkouts(currentIndex, newIndex);
+        await this.workoutUseCase.reorderWorkouts(currentIndex, newIndex);
     }
 
     protected confirmDeleteWorkoutById(workoutId: string): void {
@@ -117,7 +115,7 @@ export class Workout implements OnInit, OnDestroy {
 
         this.isDeleting.set(true);
         try {
-            await this.workoutService.deleteWorkout(workoutId);
+            await this.workoutUseCase.deleteWorkout(workoutId);
             this.items.update(items => items.filter(item => item.id !== workoutId));
             this.closeDeleteConfirm();
         } catch (error) {
@@ -139,7 +137,7 @@ export class Workout implements OnInit, OnDestroy {
         this.isClearing.set(true);
         try {
             // Clear all workouts (you can pass a userId here if needed)
-            await this.workoutService.clearAllWorkouts();
+            await this.workoutUseCase.clearAllWorkouts();
             this.closeClearAllConfirm();
             await this.loadWorkouts();
         } catch (error) {

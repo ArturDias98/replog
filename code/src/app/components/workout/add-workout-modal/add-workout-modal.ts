@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { WorkoutDataService } from '../../../services/workout-data.service';
-import { AuthService } from '../../../services/auth.service';
-import { CreateWorkoutModel } from '../../../models/workout';
+import { WorkoutUseCase, AuthPort } from '@replog/application';
+import { CreateWorkoutModel } from '@replog/shared';
 
 @Component({
     selector: 'app-add-workout-modal',
@@ -12,8 +11,8 @@ import { CreateWorkoutModel } from '../../../models/workout';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddWorkoutModal {
-    private readonly workoutService = inject(WorkoutDataService);
-    private readonly authService = inject(AuthService);
+    private readonly workoutUseCase = inject(WorkoutUseCase);
+    private readonly authPort = inject(AuthPort);
 
     protected readonly title = signal<string>('');
     protected readonly date = signal<string>(this.getTodayDate());
@@ -38,10 +37,10 @@ export class AddWorkoutModal {
         const model: CreateWorkoutModel = {
             title: this.title(),
             date: this.date(),
-            userId: this.authService.getUser()?.id ?? 'temp-user-' + crypto.randomUUID()
+            userId: this.authPort.getUser()?.id ?? 'temp-user-' + crypto.randomUUID()
         };
 
-        this.workoutService.addWorkout(model)
+        this.workoutUseCase.addWorkout(model)
             .then((newWorkout) => {
                 this.workoutAdded.emit(newWorkout.id);
                 this.close();

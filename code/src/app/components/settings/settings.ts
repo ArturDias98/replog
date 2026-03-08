@@ -1,10 +1,8 @@
 import { Component, inject, signal, ChangeDetectionStrategy, viewChild, ElementRef, OnInit } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RouterLink } from '@angular/router';
-import { I18nService } from '../../services/i18n.service';
-import { ExportImportService } from '../../services/export-import.service';
-import { BackupService } from '../../services/backup.service';
-import { Language } from '../../models/user-preferences';
+import { I18nUseCase, ExportImportPort, BackupPort } from '@replog/application';
+import { Language } from '@replog/shared';
 
 @Component({
     selector: 'app-settings',
@@ -14,9 +12,9 @@ import { Language } from '../../models/user-preferences';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsComponent implements OnInit {
-    protected readonly i18n = inject(I18nService);
-    private readonly exportImportService = inject(ExportImportService);
-    private readonly backupService = inject(BackupService);
+    protected readonly i18n = inject(I18nUseCase);
+    private readonly exportImportPort = inject(ExportImportPort);
+    private readonly backupPort = inject(BackupPort);
 
     protected readonly languages: { value: Language; labelKey: string }[] = [
         { value: 'en', labelKey: 'settings.languageEn' },
@@ -33,7 +31,7 @@ export class SettingsComponent implements OnInit {
     protected readonly dataMessageType = signal<'success' | 'error' | null>(null);
 
     async ngOnInit(): Promise<void> {
-        const uri = await this.backupService.checkBackupExists();
+        const uri = await this.backupPort.checkBackupExists();
         this.backupUri.set(uri);
     }
 
@@ -48,7 +46,7 @@ export class SettingsComponent implements OnInit {
         this.clearMessage();
 
         try {
-            const result = await this.exportImportService.exportWorkouts();
+            const result = await this.exportImportPort.exportWorkouts();
 
             switch (result.status) {
                 case 'success':
@@ -87,7 +85,7 @@ export class SettingsComponent implements OnInit {
         this.clearMessage();
 
         try {
-            const result = await this.exportImportService.importWorkouts(file);
+            const result = await this.exportImportPort.importWorkouts(file);
 
             switch (result.status) {
                 case 'success':
