@@ -26,6 +26,10 @@ export const DATA_RECORD_KEY = 'workouts';
 
 let dbPromise: Promise<IDBPDatabase<RepLogDB>> | null = null;
 
+export function resetDb(): void {
+    dbPromise = null;
+}
+
 export function getDb(): Promise<IDBPDatabase<RepLogDB>> {
     if (!dbPromise) {
         dbPromise = openDB<RepLogDB>(DB_NAME, DB_VERSION, {

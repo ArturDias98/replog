@@ -117,7 +117,8 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "projects/infrastructure/tsconfig.spec.json"
+            "tsConfig": "tests/infrastructure/tsconfig.spec.json",
+            "include": ["../../../tests/infrastructure/**/*.spec.ts"]
           }
         }
       }

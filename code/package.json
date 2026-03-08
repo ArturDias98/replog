@@ -49,6 +49,7 @@
     "@angular/compiler-cli": "^21.1.0",
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.1.0",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^27.1.0",
     "ng-packagr": "^21.1.0",
     "typescript": "~5.9.2",

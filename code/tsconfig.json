@@ -50,7 +50,7 @@
       "path": "./projects/infrastructure/tsconfig.lib.json"
     },
     {
-      "path": "./projects/infrastructure/tsconfig.spec.json"
+      "path": "./tests/infrastructure/tsconfig.spec.json"
     },
     {
       "path": "./projects/application/tsconfig.lib.json"

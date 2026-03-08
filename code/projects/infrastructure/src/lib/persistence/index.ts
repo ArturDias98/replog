@@ -1,3 +1,4 @@
+export * from './db';
 export * from './workout.repository.impl';
 export * from './muscle-group.repository.impl';
 export * from './exercise.repository.impl';
