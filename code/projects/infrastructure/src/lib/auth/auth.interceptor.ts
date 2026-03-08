@@ -30,7 +30,6 @@ function handle401(error: unknown, req: HttpRequest<unknown>, next: HttpHandlerF
     return from(authService.refreshToken()).pipe(
         switchMap((newToken) => {
             if (!newToken) {
-                authService.signOut();
                 return throwError(() => error);
             }
             return next(req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } }));
