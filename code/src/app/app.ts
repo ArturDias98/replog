@@ -1,11 +1,8 @@
 import { Component, inject, OnInit, ChangeDetectionStrategy, signal, viewChild, effect, ElementRef } from '@angular/core';
-import { Router, RouterOutlet, RouterLink, NavigationEnd } from '@angular/router';
-import { Location } from '@angular/common';
-import { filter, take } from 'rxjs';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { App as CapacitorApp } from '@capacitor/app';
 import { AuthUser } from '@replog/shared';
-import { SyncQueuePort, UserPreferencesPort, SyncUseCase } from '@replog/application';
+import { SyncQueuePort, SyncUseCase } from '@replog/application';
 import { AuthPort, TokenRefreshUseCase } from './auth';
 import { SyncJob } from './jobs/sync.job';
 
@@ -17,9 +14,6 @@ import { SyncJob } from './jobs/sync.job';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App implements OnInit {
-    private readonly router = inject(Router);
-    private readonly location = inject(Location);
-    private readonly userPreferencesPort = inject(UserPreferencesPort);
     private readonly authPort = inject(AuthPort);
     private readonly syncUseCase = inject(SyncUseCase);
     private readonly syncQueue = inject(SyncQueuePort);
@@ -63,19 +57,6 @@ export class App implements OnInit {
 
         this.syncJob.start();
         this.tokenRefreshUseCase.initialize();
-
-        // Wait for the first navigation to complete before checking if we should redirect
-        this.router.events.pipe(
-            filter(event => event instanceof NavigationEnd),
-            take(1)
-        ).subscribe((event: NavigationEnd) => {
-            const lastVisitedWorkoutId = this.userPreferencesPort.getLastVisitedWorkout();
-
-            // Only navigate to saved workout if user landed on the root route
-            if (lastVisitedWorkoutId && event.urlAfterRedirects === '/') {
-                this.router.navigate(['/muscle-group', lastVisitedWorkoutId]);
-            }
-        });
     }
 
     private async performInitialSync(): Promise<void> {

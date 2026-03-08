@@ -4,7 +4,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
-import { WorkoutUseCase, MuscleGroupUseCase, StoragePort, UserPreferencesPort, I18nUseCase } from '@replog/application';
+import { WorkoutUseCase, MuscleGroupUseCase, StoragePort } from '@replog/application';
+import { I18nUseCase } from '../../i18n';
 import { MuscleGroup } from '@replog/shared';
 import { EditWorkoutModal } from '../workout/edit-workout-modal/edit-workout-modal';
 import { AddMuscleGroupModal } from './add-muscle-group-modal/add-muscle-group-modal';
@@ -25,7 +26,6 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly workoutUseCase = inject(WorkoutUseCase);
     private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
-    private readonly userPreferencesPort = inject(UserPreferencesPort);
     private readonly storagePort = inject(StoragePort);
     protected readonly i18n = inject(I18nUseCase);
 
@@ -51,7 +51,6 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
         const workoutId = this.route.snapshot.paramMap.get('workoutId');
         if (workoutId) {
             this.workoutId.set(workoutId);
-            this.userPreferencesPort.setLastVisitedWorkout(workoutId);
             this.unsubscribeStorage = this.storagePort.onDataChanged(() => this.loadWorkout());
             await this.loadWorkout();
         }

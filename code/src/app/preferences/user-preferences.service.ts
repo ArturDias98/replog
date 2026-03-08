@@ -1,26 +1,10 @@
 import { Injectable } from '@angular/core';
 import { UserPreferences, Language } from '@replog/shared';
-import { UserPreferencesPort } from '@replog/application';
+import { UserPreferencesPort } from './user-preferences.port';
 
 @Injectable()
 export class UserPreferencesServiceImpl extends UserPreferencesPort {
     private readonly STORAGE_KEY = 'replog_user_preferences';
-
-    setLastVisitedWorkout(workoutId: string): void {
-        const preferences = this.loadFromStorage();
-        preferences.lastVisitedWorkoutId = workoutId;
-        this.saveToStorage(preferences);
-    }
-
-    getLastVisitedWorkout(): string | null {
-        return this.loadFromStorage().lastVisitedWorkoutId;
-    }
-
-    clearLastVisitedWorkout(): void {
-        const preferences = this.loadFromStorage();
-        preferences.lastVisitedWorkoutId = null;
-        this.saveToStorage(preferences);
-    }
 
     getLanguage(): Language {
         return this.loadFromStorage().language ?? 'en';
@@ -34,7 +18,6 @@ export class UserPreferencesServiceImpl extends UserPreferencesPort {
 
     clearAllPreferences(): void {
         const defaultPreferences: UserPreferences = {
-            lastVisitedWorkoutId: null,
             language: 'en'
         };
         this.saveToStorage(defaultPreferences);
@@ -51,7 +34,6 @@ export class UserPreferencesServiceImpl extends UserPreferencesPort {
         }
 
         return {
-            lastVisitedWorkoutId: null,
             language: 'en'
         };
     }

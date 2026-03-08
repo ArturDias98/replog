@@ -1,7 +1,8 @@
 import { Component, inject, signal, ChangeDetectionStrategy, viewChild, ElementRef, OnInit } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RouterLink } from '@angular/router';
-import { I18nUseCase, ExportImportPort, BackupPort } from '@replog/application';
+import { ExportImportPort, BackupPort } from '@replog/application';
+import { I18nUseCase } from '../../i18n';
 import { Language } from '@replog/shared';
 
 @Component({

@@ -19,7 +19,6 @@ import {
     SyncQueuePort,
     SyncApiPort,
     BackupPort,
-    UserPreferencesPort,
     ExportImportPort,
 } from '@replog/application';
 
@@ -32,11 +31,11 @@ import {
     SyncQueueServiceImpl,
     SyncApiServiceImpl,
     BackupServiceImpl,
-    UserPreferencesServiceImpl,
     ExportImportServiceImpl,
 } from '@replog/infrastructure';
 
 import { AuthPort, AuthServiceImpl, authInterceptor } from './auth';
+import { UserPreferencesPort, UserPreferencesServiceImpl } from './preferences';
 
 registerLocaleData(localePtBr, 'pt-BR');
 

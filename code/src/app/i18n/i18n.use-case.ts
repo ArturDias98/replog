@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { Language } from '@replog/shared';
-import { UserPreferencesPort } from '../../ports/user-preferences.port';
+import { UserPreferencesPort } from '../preferences';
 
 @Injectable({ providedIn: 'root' })
 export class I18nUseCase {
