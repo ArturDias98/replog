@@ -10,7 +10,7 @@ interface RepLogDB extends DBSchema {
         };
     };
     sync_queue: {
-        key: string;
+        key: number;
         value: SyncChange;
     };
     sync_meta: {
@@ -20,7 +20,7 @@ interface RepLogDB extends DBSchema {
 }
 
 const DB_NAME = 'replog-db';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 export const DATA_RECORD_KEY = 'workouts';
 
@@ -40,6 +40,10 @@ export function getDb(): Promise<IDBPDatabase<RepLogDB>> {
                 if (oldVersion < 2) {
                     db.createObjectStore('sync_queue', { keyPath: 'id' });
                     db.createObjectStore('sync_meta', { keyPath: 'id' });
+                }
+                if (oldVersion < 3) {
+                    db.deleteObjectStore('sync_queue');
+                    db.createObjectStore('sync_queue', { autoIncrement: true });
                 }
             },
         });

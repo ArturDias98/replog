@@ -16,7 +16,7 @@ export class SyncQueueServiceImpl extends SyncQueuePort {
             data,
         };
         const db = await getDb();
-        await db.put('sync_queue', change);
+        await db.add('sync_queue', change);
     }
 
     async getPendingChanges(): Promise<SyncChange[]> {
@@ -30,10 +30,15 @@ export class SyncQueueServiceImpl extends SyncQueuePort {
     }
 
     async removePendingChanges(changeIds: string[]): Promise<void> {
+        const idsToRemove = new Set(changeIds);
         const db = await getDb();
         const tx = db.transaction('sync_queue', 'readwrite');
-        for (const id of changeIds) {
-            tx.store.delete(id);
+        let cursor = await tx.store.openCursor();
+        while (cursor) {
+            if (idsToRemove.has(cursor.value.id)) {
+                cursor.delete();
+            }
+            cursor = await cursor.continue();
         }
         await tx.done;
     }
