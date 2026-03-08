@@ -6,6 +6,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { App as CapacitorApp } from '@capacitor/app';
 import { AuthUser } from '@replog/shared';
 import { AuthPort, SyncQueuePort, UserPreferencesPort, SyncUseCase, TokenRefreshUseCase } from '@replog/application';
+import { SyncJob } from './jobs/sync.job';
 
 @Component({
     selector: 'app-root',
@@ -21,6 +22,7 @@ export class App implements OnInit {
     private readonly authPort = inject(AuthPort);
     private readonly syncUseCase = inject(SyncUseCase);
     private readonly syncQueue = inject(SyncQueuePort);
+    private readonly syncJob = inject(SyncJob);
     private readonly tokenRefreshUseCase = inject(TokenRefreshUseCase);
 
     protected readonly currentUser = signal<AuthUser | null>(null);
@@ -58,7 +60,7 @@ export class App implements OnInit {
             }
         });
 
-        this.syncUseCase.initialize();
+        this.syncJob.start();
         this.tokenRefreshUseCase.initialize();
 
         // Wait for the first navigation to complete before checking if we should redirect
@@ -79,12 +81,12 @@ export class App implements OnInit {
         this.initialSyncError.set(false);
         this.initialSyncLoading.set(true);
         try {
-            await this.syncUseCase.sync();
+            const status = await this.syncUseCase.sync();
+            if (status !== 'success') {
+                this.initialSyncError.set(true);
+            }
         } finally {
             this.initialSyncLoading.set(false);
-        }
-        if (this.syncUseCase.lastSyncStatus !== 'success') {
-            this.initialSyncError.set(true);
         }
     }
 

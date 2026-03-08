@@ -4,11 +4,9 @@ import { WorkOutGroup, SyncPullWorkout, SyncChange } from '@replog/shared';
 import { SyncQueuePort } from '../../ports/sync-queue.port';
 import { SyncApiPort } from '../../ports/sync-api.port';
 import { StoragePort } from '../../ports/storage.port';
-import { AuthPort } from '../../ports/auth.port';
 
-export type SyncStatus = 'idle' | 'success' | 'error' | 'offline' | 'unauthenticated';
+export type SyncStatus = 'idle' | 'success' | 'error' | 'unauthenticated';
 
-const SYNC_INTERVAL_MS = 1000;
 const PUSH_BATCH_SIZE = 100;
 
 @Injectable({ providedIn: 'root' })
@@ -16,51 +14,17 @@ export class SyncUseCase {
     private readonly syncQueue = inject(SyncQueuePort);
     private readonly syncApi = inject(SyncApiPort);
     private readonly storage = inject(StoragePort);
-    private readonly auth = inject(AuthPort);
 
-    isSyncing = false;
-    lastSyncStatus: SyncStatus = 'idle';
-    pendingChangeCount = 0;
+    private isSyncing = false;
 
-    private intervalId: ReturnType<typeof setInterval> | null = null;
-
-    initialize(): void {
-        if (this.auth.isAuthenticated() && navigator.onLine) {
-            this.sync();
-        }
-
-        window.addEventListener('online', () => {
-            if (this.auth.isAuthenticated()) {
-                this.sync();
-            }
-        });
-
-        this.intervalId = setInterval(() => {
-            if (this.auth.isAuthenticated() && navigator.onLine) {
-                this.sync();
-            }
-        }, SYNC_INTERVAL_MS);
-
-        this.updatePendingCount();
-    }
-
-    async sync(): Promise<void> {
-        if (this.isSyncing) return;
-
-        if (!navigator.onLine) {
-            this.lastSyncStatus = 'offline';
-            return;
-        }
-
-        if (!this.auth.isAuthenticated()) {
-            this.lastSyncStatus = 'unauthenticated';
-            return;
-        }
+    async sync(): Promise<SyncStatus> {
+        if (this.isSyncing) return 'idle';
 
         this.isSyncing = true;
 
         try {
-            await this.ensureInitialSyncQueue();
+            const workouts = await this.storage.loadAll();
+            await this.syncQueue.ensureInitialQueue(workouts);
             const isFirstSync = (await this.syncQueue.getLastSyncedAt()) === null;
             const didPush = await this.pushChanges();
 
@@ -68,12 +32,11 @@ export class SyncUseCase {
                 await this.pullChanges();
             }
 
-            this.lastSyncStatus = 'success';
+            return 'success';
         } catch (error) {
-            this.handleSyncError(error);
+            return this.handleSyncError(error);
         } finally {
             this.isSyncing = false;
-            await this.updatePendingCount();
         }
     }
 
@@ -234,89 +197,15 @@ export class SyncUseCase {
             }));
     }
 
-    private async ensureInitialSyncQueue(): Promise<void> {
-        const lastSyncedAt = await this.syncQueue.getLastSyncedAt();
-        if (lastSyncedAt !== null) return;
-
-        const pendingChanges = await this.syncQueue.getPendingChanges();
-        if (pendingChanges.length > 0) return;
-
-        const workouts = await this.storage.loadAll();
-        if (workouts.length === 0) return;
-
-        for (let wi = 0; wi < workouts.length; wi++) {
-            const workout = workouts[wi];
-            await this.syncQueue.recordChange('workout', 'CREATE', {
-                id: workout.id,
-                userId: workout.userId,
-                title: workout.title,
-                date: workout.date,
-                orderIndex: wi,
-            });
-
-            for (let mgi = 0; mgi < workout.muscleGroup.length; mgi++) {
-                const mg = workout.muscleGroup[mgi];
-                await this.syncQueue.recordChange('muscleGroup', 'CREATE', {
-                    id: mg.id,
-                    workoutId: workout.id,
-                    title: mg.title,
-                    date: mg.date,
-                    orderIndex: mgi,
-                });
-
-                for (let exi = 0; exi < mg.exercises.length; exi++) {
-                    const ex = mg.exercises[exi];
-                    await this.syncQueue.recordChange('exercise', 'CREATE', {
-                        id: ex.id,
-                        workoutId: workout.id,
-                        muscleGroupId: mg.id,
-                        title: ex.title,
-                        orderIndex: exi,
-                    });
-
-                    for (const log of ex.log) {
-                        const dateStr = log.date instanceof Date
-                            ? log.date.toISOString().split('T')[0]
-                            : String(log.date);
-                        await this.syncQueue.recordChange('log', 'CREATE', {
-                            id: log.id,
-                            workoutId: workout.id,
-                            muscleGroupId: mg.id,
-                            exerciseId: ex.id,
-                            numberReps: log.numberReps,
-                            maxWeight: log.maxWeight,
-                            date: dateStr,
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    private handleSyncError(error: unknown): void {
+    private handleSyncError(error: unknown): SyncStatus {
         if (error instanceof Object && 'status' in error) {
             const httpError = error as { status: number };
             if (httpError.status === 401) {
-                this.lastSyncStatus = 'unauthenticated';
-                return;
-            }
-            if (httpError.status === 429) {
-                this.lastSyncStatus = 'error';
-                return;
+                return 'unauthenticated';
             }
         }
 
-        if (!navigator.onLine) {
-            this.lastSyncStatus = 'offline';
-            return;
-        }
-
-        this.lastSyncStatus = 'error';
         console.error('Sync failed:', error);
-    }
-
-    private async updatePendingCount(): Promise<void> {
-        const count = await this.syncQueue.getPendingChangeCount();
-        this.pendingChangeCount = count;
+        return 'error';
     }
 }
