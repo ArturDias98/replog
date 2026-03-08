@@ -34,6 +34,13 @@ src/app/           → Web application (components, routing, UI)
 src/app/               → may import all three; @replog/infrastructure only in app.config.ts for DI wiring
 ```
 
+## Testing
+
+- Always run tests after modifying code: `npx ng test infrastructure`
+- Tests live in `tests/infrastructure/` (outside the library projects)
+- Test runner: Vitest via `@angular/build:unit-test`
+- IndexedDB tests use `fake-indexeddb` polyfill with `resetIndexedDB()` in `beforeEach`
+
 ## TypeScript Best Practices
 
 - Use strict type checking

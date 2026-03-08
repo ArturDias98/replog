@@ -1,8 +1,8 @@
 import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { from, Observable, switchMap, throwError, catchError } from 'rxjs';
-import { AuthPort } from '@replog/application';
-import { environment } from '../../../../../src/environments/environment';
+import { AuthPort } from './auth.port';
+import { environment } from '../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     if (!req.url.startsWith(environment.apiBaseUrl)) return next(req);

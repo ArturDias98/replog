@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { WorkoutUseCase, AuthPort } from '@replog/application';
+import { WorkoutUseCase } from '@replog/application';
+import { AuthPort } from '../../../auth';
 import { CreateWorkoutModel } from '@replog/shared';
 
 @Component({

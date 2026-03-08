@@ -5,7 +5,8 @@ import { filter, take } from 'rxjs';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App as CapacitorApp } from '@capacitor/app';
 import { AuthUser } from '@replog/shared';
-import { AuthPort, SyncQueuePort, UserPreferencesPort, SyncUseCase, TokenRefreshUseCase } from '@replog/application';
+import { SyncQueuePort, UserPreferencesPort, SyncUseCase } from '@replog/application';
+import { AuthPort, TokenRefreshUseCase } from './auth';
 import { SyncJob } from './jobs/sync.job';
 
 @Component({

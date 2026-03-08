@@ -5,7 +5,6 @@ export * from './exercise.repository';
 export * from './log.repository';
 export * from './sync-queue.port';
 export * from './sync-api.port';
-export * from './auth.port';
 export * from './backup.port';
 export * from './user-preferences.port';
 export * from './export-import.port';

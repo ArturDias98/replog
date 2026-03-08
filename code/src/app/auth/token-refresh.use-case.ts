@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthPort } from '../../ports/auth.port';
+import { AuthPort } from './auth.port';
 
 @Injectable({ providedIn: 'root' })
 export class TokenRefreshUseCase {

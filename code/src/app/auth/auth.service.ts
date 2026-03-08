@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthUser } from '@replog/shared';
-import { AuthPort, StoragePort } from '@replog/application';
-import { environment } from '../../../../../src/environments/environment';
+import { StoragePort } from '@replog/application';
+import { AuthPort } from './auth.port';
+import { environment } from '../../environments/environment';
 
 declare const google: {
     accounts: {
