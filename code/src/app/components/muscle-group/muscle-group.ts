@@ -4,7 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
-import { WorkoutUseCase, MuscleGroupUseCase, StoragePort } from '@replog/application';
+import { WorkoutUseCase, MuscleGroupUseCase } from '@replog/application';
 import { I18nUseCase } from '../../i18n';
 import { MuscleGroup } from '@replog/shared';
 import { EditWorkoutModal } from '../workout/edit-workout-modal/edit-workout-modal';
@@ -26,7 +26,6 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly workoutUseCase = inject(WorkoutUseCase);
     private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
-    private readonly storagePort = inject(StoragePort);
     protected readonly i18n = inject(I18nUseCase);
 
     protected readonly muscleGroups = signal<MuscleGroup[]>([]);
@@ -45,13 +44,11 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     protected readonly isDeletingItem = signal<boolean>(false);
 
     private backButtonListener?: any;
-    private unsubscribeStorage?: () => void;
 
     async ngOnInit(): Promise<void> {
         const workoutId = this.route.snapshot.paramMap.get('workoutId');
         if (workoutId) {
             this.workoutId.set(workoutId);
-            this.unsubscribeStorage = this.storagePort.onDataChanged(() => this.loadWorkout());
             await this.loadWorkout();
         }
 
@@ -62,7 +59,6 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.unsubscribeStorage?.();
         this.backButtonListener?.remove();
     }
 
@@ -99,8 +95,8 @@ export class MuscleGroupComponent implements OnInit, OnDestroy {
         this.showAddModal.set(false);
     }
 
-    protected onMuscleGroupAdded(): void {
-        // Data reload is handled by onDataChanged listener
+    protected async onMuscleGroupAdded(): Promise<void> {
+        await this.loadWorkout();
     }
 
     protected onWorkoutUpdated(updatedData: { title: string; date: string }): void {

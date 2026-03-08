@@ -23,8 +23,6 @@ export class SyncUseCase {
         this.isSyncing = true;
 
         try {
-            const workouts = await this.storage.loadAll();
-            await this.syncQueue.ensureInitialQueue(workouts);
             const isFirstSync = (await this.syncQueue.getLastSyncedAt()) === null;
             const didPush = await this.pushChanges();
 

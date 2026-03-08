@@ -39,7 +39,12 @@
     "importInvalidFile": "Arquivo inválido. Selecione um arquivo de backup RepLog válido.",
     "importError": "Falha ao importar dados. Tente novamente.",
     "backupTitle": "Backup",
-    "backupFound": "Um arquivo de backup foi encontrado neste dispositivo. Use Importar Dados para restaurá-lo."
+    "backupFound": "Um arquivo de backup foi encontrado neste dispositivo. Use Importar Dados para restaurá-lo.",
+    "syncTitle": "Sincronização",
+    "syncButton": "Sincronizar Agora",
+    "syncing": "Sincronizando...",
+    "syncSuccess": "Sincronização concluída com sucesso!",
+    "syncError": "Falha na sincronização. Tente novamente."
   },
   "workout": {
     "loading": "Carregando treinos...",
@@ -191,5 +196,10 @@
     "syncingData": "Sincronizando seus dados...",
     "syncError": "Falha ao sincronizar seus dados. Verifique sua conexão e tente novamente.",
     "syncRetry": "Tentar novamente"
+  },
+  "sync": {
+    "syncNow": "Sincronizar agora",
+    "success": "Sincronização concluída!",
+    "error": "Falha na sincronização. Tente novamente."
   }
 }

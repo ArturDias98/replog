@@ -15,6 +15,22 @@
           </svg>
         </a>
         @if (currentUser(); as user) {
+          <button
+            class="btn-icon-sync"
+            (click)="syncNow()"
+            [attr.aria-label]="'sync.syncNow' | transloco">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
+              <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
+            </svg>
+            <span class="sync-dot"
+              [class.sync-dot-green]="syncStatus() === 'synced'"
+              [class.sync-dot-red]="syncStatus() === 'pending'"
+              aria-hidden="true"></span>
+          </button>
           <div class="user-menu-wrapper">
             <button
               class="btn-user-avatar"
@@ -46,30 +62,16 @@
 </header>
 
 <main class="main-content">
-  @if (initialSyncLoading()) {
-    <div class="sync-loading-overlay" role="status">
-      <div class="loading-container">
-        <div class="spinner"></div>
-        <p>{{ 'auth.syncingData' | transloco }}</p>
-      </div>
-    </div>
-  } @else if (initialSyncError()) {
-    <div class="sync-loading-overlay" role="alert">
-      <div class="sync-error-content">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="sync-error-icon" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        <p class="sync-error-message">{{ 'auth.syncError' | transloco }}</p>
-        <button type="button" class="btn btn-primary" (click)="retrySync()">
-          {{ 'auth.syncRetry' | transloco }}
-        </button>
-      </div>
-    </div>
-  }
   <div class="container">
     <router-outlet />
   </div>
+  @if (toastVisible()) {
+    <div class="toast"
+      [class.toast-success]="toastType() === 'success'"
+      [class.toast-error]="toastType() === 'error'"
+      role="status"
+      aria-live="polite">
+      {{ toastMessage()! | transloco }}
+    </div>
+  }
 </main>

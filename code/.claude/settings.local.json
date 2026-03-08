@@ -14,7 +14,8 @@
       "Bash(mkdir -p projects/application/src/lib/ports projects/application/src/lib/use-cases/workout projects/application/src/lib/use-cases/muscle-group projects/application/src/lib/use-cases/exercise projects/application/src/lib/use-cases/log projects/application/src/lib/use-cases/sync projects/application/src/lib/use-cases/token-refresh projects/application/src/lib/use-cases/i18n)",
       "Bash(mkdir -p projects/infrastructure/src/lib/persistence projects/infrastructure/src/lib/sync projects/infrastructure/src/lib/auth projects/infrastructure/src/lib/backup projects/infrastructure/src/lib/preferences projects/infrastructure/src/lib/export-import)",
       "Bash(ls -la /d/Projetos/replog/code/projects/*/)",
-      "Bash(npm install --save-dev fake-indexeddb)"
+      "Bash(npm install --save-dev fake-indexeddb)",
+      "Bash(npx ng test infrastructure)"
     ]
   }
 }

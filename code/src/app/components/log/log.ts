@@ -3,7 +3,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
-import { ExerciseUseCase, MuscleGroupUseCase, StoragePort, LogUseCase } from '@replog/application';
+import { ExerciseUseCase, MuscleGroupUseCase, LogUseCase } from '@replog/application';
 import { I18nUseCase } from '../../i18n';
 import { Log, Exercise } from '@replog/shared';
 import { EditExerciseModal } from '../exercises/edit-exercise-modal/edit-exercise-modal';
@@ -36,7 +36,6 @@ export class LogComponent implements OnInit, OnDestroy {
     private readonly exerciseUseCase = inject(ExerciseUseCase);
     private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
     private readonly logUseCase = inject(LogUseCase);
-    private readonly storagePort = inject(StoragePort);
     protected readonly i18n = inject(I18nUseCase);
 
     protected readonly logs = signal<Log[]>([]);
@@ -61,7 +60,6 @@ export class LogComponent implements OnInit, OnDestroy {
     protected readonly viewport = viewChild<CdkVirtualScrollViewport>('viewport');
 
     private backButtonListener?: any;
-    private unsubscribeStorage?: () => void;
 
     protected readonly groupedLogs = computed<LogGroup[]>(() => {
         const logs = this.logs();
@@ -123,7 +121,6 @@ export class LogComponent implements OnInit, OnDestroy {
 
         if (exerciseId) {
             this.exerciseId.set(exerciseId);
-            this.unsubscribeStorage = this.storagePort.onDataChanged(() => this.loadExercise());
             await this.loadExercise();
         }
 
@@ -134,7 +131,6 @@ export class LogComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.unsubscribeStorage?.();
         this.backButtonListener?.remove();
     }
 
@@ -173,8 +169,8 @@ export class LogComponent implements OnInit, OnDestroy {
         this.showAddLogModal.set(false);
     }
 
-    protected onLogAdded(): void {
-        // Data reload is handled by onDataChanged listener
+    protected async onLogAdded(): Promise<void> {
+        await this.loadExercise();
     }
 
     protected confirmDelete(logId: string): void {

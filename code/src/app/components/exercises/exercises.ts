@@ -4,7 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { App } from '@capacitor/app';
 import { CdkDragDrop, CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
-import { MuscleGroupUseCase, ExerciseUseCase, StoragePort } from '@replog/application';
+import { MuscleGroupUseCase, ExerciseUseCase } from '@replog/application';
 import { I18nUseCase } from '../../i18n';
 import { Exercise, MuscleGroup } from '@replog/shared';
 import { AddExerciseModal } from './add-exercise-modal/add-exercise-modal';
@@ -27,7 +27,6 @@ export class ExercisesComponent implements OnInit, OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly muscleGroupUseCase = inject(MuscleGroupUseCase);
     private readonly exerciseUseCase = inject(ExerciseUseCase);
-    private readonly storagePort = inject(StoragePort);
     protected readonly i18n = inject(I18nUseCase);
 
     protected readonly exercises = signal<Exercise[]>([]);
@@ -50,14 +49,12 @@ export class ExercisesComponent implements OnInit, OnDestroy {
     protected readonly isDeletingMuscleGroup = signal<boolean>(false);
 
     private backButtonListener?: any;
-    private unsubscribeStorage?: () => void;
 
     async ngOnInit(): Promise<void> {
         const muscleGroupId = this.route.snapshot.paramMap.get('muscleGroupId');
 
         if (muscleGroupId) {
             this.muscleGroupId.set(muscleGroupId);
-            this.unsubscribeStorage = this.storagePort.onDataChanged(() => this.loadMuscleGroup());
             await this.loadMuscleGroup();
         }
 
@@ -68,7 +65,6 @@ export class ExercisesComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.unsubscribeStorage?.();
         this.backButtonListener?.remove();
     }
 
@@ -106,8 +102,8 @@ export class ExercisesComponent implements OnInit, OnDestroy {
         this.showAddExerciseModal.set(false);
     }
 
-    protected handleExerciseAdded(): void {
-        // Data reload is handled by onDataChanged listener
+    protected async handleExerciseAdded(): Promise<void> {
+        await this.loadMuscleGroup();
     }
 
     protected async onItemDropped(event: CdkDragDrop<unknown>): Promise<void> {

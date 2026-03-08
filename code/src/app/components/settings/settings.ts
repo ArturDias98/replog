@@ -1,7 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy, viewChild, ElementRef, OnInit } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RouterLink } from '@angular/router';
-import { ExportImportPort, BackupPort } from '@replog/application';
+import { ExportImportPort, BackupPort, SyncUseCase } from '@replog/application';
 import { I18nUseCase } from '../../i18n';
 import { Language } from '@replog/shared';
 
@@ -16,6 +16,7 @@ export class SettingsComponent implements OnInit {
     protected readonly i18n = inject(I18nUseCase);
     private readonly exportImportPort = inject(ExportImportPort);
     private readonly backupPort = inject(BackupPort);
+    private readonly syncUseCase = inject(SyncUseCase);
 
     protected readonly languages: { value: Language; labelKey: string }[] = [
         { value: 'en', labelKey: 'settings.languageEn' },
@@ -24,6 +25,7 @@ export class SettingsComponent implements OnInit {
 
     protected readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
+    protected readonly syncing = signal(false);
     protected readonly exporting = signal(false);
     protected readonly importing = signal(false);
     protected readonly backupUri = signal<string | null>(null);
@@ -38,6 +40,26 @@ export class SettingsComponent implements OnInit {
 
     protected selectLanguage(lang: Language): void {
         this.i18n.setLanguage(lang);
+    }
+
+    protected async syncNow(): Promise<void> {
+        if (this.syncing()) return;
+
+        this.syncing.set(true);
+        this.clearMessage();
+
+        try {
+            const status = await this.syncUseCase.sync();
+            if (status === 'success') {
+                this.showMessage('settings.syncSuccess', 'success');
+            } else {
+                this.showMessage('settings.syncError', 'error');
+            }
+        } catch {
+            this.showMessage('settings.syncError', 'error');
+        } finally {
+            this.syncing.set(false);
+        }
     }
 
     protected async exportData(): Promise<void> {
