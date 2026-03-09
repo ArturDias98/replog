@@ -12,13 +12,10 @@ export class TokenRefreshUseCase {
         if (this.intervalId) return;
 
         this.intervalId = setInterval(async () => {
+            if (this.auth.isAuthenticated()) return;
             if (!this.auth.getUser()) return;
-            if (!this.auth.isTokenExpired()) return;
 
-            const token = await this.auth.refreshToken();
-            if (!token) {
-                this.auth.signOut();
-            }
+            await this.auth.refreshToken();
         }, TokenRefreshUseCase.CHECK_INTERVAL_MS);
     }
 

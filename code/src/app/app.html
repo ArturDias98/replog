@@ -38,6 +38,9 @@
               [attr.aria-label]="'auth.signedInAs' | transloco"
               [attr.aria-expanded]="showUserMenu()">
               <img [src]="user.picture" [alt]="user.name" class="user-avatar" referrerpolicy="no-referrer" />
+              @if (tokenExpired()) {
+                <span class="auth-dot auth-dot-red" aria-hidden="true"></span>
+              }
             </button>
             @if (showUserMenu()) {
               <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>

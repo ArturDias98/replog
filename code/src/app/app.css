@@ -107,6 +107,7 @@
 }
 
 .btn-user-avatar {
+    position: relative;
     background: transparent;
     border: 2px solid transparent;
     padding: 0;
@@ -130,6 +131,19 @@
     height: 30px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.auth-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.auth-dot-red {
+    background: #ef4444;
 }
 
 .user-menu-backdrop {

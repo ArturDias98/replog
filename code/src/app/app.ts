@@ -27,6 +27,7 @@ export class App implements OnInit, OnDestroy {
     protected readonly toastMessage = signal<string | null>(null);
     protected readonly toastType = signal<'success' | 'error' | null>(null);
     protected readonly toastVisible = signal(false);
+    protected readonly tokenExpired = signal(false);
     protected readonly googleBtnContainer = viewChild<ElementRef>('googleBtn');
 
     private toastTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -44,15 +45,6 @@ export class App implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.authPort.initialize();
         this.currentUser.set(this.authPort.getUser());
-
-        if (this.authPort.getUser() && this.authPort.isTokenExpired()) {
-            this.authPort.refreshToken().then((token) => {
-                if (!token) {
-                    this.authPort.signOut();
-                    this.currentUser.set(null);
-                }
-            });
-        }
 
         this.authPort.onUserChange(async (user) => {
             this.currentUser.set(user);
@@ -129,10 +121,13 @@ export class App implements OnInit, OnDestroy {
 
     private startSyncStatusPolling(): void {
         this.statusIntervalId = setInterval(async () => {
-            if (!this.currentUser()) {
+            const user = this.currentUser();
+            if (!user) {
                 this.syncStatus.set('idle');
+                this.tokenExpired.set(false);
                 return;
             }
+            this.tokenExpired.set(!this.authPort.isAuthenticated());
             const count = await this.syncQueue.getPendingChangeCount();
             this.syncStatus.set(count > 0 ? 'pending' : 'synced');
         }, 2000);
