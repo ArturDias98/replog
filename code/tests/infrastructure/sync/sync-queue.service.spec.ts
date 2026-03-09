@@ -272,7 +272,7 @@ describe('SyncQueueServiceImpl', () => {
             expect(changes[3].action).toBe('CREATE');
             expect(changes[3].data).toEqual({
                 id: 'l1', workoutId: 'w1', muscleGroupId: 'mg1', exerciseId: 'ex1',
-                numberReps: 10, maxWeight: 80, date: '2026-03-01',
+                numberReps: 10, maxWeight: 80, date: '2026-03-01', orderIndex: 0,
             });
         });
 

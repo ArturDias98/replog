@@ -16,6 +16,7 @@ export class LogUseCase {
         for (const workout of workouts) {
             const mg = workout.muscleGroup.find(mg => mg.exercises.some(ex => ex.id === model.exerciseId));
             if (mg) {
+                const exercise = mg.exercises.find(ex => ex.id === model.exerciseId);
                 const dateStr = model.date instanceof Date
                     ? model.date.toISOString().split('T')[0]
                     : String(model.date);
@@ -27,6 +28,7 @@ export class LogUseCase {
                     numberReps: model.numberReps,
                     maxWeight: model.maxWeight,
                     date: dateStr,
+                    orderIndex: exercise ? exercise.log.length - 1 : 0,
                 });
                 break;
             }

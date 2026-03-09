@@ -184,7 +184,9 @@ export class SyncUseCase {
                                 id: ex.id,
                                 muscleGroupId: ex.muscleGroupId,
                                 title: ex.title,
-                                log: ex.log.map(l => ({
+                                log: [...ex.log]
+                                .sort((a, b) => a.orderIndex - b.orderIndex)
+                                .map(l => ({
                                     id: l.id,
                                     numberReps: l.numberReps,
                                     maxWeight: l.maxWeight,

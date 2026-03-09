@@ -93,7 +93,8 @@ export class SyncQueueServiceImpl extends SyncQueuePort {
                         orderIndex: exi,
                     });
 
-                    for (const log of ex.log) {
+                    for (let li = 0; li < ex.log.length; li++) {
+                        const log = ex.log[li];
                         const dateStr = log.date instanceof Date
                             ? log.date.toISOString().split('T')[0]
                             : String(log.date);
@@ -105,6 +106,7 @@ export class SyncQueueServiceImpl extends SyncQueuePort {
                             numberReps: log.numberReps,
                             maxWeight: log.maxWeight,
                             date: dateStr,
+                            orderIndex: li,
                         });
                     }
                 }

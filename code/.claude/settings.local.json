@@ -15,7 +15,9 @@
       "Bash(mkdir -p projects/infrastructure/src/lib/persistence projects/infrastructure/src/lib/sync projects/infrastructure/src/lib/auth projects/infrastructure/src/lib/backup projects/infrastructure/src/lib/preferences projects/infrastructure/src/lib/export-import)",
       "Bash(ls -la /d/Projetos/replog/code/projects/*/)",
       "Bash(npm install --save-dev fake-indexeddb)",
-      "Bash(npx ng test infrastructure)"
+      "Bash(npx ng test infrastructure)",
+      "Bash(xargs grep -l \"reorder\\\\|orderIndex\")",
+      "Bash(xargs cat)"
     ]
   }
 }

@@ -63,4 +63,5 @@ export type SyncPullLog = {
     numberReps: number;
     maxWeight: number;
     date: string;
+    orderIndex: number;
 };
