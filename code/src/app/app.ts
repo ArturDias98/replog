@@ -125,7 +125,7 @@ export class App implements OnInit, OnDestroy {
                 this.tokenExpired.set(false);
                 return;
             }
-            this.tokenExpired.set(!this.authPort.isAuthenticated());
+            this.tokenExpired.set(this.authPort.getCredentials() !== null && this.authPort.isTokenExpired());
             const count = await this.syncQueue.getPendingChangeCount();
             this.syncStatus.set(count > 0 ? 'pending' : 'synced');
         }, 2000);

@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthUser } from '@replog/shared';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { AuthUser, AuthCredentials, LoginResponse, RefreshResponse } from '@replog/shared';
 import { StoragePort } from '@replog/application';
 import { AuthPort } from './auth.port';
 import { environment } from '../../environments/environment';
@@ -31,14 +33,16 @@ declare const google: {
 };
 
 const STORAGE_KEY = 'replog_auth_user';
-const TOKEN_STORAGE_KEY = 'replog_auth_token';
+const CREDENTIALS_STORAGE_KEY = 'replog_auth_credentials';
+const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000;
 
 @Injectable()
 export class AuthServiceImpl extends AuthPort {
-    private static readonly TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
+    private readonly http = inject(HttpClient);
     private readonly storage = inject(StoragePort);
     private initialized = false;
     private onAuthChangeCallback: ((user: AuthUser | null) => void) | null = null;
+    private refreshPromise: Promise<string | null> | null = null;
 
     private readonly gisReady = new Promise<void>((resolve) => {
         if (typeof google !== 'undefined' && google.accounts) {
@@ -93,22 +97,49 @@ export class AuthServiceImpl extends AuthPort {
         }
     }
 
-    getIdToken(): string | null {
-        return localStorage.getItem(TOKEN_STORAGE_KEY);
+    getAccessToken(): string | null {
+        return this.getCredentials()?.accessToken ?? null;
+    }
+
+    getCredentials(): AuthCredentials | null {
+        try {
+            const raw = localStorage.getItem(CREDENTIALS_STORAGE_KEY);
+            if (!raw) return null;
+            return JSON.parse(raw) as AuthCredentials;
+        } catch {
+            return null;
+        }
     }
 
     isAuthenticated(): boolean {
-        return this.getUser() !== null && this.getIdToken() !== null && !this.isTokenExpired();
+        return this.getUser() !== null && this.getCredentials() !== null && !this.isTokenExpired();
     }
 
     isTokenExpired(): boolean {
-        const token = this.getIdToken();
-        if (!token) return true;
+        const credentials = this.getCredentials();
+        if (!credentials) return true;
 
-        const expMs = this.getTokenExpiration(token);
-        if (expMs === null) return true;
+        const expiresAtMs = new Date(credentials.expiresAt).getTime();
+        return Date.now() >= expiresAtMs - TOKEN_EXPIRY_BUFFER_MS;
+    }
 
-        return Date.now() >= expMs - AuthServiceImpl.TOKEN_EXPIRY_BUFFER_MS;
+    async ensureValidToken(): Promise<string | null> {
+        const credentials = this.getCredentials();
+        if (!credentials) return null;
+
+        const expiresAtMs = new Date(credentials.expiresAt).getTime();
+        if (Date.now() < expiresAtMs - TOKEN_EXPIRY_BUFFER_MS) {
+            return credentials.accessToken;
+        }
+
+        if (this.refreshPromise) return this.refreshPromise;
+
+        this.refreshPromise = this.performRefresh(credentials);
+        try {
+            return await this.refreshPromise;
+        } finally {
+            this.refreshPromise = null;
+        }
     }
 
     signOut(): void {
@@ -122,7 +153,7 @@ export class AuthServiceImpl extends AuthPort {
             }
         }
         localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        localStorage.removeItem(CREDENTIALS_STORAGE_KEY);
         this.onAuthChangeCallback?.(null);
     }
 
@@ -142,10 +173,18 @@ export class AuthServiceImpl extends AuthPort {
         }
     }
 
-    private getTokenExpiration(token: string): number | null {
+    private async performRefresh(credentials: AuthCredentials): Promise<string | null> {
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+            const response = await firstValueFrom(
+                this.http.post<RefreshResponse>(`${environment.apiBaseUrl}/api/auth/refresh`, {
+                    accessToken: credentials.accessToken,
+                    refreshToken: credentials.refreshToken,
+                }),
+            );
+
+            this.storeCredentials(response);
+            this.updateUserFromToken(response.accessToken);
+            return response.accessToken;
         } catch {
             return null;
         }
@@ -153,22 +192,40 @@ export class AuthServiceImpl extends AuthPort {
 
     private async handleCredentialResponse(response: { credential: string }): Promise<void> {
         try {
-            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            const loginResponse = await firstValueFrom(
+                this.http.post<LoginResponse>(`${environment.apiBaseUrl}/api/auth/login`, {
+                    googleIdToken: response.credential,
+                }),
+            );
 
-            const user: AuthUser = {
-                id: payload.sub,
-                name: payload.name,
-                email: payload.email,
-                picture: payload.picture,
-            };
+            this.storeCredentials(loginResponse);
+            const user = this.extractUserFromToken(loginResponse.accessToken);
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-            localStorage.setItem(TOKEN_STORAGE_KEY, response.credential);
             await this.migrateTemporaryUserIds(user.id);
 
             this.onAuthChangeCallback?.(user);
         } catch (error) {
-            console.error('Google sign-in failed:', error);
+            console.error('Login failed:', error);
         }
+    }
+
+    private extractUserFromToken(accessToken: string): AuthUser {
+        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+        return {
+            id: payload.sub,
+            name: payload.name,
+            email: payload.email,
+            picture: payload.picture,
+        };
+    }
+
+    private updateUserFromToken(accessToken: string): void {
+        const user = this.extractUserFromToken(accessToken);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    }
+
+    private storeCredentials(credentials: AuthCredentials): void {
+        localStorage.setItem(CREDENTIALS_STORAGE_KEY, JSON.stringify(credentials));
     }
 }
