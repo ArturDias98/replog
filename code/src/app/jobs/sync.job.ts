@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { SyncUseCase } from '@replog/application';
 import { AuthPort } from '../auth';
 
-const DEFAULT_INTERVAL_MS = 1000;
+const DEFAULT_INTERVAL_MS = 5000;
 
 @Injectable({ providedIn: 'root' })
 export class SyncJob {
