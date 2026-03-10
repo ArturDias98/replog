@@ -11,6 +11,7 @@ declare const google: {
                 client_id: string;
                 callback: (response: { credential: string }) => void;
                 auto_select?: boolean;
+                use_fedcm_for_button?: boolean;
             }): void;
             renderButton(
                 parent: HTMLElement,
@@ -23,11 +24,6 @@ declare const google: {
                     width?: number;
                 }
             ): void;
-            prompt(callback?: (notification: {
-                isNotDisplayed(): boolean;
-                isSkippedMoment(): boolean;
-                isDismissedMoment(): boolean;
-            }) => void): void;
             revoke(hint: string, callback?: () => void): void;
             disableAutoSelect(): void;
         };
@@ -40,13 +36,9 @@ const TOKEN_STORAGE_KEY = 'replog_auth_token';
 @Injectable()
 export class AuthServiceImpl extends AuthPort {
     private static readonly TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
-    private static readonly REFRESH_TIMEOUT_MS = 10_000;
-
     private readonly storage = inject(StoragePort);
     private initialized = false;
     private onAuthChangeCallback: ((user: AuthUser | null) => void) | null = null;
-    private refreshPromise: Promise<string | null> | null = null;
-    private onCredentialRefreshResolve: ((credential: string | null) => void) | null = null;
 
     private readonly gisReady = new Promise<void>((resolve) => {
         if (typeof google !== 'undefined' && google.accounts) {
@@ -71,6 +63,7 @@ export class AuthServiceImpl extends AuthPort {
             client_id: environment.googleClientId,
             callback: (response) => this.handleCredentialResponse(response),
             auto_select: true,
+            use_fedcm_for_button: true,
         });
     }
 
@@ -118,18 +111,6 @@ export class AuthServiceImpl extends AuthPort {
         return Date.now() >= expMs - AuthServiceImpl.TOKEN_EXPIRY_BUFFER_MS;
     }
 
-    async refreshToken(): Promise<string | null> {
-        if (this.refreshPromise) {
-            return this.refreshPromise;
-        }
-
-        this.refreshPromise = this.attemptSilentRefresh().finally(() => {
-            this.refreshPromise = null;
-        });
-
-        return this.refreshPromise;
-    }
-
     signOut(): void {
         const user = this.getUser();
         if (user) {
@@ -170,35 +151,6 @@ export class AuthServiceImpl extends AuthPort {
         }
     }
 
-    private attemptSilentRefresh(): Promise<string | null> {
-        return new Promise<string | null>((resolve) => {
-            const timeout = setTimeout(() => {
-                this.onCredentialRefreshResolve = null;
-                resolve(null);
-            }, AuthServiceImpl.REFRESH_TIMEOUT_MS);
-
-            this.onCredentialRefreshResolve = (credential: string | null) => {
-                clearTimeout(timeout);
-                this.onCredentialRefreshResolve = null;
-                resolve(credential);
-            };
-
-            try {
-                google.accounts.id.prompt((notification) => {
-                    if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
-                        clearTimeout(timeout);
-                        this.onCredentialRefreshResolve = null;
-                        resolve(null);
-                    }
-                });
-            } catch {
-                clearTimeout(timeout);
-                this.onCredentialRefreshResolve = null;
-                resolve(null);
-            }
-        });
-    }
-
     private async handleCredentialResponse(response: { credential: string }): Promise<void> {
         try {
             const payload = JSON.parse(atob(response.credential.split('.')[1]));
@@ -215,10 +167,8 @@ export class AuthServiceImpl extends AuthPort {
             await this.migrateTemporaryUserIds(user.id);
 
             this.onAuthChangeCallback?.(user);
-            this.onCredentialRefreshResolve?.(response.credential);
         } catch (error) {
             console.error('Google sign-in failed:', error);
-            this.onCredentialRefreshResolve?.(null);
         }
     }
 }

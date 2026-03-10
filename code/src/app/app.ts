@@ -3,7 +3,7 @@ import { RouterOutlet, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthUser } from '@replog/shared';
 import { StoragePort, SyncQueuePort, SyncUseCase } from '@replog/application';
-import { AuthPort, TokenRefreshUseCase } from './auth';
+import { AuthPort } from './auth';
 import { SyncJob } from './jobs/sync.job';
 
 @Component({
@@ -19,7 +19,6 @@ export class App implements OnInit, OnDestroy {
     private readonly syncUseCase = inject(SyncUseCase);
     private readonly syncQueue = inject(SyncQueuePort);
     private readonly syncJob = inject(SyncJob);
-    private readonly tokenRefreshUseCase = inject(TokenRefreshUseCase);
 
     protected readonly currentUser = signal<AuthUser | null>(null);
     protected readonly showUserMenu = signal(false);
@@ -54,7 +53,6 @@ export class App implements OnInit, OnDestroy {
         });
 
         this.syncJob.start();
-        this.tokenRefreshUseCase.initialize();
         this.startSyncStatusPolling();
     }
 
