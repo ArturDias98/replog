@@ -3,8 +3,10 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Project Documentation
 
-The project documentation (backend API spec, sync strategy, etc.) lives in a separate repository: [replog-docs](https://github.com/ArturDias98/replog-docs).
-When you need project requirements, API contracts, or sync behavior details, fetch the relevant files from that repository using `gh` or `WebFetch`.
+- **Backend API** (spec, contracts): fetch from the permalink [replog-api/docs](https://github.com/ArturDias98/replog-api/tree/2f1f629e7772f1d83c304a40ea14ef100ea261ce/docs) using `gh` or `WebFetch`.
+- **Web project** (sync strategy, flow, etc.): read from the local `docs/` directory.
+
+After any implementation that affects documented behavior, update the relevant files in `docs/`.
 
 ## Project Structure
 
