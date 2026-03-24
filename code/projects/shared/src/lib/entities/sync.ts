@@ -17,6 +17,7 @@ export type SyncPushRequest = {
 
 export type SyncPushResponse = {
     acknowledgedChangeIds: string[];
+    failedChangeIds: string[];
     conflicts: SyncConflict[];
     serverTimestamp: string;
 };
