@@ -18,7 +18,7 @@ if (fs.existsSync(envPath)) {
 }
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID || envVars.GOOGLE_CLIENT_ID || '';
-const apiBaseUrl = process.env.API_BASE_URL || envVars.API_BASE_URL || 'http://localhost:5139';
+const apiBaseUrl = process.env.API_BASE_URL || envVars.API_BASE_URL || '';
 
 const envDir = path.resolve(__dirname, '..', 'src', 'environments');
 if (!fs.existsSync(envDir)) {

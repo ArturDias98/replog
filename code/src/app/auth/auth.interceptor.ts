@@ -5,7 +5,12 @@ import { AuthPort } from './auth.port';
 import { environment } from '../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-    if (!req.url.startsWith(environment.apiBaseUrl)) return next(req);
+    const apiBaseUrl = environment.apiBaseUrl;
+    const isApiRequest = apiBaseUrl
+        ? req.url.startsWith(apiBaseUrl)
+        : req.url.startsWith('/api/');
+
+    if (!isApiRequest) return next(req);
 
     const reqWithCredentials = req.clone({ withCredentials: true });
 

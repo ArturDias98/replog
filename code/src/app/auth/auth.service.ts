@@ -13,7 +13,6 @@ declare const google: {
                 client_id: string;
                 callback: (response: { credential: string }) => void;
                 auto_select?: boolean;
-                use_fedcm_for_button?: boolean;
             }): void;
             renderButton(
                 parent: HTMLElement,
@@ -67,7 +66,6 @@ export class AuthServiceImpl extends AuthPort {
             client_id: environment.googleClientId,
             callback: (response) => this.handleCredentialResponse(response),
             auto_select: true,
-            use_fedcm_for_button: true,
         });
     }
 

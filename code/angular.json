@@ -60,7 +60,8 @@
               "buildTarget": "code:build:production"
             },
             "development": {
-              "buildTarget": "code:build:development"
+              "buildTarget": "code:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
