@@ -91,7 +91,7 @@ export class App implements OnInit, OnDestroy {
 
     protected async onSignOut(): Promise<void> {
         await this.syncQueue.clearAll();
-        this.authPort.signOut();
+        await this.authPort.signOut();
         this.currentUser.set(null);
         this.showUserMenu.set(false);
         this.syncStatus.set('idle');

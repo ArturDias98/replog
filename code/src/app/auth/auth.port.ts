@@ -9,6 +9,6 @@ export abstract class AuthPort {
     abstract isAuthenticated(): boolean;
     abstract isTokenExpired(): boolean;
     abstract ensureValidToken(): Promise<boolean>;
-    abstract signOut(): void;
+    abstract signOut(): Promise<void>;
     abstract migrateTemporaryUserIds(googleUserId: string): Promise<void>;
 }

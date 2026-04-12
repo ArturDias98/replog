@@ -133,7 +133,7 @@ export class AuthServiceImpl extends AuthPort {
         }
     }
 
-    signOut(): void {
+    async signOut(): Promise<void> {
         const user = this.getUser();
         if (user) {
             try {
@@ -143,7 +143,11 @@ export class AuthServiceImpl extends AuthPort {
                 // GIS may not be loaded (offline)
             }
         }
-        this.http.post(`${environment.apiBaseUrl}/api/auth/logout`, {}).subscribe({ error: () => {} });
+        try {
+            await firstValueFrom(this.http.post(`${environment.apiBaseUrl}/api/auth/logout`, {}));
+        } catch {
+            // proceed with local sign-out even if the server call fails
+        }
         this.credentials = null;
         localStorage.removeItem(STORAGE_KEY);
         this.onAuthChangeCallback?.(null);
