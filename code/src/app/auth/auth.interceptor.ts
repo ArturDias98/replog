@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { from, switchMap } from 'rxjs';
+import { from, switchMap, throwError } from 'rxjs';
 import { AuthPort } from './auth.port';
 import { environment } from '../../environments/environment';
 
@@ -19,6 +19,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthPort);
 
     return from(authService.ensureValidToken()).pipe(
-        switchMap(() => next(reqWithCredentials)),
+        switchMap((isValid) => {
+            if (!isValid) {
+                return throwError(() => new Error('Not authenticated'));
+            }
+            return next(reqWithCredentials);
+        }),
     );
 };

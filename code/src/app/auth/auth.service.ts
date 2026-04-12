@@ -113,11 +113,14 @@ export class AuthServiceImpl extends AuthPort {
 
     async ensureValidToken(): Promise<boolean> {
         const credentials = this.getCredentials();
-        if (!credentials) return false;
 
-        const expiresAtMs = new Date(credentials.expiresAt).getTime();
-        if (Date.now() < expiresAtMs - TOKEN_EXPIRY_BUFFER_MS) {
-            return true;
+        if (credentials) {
+            const expiresAtMs = new Date(credentials.expiresAt).getTime();
+            if (Date.now() < expiresAtMs - TOKEN_EXPIRY_BUFFER_MS) {
+                return true;
+            }
+        } else if (!this.getUser()) {
+            return false;
         }
 
         if (this.refreshPromise) return this.refreshPromise;
@@ -172,6 +175,9 @@ export class AuthServiceImpl extends AuthPort {
             this.storeUser(response);
             return true;
         } catch {
+            this.credentials = null;
+            localStorage.removeItem(STORAGE_KEY);
+            this.onAuthChangeCallback?.(null);
             return false;
         }
     }
