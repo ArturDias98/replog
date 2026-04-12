@@ -6,12 +6,17 @@ export type AuthUser = {
 };
 
 export type AuthCredentials = {
-    accessToken: string;
-    refreshToken: string;
     expiresAt: string;
 };
 
 export type LoginRequest = { googleIdToken: string };
-export type LoginResponse = AuthCredentials;
-export type RefreshRequest = { accessToken: string; refreshToken: string };
-export type RefreshResponse = AuthCredentials;
+
+export type LoginResponse = {
+    expiresAt: string;
+    userId: string;
+    email: string;
+    displayName: string;
+    avatarUrl: string;
+};
+
+export type RefreshResponse = LoginResponse;

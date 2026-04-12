@@ -5,11 +5,10 @@ export abstract class AuthPort {
     abstract renderButton(container: HTMLElement): Promise<void>;
     abstract onUserChange(callback: (user: AuthUser | null) => void): void;
     abstract getUser(): AuthUser | null;
-    abstract getAccessToken(): string | null;
     abstract getCredentials(): AuthCredentials | null;
     abstract isAuthenticated(): boolean;
     abstract isTokenExpired(): boolean;
-    abstract ensureValidToken(): Promise<string | null>;
+    abstract ensureValidToken(): Promise<boolean>;
     abstract signOut(): void;
     abstract migrateTemporaryUserIds(googleUserId: string): Promise<void>;
 }

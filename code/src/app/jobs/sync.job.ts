@@ -14,8 +14,8 @@ export class SyncJob {
         if (this.intervalId) return;
 
         this.intervalId = setInterval(async () => {
-            const token = await this.authPort.ensureValidToken();
-            if (!token) return;
+            const isValid = await this.authPort.ensureValidToken();
+            if (!isValid) return;
             this.syncUseCase.sync();
         }, intervalMs);
     }
