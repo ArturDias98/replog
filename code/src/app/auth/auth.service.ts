@@ -179,9 +179,10 @@ export class AuthServiceImpl extends AuthPort {
             this.storeUser(response);
             return true;
         } catch {
+            // On any failure, only drop the in-memory credentials.
+            // localStorage is never touched here — sign-out is exclusively
+            // triggered by the user clicking "Sign out".
             this.credentials = null;
-            localStorage.removeItem(STORAGE_KEY);
-            this.onAuthChangeCallback?.(null);
             return false;
         }
     }
