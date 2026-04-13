@@ -155,7 +155,6 @@ export class AuthServiceImpl extends AuthPort {
         try {
             await firstValueFrom(this.http.post(`${environment.apiBaseUrl}/api/auth/logout`, {}));
         } catch {
-            // proceed with local sign-out even if the server call fails
         }
         this.credentials = null;
         localStorage.removeItem(STORAGE_KEY);
