@@ -61,7 +61,7 @@
             },
             "development": {
               "buildTarget": "code:build:development",
-              "proxyConfig": "proxy.conf.json"
+              "proxyConfig": "proxy.conf.js"
             }
           },
           "defaultConfiguration": "development"
