@@ -1,19 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const envVars = {};
-const envPath = path.resolve(__dirname, '.env');
-if (fs.existsSync(envPath)) {
-  for (const line of fs.readFileSync(envPath, 'utf-8').split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const eq = trimmed.indexOf('=');
-    if (eq === -1) continue;
-    envVars[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
-  }
-}
+const envJsPath = path.resolve(__dirname, 'public', 'env.js');
+let target = '';
 
-const target = process.env.API_BASE_URL || envVars.API_BASE_URL || '';
+if (fs.existsSync(envJsPath)) {
+  const content = fs.readFileSync(envJsPath, 'utf-8');
+  const match = content.match(/window\.__env\.apiBaseUrl\s*=\s*['"]([^'"]*)['"]/);
+  if (match) target = match[1];
+}
 
 module.exports = {
   '/api': {

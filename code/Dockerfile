@@ -5,7 +5,7 @@ RUN npm ci
 COPY . .
 RUN npm run build --production
 
-FROM nginx:25-alpine3.22
+FROM nginx:1.29.8
 COPY --from=build /app/dist/code/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker-entrypoint.sh /docker-entrypoint.sh

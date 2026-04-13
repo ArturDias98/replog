@@ -40,8 +40,8 @@ testem.log
 __screenshots__/
 
 # Environment secrets
-.env
 /src/environments/environment.ts
+/public/env.js
 
 # System files
 .DS_Store
