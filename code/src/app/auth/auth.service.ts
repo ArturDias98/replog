@@ -227,5 +227,6 @@ export class AuthServiceImpl extends AuthPort {
 
     private storeCredentials(credentials: AuthCredentials): void {
         this.credentials = credentials;
+        localStorage.setItem(CREDENTIALS_STORAGE_KEY, JSON.stringify(credentials));
     }
 }
