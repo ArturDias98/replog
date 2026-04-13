@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build --development
+RUN npm run build
 
 FROM nginx:1.29.8
 COPY --from=build /app/dist/code/browser /usr/share/nginx/html
