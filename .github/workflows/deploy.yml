@@ -15,8 +15,8 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: replog
   ECS_CLUSTER: replog-cluster
-  ECS_SERVICE: replog
-  CONTAINER_NAME: replog
+  ECS_SERVICE: replog-frontend
+  CONTAINER_NAME: replog-frontend
 
 jobs:
   deploy:
