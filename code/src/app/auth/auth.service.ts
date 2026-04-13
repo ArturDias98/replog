@@ -32,6 +32,7 @@ declare const google: {
 };
 
 const STORAGE_KEY = 'replog_auth_user';
+const CREDENTIALS_STORAGE_KEY = 'replog_auth_credentials';
 const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000;
 
 @Injectable()
@@ -96,7 +97,15 @@ export class AuthServiceImpl extends AuthPort {
     }
 
     getCredentials(): AuthCredentials | null {
-        return this.credentials;
+        if (this.credentials) return this.credentials;
+        try {
+            const raw = localStorage.getItem(CREDENTIALS_STORAGE_KEY);
+            if (!raw) return null;
+            this.credentials = JSON.parse(raw) as AuthCredentials;
+            return this.credentials;
+        } catch {
+            return null;
+        }
     }
 
     isAuthenticated(): boolean {
@@ -150,6 +159,7 @@ export class AuthServiceImpl extends AuthPort {
         }
         this.credentials = null;
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(CREDENTIALS_STORAGE_KEY);
         this.onAuthChangeCallback?.(null);
     }
 

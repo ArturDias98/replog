@@ -119,13 +119,7 @@ export class App implements OnInit, OnDestroy {
 
     private startSyncStatusPolling(): void {
         this.statusIntervalId = setInterval(async () => {
-            const user = this.currentUser();
-            if (!user) {
-                this.syncStatus.set('idle');
-                this.tokenExpired.set(false);
-                return;
-            }
-            this.tokenExpired.set(this.authPort.getCredentials() !== null && this.authPort.isTokenExpired());
+            this.tokenExpired.set(!this.authPort.isAuthenticated());
             const count = await this.syncQueue.getPendingChangeCount();
             this.syncStatus.set(count > 0 ? 'pending' : 'synced');
         }, 2000);
