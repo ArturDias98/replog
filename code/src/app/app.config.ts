@@ -20,7 +20,10 @@ import {
     SyncApiPort,
     BackupPort,
     ExportImportPort,
+    API_BASE_URL,
 } from '@replog/application';
+
+import { environment } from '../environments/environment';
 
 import {
     StorageServiceImpl,
@@ -82,6 +85,7 @@ export const appConfig: ApplicationConfig = {
         { provide: ExerciseRepository, useClass: ExerciseRepositoryImpl },
         { provide: LogRepository, useClass: LogRepositoryImpl },
         { provide: SyncQueuePort, useClass: SyncQueueServiceImpl },
+        { provide: API_BASE_URL, useFactory: () => environment.apiBaseUrl },
         { provide: SyncApiPort, useClass: SyncApiServiceImpl },
         { provide: AuthPort, useClass: AuthServiceImpl },
         { provide: BackupPort, useClass: BackupServiceImpl },

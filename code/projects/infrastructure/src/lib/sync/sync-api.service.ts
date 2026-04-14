@@ -2,13 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SyncPushRequest, SyncPushResponse, SyncPullResponse } from '@replog/shared';
-import { SyncApiPort } from '@replog/application';
-import { environment } from '../../../../../src/environments/environment';
+import { SyncApiPort, API_BASE_URL } from '@replog/application';
 
 @Injectable()
 export class SyncApiServiceImpl extends SyncApiPort {
     private readonly http = inject(HttpClient);
-    private readonly baseUrl = environment.apiBaseUrl;
+    private readonly baseUrl = inject(API_BASE_URL);
 
     push(request: SyncPushRequest): Observable<SyncPushResponse> {
         return this.http.post<SyncPushResponse>(`${this.baseUrl}/api/sync/push`, request);
