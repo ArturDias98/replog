@@ -26,7 +26,10 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "define": {
+              "APP_VERSION": "'2.0.0'"
+            }
           },
           "configurations": {
             "production": {
@@ -119,7 +122,9 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "tests/infrastructure/tsconfig.spec.json",
-            "include": ["../../../tests/infrastructure/**/*.spec.ts"]
+            "include": [
+              "../../../tests/infrastructure/**/*.spec.ts"
+            ]
           }
         }
       }

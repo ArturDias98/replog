@@ -36,11 +36,41 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Never cache the app shell, service worker, runtime config, or manifest.
+    # Browsers and the SW must always revalidate these on every request.
+    location = /index.html {
+        add_header Cache-Control "no-store, must-revalidate";
+    }
+
+    location = /ngsw.json {
+        add_header Cache-Control "no-store, must-revalidate";
+    }
+
+    location = /ngsw-worker.js {
+        add_header Cache-Control "no-store, must-revalidate";
+    }
+
+    location = /env.js {
+        add_header Cache-Control "no-store, must-revalidate";
+    }
+
+    location = /manifest.webmanifest {
+        add_header Cache-Control "no-store, must-revalidate";
+    }
+
+    # Hashed JS/CSS bundles are safe to cache indefinitely (Angular outputHashing: "all").
+    location ~* \.(?:js|css)$ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
     location / {
         try_files $uri $uri/ /index.html;
     }
 }
 ```
+
+The exact-match `location =` blocks take priority over the regex `location ~*` block, so
+`env.js` and `ngsw-worker.js` always get `no-store` instead of the immutable header.
 
 The `try_files` directive ensures Angular client-side routes (e.g. `/workouts`, `/settings`)
 serve `index.html` instead of returning 404. This does not interfere with `/api/*` requests —
@@ -210,4 +240,5 @@ is never forwarded to the frontend container.
 | CloudWatch Log Group      | `/ecs/replog`|
 | Auto-scaling              | CPU 70%, min 2, max 4 |
 | Container port            | 80 (Nginx)            |
+
 ```

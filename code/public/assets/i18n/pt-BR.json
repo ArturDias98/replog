@@ -44,7 +44,8 @@
     "syncButton": "Sincronizar Agora",
     "syncing": "Sincronizando...",
     "syncSuccess": "Sincronização concluída com sucesso!",
-    "syncError": "Falha na sincronização. Tente novamente."
+    "syncError": "Falha na sincronização. Tente novamente.",
+    "version": "Versão"
   },
   "workout": {
     "loading": "Carregando treinos...",
@@ -201,5 +202,9 @@
     "syncNow": "Sincronizar agora",
     "success": "Sincronização concluída!",
     "error": "Falha na sincronização. Tente novamente."
+  },
+  "app": {
+    "updateAvailable": "Nova versão disponível",
+    "updateAction": "Atualizar"
   }
 }

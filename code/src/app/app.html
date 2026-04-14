@@ -15,49 +15,41 @@
           </svg>
         </a>
         @if (currentUser(); as user) {
-          <button
-            class="btn-icon-sync"
-            (click)="syncNow()"
-            [attr.aria-label]="'sync.syncNow' | transloco">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="23 4 23 10 17 10" />
-              <polyline points="1 20 1 14 7 14" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
-              <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
-            </svg>
-            <span class="sync-dot"
-              [class.sync-dot-green]="syncStatus() === 'synced'"
-              [class.sync-dot-red]="syncStatus() === 'pending'"
-              aria-hidden="true"></span>
-          </button>
-          <div class="user-menu-wrapper">
-            <button
-              class="btn-user-avatar"
-              (click)="toggleUserMenu()"
-              [attr.aria-label]="'auth.signedInAs' | transloco"
-              [attr.aria-expanded]="showUserMenu()">
-              <img [src]="user.picture" [alt]="user.name" class="user-avatar" referrerpolicy="no-referrer" />
-              @if (tokenExpired()) {
-                <span class="auth-dot auth-dot-red" aria-hidden="true"></span>
-              }
-            </button>
-            @if (showUserMenu()) {
-              <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>
-              <div class="user-menu" role="menu">
-                <div class="user-menu-info">
-                  <span class="user-menu-name">{{ user.name }}</span>
-                  <span class="user-menu-email">{{ user.email }}</span>
-                </div>
-                <hr class="user-menu-divider" />
-                <button class="user-menu-item" role="menuitem" (click)="onSignOut()">
-                  {{ 'auth.signOut' | transloco }}
-                </button>
-              </div>
+        <button class="btn-icon-sync" (click)="syncNow()" [attr.aria-label]="'sync.syncNow' | transloco">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="23 4 23 10 17 10" />
+            <polyline points="1 20 1 14 7 14" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
+            <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
+          </svg>
+          <span class="sync-dot" [class.sync-dot-green]="syncStatus() === 'synced'"
+            [class.sync-dot-red]="syncStatus() === 'pending'" aria-hidden="true"></span>
+        </button>
+        <div class="user-menu-wrapper">
+          <button class="btn-user-avatar" (click)="toggleUserMenu()" [attr.aria-label]="'auth.signedInAs' | transloco"
+            [attr.aria-expanded]="showUserMenu()">
+            <img [src]="user.picture" [alt]="user.name" class="user-avatar" referrerpolicy="no-referrer" />
+            @if (tokenExpired()) {
+            <span class="auth-dot auth-dot-red" aria-hidden="true"></span>
             }
+          </button>
+          @if (showUserMenu()) {
+          <div class="user-menu-backdrop" (click)="closeUserMenu()"></div>
+          <div class="user-menu" role="menu">
+            <div class="user-menu-info">
+              <span class="user-menu-name">{{ user.name }}</span>
+              <span class="user-menu-email">{{ user.email }}</span>
+            </div>
+            <hr class="user-menu-divider" />
+            <button class="user-menu-item" role="menuitem" (click)="onSignOut()">
+              {{ 'auth.signOut' | transloco }}
+            </button>
           </div>
+          }
+        </div>
         } @else {
-          <div class="google-btn-container" #googleBtn></div>
+        <div class="google-btn-container" #googleBtn></div>
         }
       </nav>
     </div>
@@ -69,12 +61,17 @@
     <router-outlet />
   </div>
   @if (toastVisible()) {
-    <div class="toast"
-      [class.toast-success]="toastType() === 'success'"
-      [class.toast-error]="toastType() === 'error'"
-      role="status"
-      aria-live="polite">
-      {{ toastMessage()! | transloco }}
-    </div>
+  <div class="toast" [class.toast-success]="toastType() === 'success'" [class.toast-error]="toastType() === 'error'"
+    role="status" aria-live="polite">
+    {{ toastMessage()! | transloco }}
+  </div>
+  }
+  @if (updateAvailable()) {
+  <div class="toast toast-update" role="alert" aria-live="assertive">
+    {{ 'app.updateAvailable' | transloco }}
+    <button class="toast-action" (click)="applyUpdate()">
+      {{ 'app.updateAction' | transloco }}
+    </button>
+  </div>
   }
 </main>

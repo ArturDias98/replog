@@ -5,6 +5,7 @@ import { AuthUser } from '@replog/shared';
 import { StoragePort, SyncQueuePort, SyncUseCase } from '@replog/application';
 import { AuthPort } from './auth';
 import { SyncJob } from './jobs/sync.job';
+import { AppUpdateService } from './app-update.service';
 
 @Component({
     selector: 'app-root',
@@ -19,8 +20,10 @@ export class App implements OnInit, OnDestroy {
     private readonly syncUseCase = inject(SyncUseCase);
     private readonly syncQueue = inject(SyncQueuePort);
     private readonly syncJob = inject(SyncJob);
+    private readonly appUpdate = inject(AppUpdateService);
 
     protected readonly currentUser = signal<AuthUser | null>(null);
+    protected readonly updateAvailable = this.appUpdate.updateAvailable;
     protected readonly showUserMenu = signal(false);
     protected readonly syncStatus = signal<'idle' | 'synced' | 'pending'>('idle');
     protected readonly toastMessage = signal<string | null>(null);
@@ -53,16 +56,22 @@ export class App implements OnInit, OnDestroy {
         });
 
         this.syncJob.start();
+        this.appUpdate.start();
         this.startSyncStatusPolling();
     }
 
     ngOnDestroy(): void {
+        this.appUpdate.stop();
         if (this.statusIntervalId) {
             clearInterval(this.statusIntervalId);
         }
         if (this.toastTimeout) {
             clearTimeout(this.toastTimeout);
         }
+    }
+
+    protected applyUpdate(): void {
+        this.appUpdate.activateAndReload();
     }
 
     protected async syncNow(): Promise<void> {

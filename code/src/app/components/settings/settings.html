@@ -3,7 +3,8 @@
         <div class="settings-title-row">
             <a routerLink="/" class="btn-icon-back" [attr.aria-label]="'common.goBack' | transloco">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
                     <path d="M19 12H5" />
                     <path d="M12 19l-7-7 7-7" />
                 </svg>
@@ -16,12 +17,8 @@
         <p class="settings-label">{{ 'settings.language' | transloco }}</p>
         <div class="language-options" role="radiogroup" [attr.aria-label]="'settings.language' | transloco">
             @for (lang of languages; track lang.value) {
-            <button
-                type="button"
-                class="language-option"
-                [class.active]="i18n.language() === lang.value"
-                [attr.aria-pressed]="i18n.language() === lang.value"
-                (click)="selectLanguage(lang.value)">
+            <button type="button" class="language-option" [class.active]="i18n.language() === lang.value"
+                [attr.aria-pressed]="i18n.language() === lang.value" (click)="selectLanguage(lang.value)">
                 {{ lang.labelKey | transloco }}
             </button>
             }
@@ -31,90 +28,77 @@
     <div class="settings-section data-section">
         <p class="settings-label">{{ 'settings.dataTitle' | transloco }}</p>
         <div class="data-buttons">
-            <button
-                type="button"
-                class="btn btn-primary"
-                [disabled]="exporting() || importing()"
+            <button type="button" class="btn btn-primary" [disabled]="exporting() || importing()"
                 (click)="exportData()">
                 @if (exporting()) {
-                    <span class="spinner-small" aria-hidden="true"></span>
-                    {{ 'settings.exporting' | transloco }}
+                <span class="spinner-small" aria-hidden="true"></span>
+                {{ 'settings.exporting' | transloco }}
                 } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    {{ 'settings.exportButton' | transloco }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                {{ 'settings.exportButton' | transloco }}
                 }
             </button>
-            <button
-                type="button"
-                class="btn btn-secondary"
-                [disabled]="exporting() || importing()"
+            <button type="button" class="btn btn-secondary" [disabled]="exporting() || importing()"
                 (click)="triggerImport()">
                 @if (importing()) {
-                    <span class="spinner-small" aria-hidden="true"></span>
-                    {{ 'settings.importing' | transloco }}
+                <span class="spinner-small" aria-hidden="true"></span>
+                {{ 'settings.importing' | transloco }}
                 } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    {{ 'settings.importButton' | transloco }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                {{ 'settings.importButton' | transloco }}
                 }
             </button>
         </div>
         @if (dataMessage()) {
-            <p class="data-message"
-               [class.data-message-success]="dataMessageType() === 'success'"
-               [class.data-message-error]="dataMessageType() === 'error'"
-               role="status"
-               aria-live="polite">
-                {{ dataMessage()! | transloco:dataMessageParams() }}
-            </p>
+        <p class="data-message" [class.data-message-success]="dataMessageType() === 'success'"
+            [class.data-message-error]="dataMessageType() === 'error'" role="status" aria-live="polite">
+            {{ dataMessage()! | transloco:dataMessageParams() }}
+        </p>
         }
-        <input
-            #fileInput
-            type="file"
-            accept=".json"
-            class="visually-hidden"
-            (change)="onFileSelected($event)" />
+        <input #fileInput type="file" accept=".json" class="visually-hidden" (change)="onFileSelected($event)" />
     </div>
 
     <div class="settings-section data-section">
         <p class="settings-label">{{ 'settings.syncTitle' | transloco }}</p>
         <div class="data-buttons">
-            <button
-                type="button"
-                class="btn btn-primary"
-                [disabled]="syncing()"
-                (click)="syncNow()">
+            <button type="button" class="btn btn-primary" [disabled]="syncing()" (click)="syncNow()">
                 @if (syncing()) {
-                    <span class="spinner-small" aria-hidden="true"></span>
-                    {{ 'settings.syncing' | transloco }}
+                <span class="spinner-small" aria-hidden="true"></span>
+                {{ 'settings.syncing' | transloco }}
                 } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <polyline points="23 4 23 10 17 10" />
-                        <polyline points="1 20 1 14 7 14" />
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
-                        <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
-                    </svg>
-                    {{ 'settings.syncButton' | transloco }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <polyline points="23 4 23 10 17 10" />
+                    <polyline points="1 20 1 14 7 14" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
+                    <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
+                </svg>
+                {{ 'settings.syncButton' | transloco }}
                 }
             </button>
         </div>
     </div>
 
     @if (backupUri()) {
-        <div class="settings-section data-section">
-            <p class="settings-label">{{ 'settings.backupTitle' | transloco }}</p>
-            <p class="backup-info">{{ 'settings.backupFound' | transloco }}</p>
-            <p class="backup-path">{{ backupUri() }}</p>
-        </div>
+    <div class="settings-section data-section">
+        <p class="settings-label">{{ 'settings.backupTitle' | transloco }}</p>
+        <p class="backup-info">{{ 'settings.backupFound' | transloco }}</p>
+        <p class="backup-path">{{ backupUri() }}</p>
+    </div>
     }
+
+    <p class="version-label">{{ 'settings.version' | transloco }} {{ appVersion }}</p>
 </div>

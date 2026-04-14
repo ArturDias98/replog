@@ -5,6 +5,8 @@ import { ExportImportPort, BackupPort, SyncUseCase } from '@replog/application';
 import { I18nUseCase } from '../../i18n';
 import { Language } from '@replog/shared';
 
+declare const APP_VERSION: string;
+
 @Component({
     selector: 'app-settings',
     imports: [TranslocoPipe, RouterLink],
@@ -32,6 +34,8 @@ export class SettingsComponent implements OnInit {
     protected readonly dataMessage = signal<string | null>(null);
     protected readonly dataMessageParams = signal<Record<string, unknown>>({});
     protected readonly dataMessageType = signal<'success' | 'error' | null>(null);
+
+    protected readonly appVersion = APP_VERSION;
 
     async ngOnInit(): Promise<void> {
         const uri = await this.backupPort.checkBackupExists();

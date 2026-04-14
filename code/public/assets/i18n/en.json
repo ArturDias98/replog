@@ -44,7 +44,8 @@
     "syncButton": "Sync Now",
     "syncing": "Syncing...",
     "syncSuccess": "Sync completed successfully!",
-    "syncError": "Sync failed. Please try again."
+    "syncError": "Sync failed. Please try again.",
+    "version": "Version"
   },
   "workout": {
     "loading": "Loading workouts...",
@@ -201,5 +202,9 @@
     "syncNow": "Sync now",
     "success": "Sync completed successfully!",
     "error": "Sync failed. Try again."
+  },
+  "app": {
+    "updateAvailable": "New version available",
+    "updateAction": "Update"
   }
 }
