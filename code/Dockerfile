@@ -3,9 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN mkdir -p src/environments && \
-    printf 'const w = typeof window !== "undefined" ? (window as any) : {};\n\nexport const environment = {\n    get googleClientId(): string { return w.__env?.googleClientId ?? ""; },\n    get apiBaseUrl(): string { return w.__env?.apiBaseUrl ?? ""; },\n};\n' \
-    > src/environments/environment.ts
+
 RUN npm run build --production
 
 FROM nginx:1.29.8

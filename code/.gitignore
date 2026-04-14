@@ -40,7 +40,6 @@ testem.log
 __screenshots__/
 
 # Environment secrets
-/src/environments/environment.ts
 /public/env.js
 
 # System files
