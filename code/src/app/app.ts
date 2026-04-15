@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, ChangeDetectionStrategy, signal, viewChild, effect, ElementRef } from '@angular/core';
+import { Component, inject, NgZone, OnInit, OnDestroy, ChangeDetectionStrategy, signal, viewChild, effect, ElementRef } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthUser } from '@replog/shared';
@@ -21,6 +21,7 @@ export class App implements OnInit, OnDestroy {
     private readonly syncQueue = inject(SyncQueuePort);
     private readonly syncJob = inject(SyncJob);
     private readonly appUpdate = inject(AppUpdateService);
+    private readonly zone = inject(NgZone);
 
     protected readonly currentUser = signal<AuthUser | null>(null);
     protected readonly updateAvailable = this.appUpdate.updateAvailable;
@@ -127,10 +128,12 @@ export class App implements OnInit, OnDestroy {
     }
 
     private startSyncStatusPolling(): void {
-        this.statusIntervalId = setInterval(async () => {
-            this.tokenExpired.set(!this.authPort.isAuthenticated());
-            const count = await this.syncQueue.getPendingChangeCount();
-            this.syncStatus.set(count > 0 ? 'pending' : 'synced');
-        }, 2000);
+        this.zone.runOutsideAngular(() => {
+            this.statusIntervalId = setInterval(async () => {
+                this.tokenExpired.set(!this.authPort.isAuthenticated());
+                const count = await this.syncQueue.getPendingChangeCount();
+                this.syncStatus.set(count > 0 ? 'pending' : 'synced');
+            }, 2000);
+        });
     }
 }
